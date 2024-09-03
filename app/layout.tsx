@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import {Raleway} from "next/font/google";
 import localFont from "next/font/local";
 import { Lenis } from "@/components/Lenis";
 import TopBar from "@/components/Header/TopBar";
 import Navbar from "@/components/Header/Navbar";
 
-const neueMachina = localFont({
-  src: "../public/fonts/Neue Machina Inktrap Medium.ttf",
-  variable: "--font-neue-machina",
-});
+
+const raleway = Raleway({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-berkshire-swash',
+})
 
 export const metadata: Metadata = {
   title: "GBLACK",
@@ -22,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${neueMachina.variable}`}>
+      <body className={`${raleway.variable}`}>
         <Lenis>
           <TopBar/>
           <Navbar/>

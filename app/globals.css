@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -49,6 +55,9 @@ html.lenis body {
   font-style: normal;
   font-display: swap;
 }
+body {
+  font-family: var(--font-berkshire-swash);
+}
 
 body .font-neue-Light {
   font-family: "Neue Machina Light", sans-serif;
@@ -61,8 +70,8 @@ html {
   overflow-x: hidden;
 }
 
-.bg-image{
-  background-image: url('/Hero_Banner-topaz-standard_v2-2x.jpg');
+.bg-image {
+  background-image: url("/Hero_Banner-topaz-standard_v2-2x.jpg");
   background-size: cover;
   background-position: center;
 }
@@ -147,4 +156,118 @@ html {
   }
 }
 
+/* Images Show */
 
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.section {
+  position: relative;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+.hero {
+  height: 100vh;
+}
+
+.hero .img {
+  width: 50%;
+  aspect-ratio: 1;
+}
+
+.footer {
+  height: 50vh;
+  align-items: flex-start;
+}
+
+.footer a {
+  font-size: 4vw;
+  color: #fff;
+}
+
+.main {
+  width: 100vw;
+  height: 150vh;
+  flex-direction: column;
+}
+
+.row {
+  position: relative;
+  width: 100%;
+  margin: 1em 0;
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+}
+
+.card {
+  position: relative;
+  width: 40%;
+  height: 360px;
+  border-radius: 0.75em;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.main-content {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  width: 150px;
+  height: 150px;
+  border: 2px solid #fff;
+  border-radius: 100%;
+  overflow: hidden;
+  transform: scale(0);
+}
+
+.copy {
+  margin: 2em 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.line {
+  position: relative;
+  margin: 0.5em 0;
+  width: max-content;
+  height: 28px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+.line p {
+  position: relative;
+  font-size: 24px;
+  transform: translateY(30px);
+}
+
+@media (max-width: 900px) {
+  .card {
+    width: 50%;
+    height: 240px;
+  }
+}
+
+.hero-img {
+  clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%);
+}
+
+.clip-path-polygon-0-0-100-0-100-100-0-100 {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}

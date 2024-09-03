@@ -72,10 +72,10 @@ export default function TopBar() {
 
         <Link href="/" className="absolute left-1/2 transform -translate-x-1/2">
           <Image
-            src="/Logo.png"
+            src="/LogoG.png"
             alt="GBLACK Logo"
-            width={120}
-            height={40}
+            width={400}
+            height={400}
             className="w-auto h-8"
           />
         </Link>

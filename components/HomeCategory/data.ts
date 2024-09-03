@@ -1,13 +1,14 @@
-// categories.ts
-export const categories = [
-    {
-      name: "Men",
-      description: "Explore our collection for men",
-      src: "Man.jpg",
-    },
-    {
-      name: "Women",
-      description: "Discover our women's fashion",
-      src: "Women.jpg",
-    },
-  ];
+export const projects = [
+  {
+    name: "Explore Men's Collection",
+    description: "Discover the latest trends in men's fashion",
+    src: "Man.jpg",
+    link: "/mens-collection",
+  },
+  {
+    name: "Women's Style Guide",
+    description: "Explore curated looks for every occasion",
+    src: "Women.jpg",
+    link: "/womens-style-guide",
+  },
+];
