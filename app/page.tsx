@@ -37,6 +37,22 @@ const newestProducts = [
     image1: "/images/Man.jpg",
     image2: "/images/Women.jpg",
   },
+  {
+    name: "Hudson Baby",
+    brand: "BABY SKINCARE",
+    price: "$16.99",
+    rating: 5,
+    image1: "/images/Man.jpg",
+    image2: "/images/Women.jpg",
+  },
+  {
+    name: "Hudson Baby",
+    brand: "BABY SKINCARE",
+    price: "$16.99",
+    rating: 5,
+    image1: "/images/Man.jpg",
+    image2: "/images/Women.jpg",
+  },
 ]
 
 export default function Home() {
@@ -59,6 +75,7 @@ export default function Home() {
         featuredTitle="Latest Arrivals"
         featuredDescription="Discover our freshest styles"
       />
+
     </main>
   );
 }

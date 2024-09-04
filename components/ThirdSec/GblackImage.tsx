@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { gsap } from 'gsap'
 
-export default function ImageAnimation() {
+export default function Component() {
   const sectionRef = useRef<HTMLElement>(null)
   const headerRef = useRef<HTMLHeadingElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
@@ -14,7 +14,7 @@ export default function ImageAnimation() {
       const text = headerRef.current.innerText
       const splitText = text
         .split("")
-        .map((char) => `<span class="inline-block relative top-[400px]">${char}</span>`)
+        .map((char) => `<span class="inline-block">${char}</span>`)
         .join("")
       headerRef.current.innerHTML = splitText
     }
@@ -24,64 +24,77 @@ export default function ImageAnimation() {
         if (entry.isIntersecting) {
           const tl = gsap.timeline()
 
-          // Initial animation (slower)
-          tl.set(".hero-img", { clipPath: "polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)" })
-          tl.to(".hero-img", {
-            clipPath: "polygon(100% 0%, 0% 0%, 0% 100%, 100% 100%)",
-            duration: 1.5,
-            ease: "power2.inOut",
-            stagger: 0.2,
+          // Set initial states
+          tl.set(".grid-img", { opacity: 0, scale: 0, x: (i) => i % 2 === 0 ? -100 : 100 })
+          tl.set("h1", { y: "-100vh", opacity: 0, scale: 0 })
+
+          // Animate grid images to form a larger square in the middle
+          tl.to(".grid-img", {
+            opacity: 1,
+            scale: 1,
+            x: 0,
+            duration: 1,
+            stagger: {
+              each: 0.1,
+              grid: [3, 3],
+              from: "edges",
+              axis: "x"
+            },
+            ease: "power2.out",
           })
 
-          tl.to(".hero", {
-            scale: 1.1,
-            duration: 2,
-            ease: "power2.inOut",
-          }, "-=1")
+          // Short pause after square formation
+          tl.to({}, { duration: 0.5 })
 
-          // Faster transition to final state
-          tl.to(".hero-img", {
-            opacity: 0,
-            duration: 0.2,
-            ease: "power2.inOut",
-          }, "+=0.2")
+          // Animate GBLACK text like a missile
+          tl.to("h1", {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.3,
+            ease: "power4.in",
+            onComplete: () => {
+              // Shake effect on impact
+              gsap.to(".grid-img", {
+                x: "random(-15, 15)",
+                y: "random(-15, 15)",
+                rotation: "random(-8, 8)",
+                duration: 0.1,
+                repeat: 5,
+                yoyo: true,
+                ease: "none",
+              })
 
-          tl.set(".hero-imgs", { display: "none" })
-          tl.set(".grid-container", { display: "grid" })
+              // Blur effect on impact
+              gsap.to(".grid-container", {
+                filter: "blur(4px)",
+                duration: 0.1,
+              })
 
-          tl.fromTo(".grid-img", 
-            { scale: 0, opacity: 0 },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.3,
-              stagger: {
-                amount: 0.2,
-                grid: [6, 6],
-                from: "center",
-              },
-              ease: "back.out(1.2)",
-            },
-            "-=0.1"
-          )
+              // Flash effect on impact
+              gsap.to("section", {
+                backgroundColor: "white",
+                duration: 0.05,
+                yoyo: true,
+                repeat: 3,
+              })
+            }
+          })
+
+          // Settle everything
+          tl.to([".grid-img", "h1"], {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            scale: 1,
+            duration: 0.5,
+            ease: "power2.out",
+          }, ">=0.5")
 
           tl.to(".grid-container", {
-            filter: "blur(5px) brightness(0.7)",
-            duration: 0.2,
-          }, "-=0.1")
-
-          tl.to("h1 span", {
-            top: "0px",
-            stagger: 0.03,
-            duration: 0.4,
-            ease: "back.out(1.7)",
-          }, "-=0.3")
-
-          tl.to("h1", {
-            scale: 1.2,
+            filter: "blur(1px)",
             duration: 0.3,
-            ease: "power2.inOut",
-          }, "-=0.2")
+          }, "<")
 
           observer.unobserve(entry.target)
         }
@@ -100,34 +113,26 @@ export default function ImageAnimation() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="hero w-screen h-screen bg-black overflow-hidden relative">
-      <div className="hero-imgs relative w-full h-full overflow-hidden z-0">
-        <Image src="/images/Rotated/img-1.jpg" alt="" layout="fill" objectFit="cover" className="hero-img absolute" />
-        <Image src="/images/Rotated/img-2.jpg" alt="" layout="fill" objectFit="cover" className="hero-img absolute" />
-        <Image src="/images/Rotated/img-3.jpg" alt="" layout="fill" objectFit="cover" className="hero-img absolute" />
-        <Image src="/images/Rotated/img-4.jpg" alt="" layout="fill" objectFit="cover" className="hero-img absolute" />
-        <Image src="/images/Rotated/img-5.jpg" alt="" layout="fill" objectFit="cover" className="hero-img absolute" />
-        <Image src="/images/Rotated/img-6.jpg" alt="" layout="fill" objectFit="cover" className="hero-img absolute" />
-      </div>
-      <div 
+    <section ref={sectionRef} className="hero w-screen h-screen overflow-hidden relative flex items-center justify-center">
+      <div
         ref={gridRef}
-        className="grid-container hidden grid-cols-6 gap-1 absolute inset-0 z-10"
+        className="grid-container grid grid-cols-3 gap-4 w-[120vmin] h-[80vmin] z-10"
       >
-        {[...Array(36)].map((_, i) => (
-          <div key={i} className="grid-img relative w-full h-full overflow-hidden">
-            <Image 
-              src={`/images/Rotated/img-${(i % 6) + 1}.jpg`} 
-              alt="" 
-              layout="fill" 
+        {[...Array(9)].map((_, i) => (
+          <div key={i} className="grid-img relative w-full h-full overflow-hidden rounded-lg">
+            <Image
+              src={`/assets/img${(i % 6) + 1}.jpeg`}
+              alt={`Image ${i + 1}`}
+              layout="fill"
               objectFit="cover"
             />
           </div>
         ))}
       </div>
-      <div className="website-content absolute top-0 left-0 w-full h-full z-20 flex items-center justify-center">
+      <div className="website-content absolute inset-0 flex items-center justify-center pointer-events-none z-20">
         <h1
           ref={headerRef}
-          className="text-[10vw] font-bold text-white"
+          className="text-[12vw] font-bold text-white"
         >
           GBLACK
         </h1>
