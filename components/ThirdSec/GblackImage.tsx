@@ -24,11 +24,9 @@ export default function Component() {
         if (entry.isIntersecting) {
           const tl = gsap.timeline()
 
-          // Set initial states
           tl.set(".grid-img", { opacity: 0, scale: 0, x: (i) => i % 2 === 0 ? -100 : 100 })
           tl.set("h1", { y: "-100vh", opacity: 0, scale: 0 })
 
-          // Animate grid images to form a larger square in the middle
           tl.to(".grid-img", {
             opacity: 1,
             scale: 1,
@@ -43,10 +41,8 @@ export default function Component() {
             ease: "power2.out",
           })
 
-          // Short pause after square formation
           tl.to({}, { duration: 0.5 })
 
-          // Animate GBLACK text like a missile
           tl.to("h1", {
             y: 0,
             opacity: 1,
@@ -54,7 +50,6 @@ export default function Component() {
             duration: 0.3,
             ease: "power4.in",
             onComplete: () => {
-              // Shake effect on impact
               gsap.to(".grid-img", {
                 x: "random(-15, 15)",
                 y: "random(-15, 15)",
@@ -65,13 +60,11 @@ export default function Component() {
                 ease: "none",
               })
 
-              // Blur effect on impact
               gsap.to(".grid-container", {
                 filter: "blur(4px)",
                 duration: 0.1,
               })
 
-              // Flash effect on impact
               gsap.to("section", {
                 backgroundColor: "white",
                 duration: 0.05,
@@ -81,7 +74,6 @@ export default function Component() {
             }
           })
 
-          // Settle everything
           tl.to([".grid-img", "h1"], {
             x: 0,
             y: 0,
@@ -107,6 +99,7 @@ export default function Component() {
 
     return () => {
       if (sectionRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(sectionRef.current)
       }
     }

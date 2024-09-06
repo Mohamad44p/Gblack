@@ -55,16 +55,12 @@ export default function SecSection() {
       <div className="mx-auto max-w-7xl">
         <motion.h1
           ref={ref}
-          className="mb-16 text-center text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-6xl"
+          className="mb-16 text-center text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-5xl"
           variants={titleVariants}
           initial="hidden"
           animate={controls}
         >
-          {createTypingAnimation("We use design and technology", "bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent")}
-          {" "}
-          {createTypingAnimation("to create brands and products that", "")}
-          {" "}
-          {createTypingAnimation("perform, delight, and scale.", "bg-gradient-to-r from-blue-400 to-green-500 bg-clip-text text-transparent")}
+          {createTypingAnimation("For men and women who want to feel seen and valued.", "block")}
         </motion.h1>
 
         <motion.div
@@ -73,7 +69,7 @@ export default function SecSection() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8 }}
         >
-          <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 opacity-75 blur"></div>
+          <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-[#facc15] to-[#ecc010] opacity-75 blur"></div>
           <div className="relative overflow-hidden rounded-lg">
             <CategoryGallery />
           </div>

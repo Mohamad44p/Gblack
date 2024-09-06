@@ -1,3 +1,4 @@
+import AllHome from "@/components/AllProductsHome/AllHome";
 import BentoGrid from "@/components/ProdcutsGrid/BentoGrid";
 import SecSection from "@/components/Sec/SecSection";
 import Carousel from "@/components/slider/Carousel";
@@ -75,6 +76,8 @@ export default function Home() {
         featuredTitle="Latest Arrivals"
         featuredDescription="Discover our freshest styles"
       />
+
+      <AllHome />
 
     </main>
   );
