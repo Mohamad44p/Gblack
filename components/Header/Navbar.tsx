@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react"
 const navItems = [
   { name: "MEN", href: "/men" },
   { name: "WOMEN", href: "/women" },
-  { name: "GBLACK HOME", href: "/home" },
+  { name: "Explore On GBLACK way", href: "/way" },
   { name: "DIGITAL", href: "/digital" },
   { name: "COLLAB", href: "/collab" },
 ]

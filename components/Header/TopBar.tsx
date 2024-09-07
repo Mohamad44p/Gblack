@@ -83,7 +83,7 @@ export default function TopBar() {
         <div className="flex items-center space-x-4">
           <div className="hidden md:flex space-x-2">
             <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
-              <Link href="/register">Register</Link>
+              <Link href="/sign-up">Register</Link>
             </Button>
             <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
               <Link href="/login">Login</Link>
@@ -101,7 +101,9 @@ export default function TopBar() {
             whileTap={{ scale: 0.9 }}
             className="focus:outline-none"
           >
-            <User size={20} />
+            <Link href="/profile">
+              <User size={20} />
+            </Link>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.1 }}

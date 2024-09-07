@@ -55,6 +55,31 @@ html.lenis body {
   font-style: normal;
   font-display: swap;
 }
+
+@font-face {
+  font-family: "GTWalsheim";
+  src: url("/fonts/GT-Walsheim-Condensed-Thin-Trial-BF651b7fc72dc1c.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Saolice";
+  src: url("/fonts/saoliceregular-x39q0.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-saolice {
+  font-family: "Saolice", sans-serif;
+}
+
+.Font-GTWalsheim {
+  font-family: "GTWalsheim", sans-serif;
+}
+
 body {
   font-family: var(--font-berkshire-swash);
 }
@@ -271,3 +296,14 @@ html {
 .clip-path-polygon-0-0-100-0-100-100-0-100 {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
+
+
+.bg-image{
+  background-image: url("/assets/TestWavy.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+
