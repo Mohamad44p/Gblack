@@ -47,10 +47,16 @@ const sampleOrders = [
     },
 ]
 
+interface Order {
+    id: number;
+    date: string;
+    items: { id: number; name: string; price: number; image: string; }[];
+    total: number;
+  }
+
 export default function EcommerceProfileRedesign() {
     const [activeItem, setActiveItem] = useState('Orders')
-    const [selectedOrder, setSelectedOrder] = useState(null)
-
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     return (
         <div className="min-h-screen text-white flex items-center justify-center p-4">
             <motion.div

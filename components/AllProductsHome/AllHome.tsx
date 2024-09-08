@@ -3,9 +3,10 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+
 import { ShoppingCart, Heart, Star, ChevronRight, X } from 'lucide-react'
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const products = [
     { id: 1, name: 'Quantum Smartwatch', price: 299, category: 'New Arrivals', rating: 4.8, image: '/assets/img2.jpeg', description: 'Experience the future on your wrist with our advanced Quantum Smartwatch. Featuring cutting-edge health monitoring, seamless connectivity, and a sleek design.' },
