@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Search, User, ShoppingBag, Heart, Facebook, Instagram, Twitter } from "lucide-react"
+import { User, ShoppingBag, Heart, Facebook, Instagram, Twitter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import SearchModal from "./SearchModal"
 
 export default function TopBar() {
   const [lang, setLang] = useState<"en" | "ar">("en")
@@ -19,9 +20,9 @@ export default function TopBar() {
   return (
     <motion.header
       className="bg-black text-white py-4 px-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
     >
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-4">
@@ -89,13 +90,7 @@ export default function TopBar() {
               <Link href="/login">Login</Link>
             </Button>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="focus:outline-none"
-          >
-            <Search size={20} />
-          </motion.button>
+          <SearchModal />
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

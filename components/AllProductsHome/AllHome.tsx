@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingCart, Heart, Star, ChevronRight, X } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 const products = [
     { id: 1, name: 'Quantum Smartwatch', price: 299, category: 'New Arrivals', rating: 4.8, image: '/assets/img2.jpeg', description: 'Experience the future on your wrist with our advanced Quantum Smartwatch. Featuring cutting-edge health monitoring, seamless connectivity, and a sleek design.' },
@@ -223,7 +224,9 @@ export default function AllHome() {
                         transition={{ duration: 0.8, delay: 0.4 }}
                     >
                         <Button className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-full">
+                            <Link href="/all">
                             View All Products
+                            </Link>
                             <ChevronRight className="ml-2 w-5 h-5" />
                         </Button>
                     </motion.div>
