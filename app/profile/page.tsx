@@ -52,13 +52,13 @@ interface Order {
     date: string;
     items: { id: number; name: string; price: number; image: string; }[];
     total: number;
-  }
+}
 
 export default function EcommerceProfileRedesign() {
     const [activeItem, setActiveItem] = useState('Orders')
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     return (
-        <div className="min-h-screen text-white flex items-center justify-center p-4">
+        <div className="min-h-screen text-white flex items-center justify-center p-4 bg-gradient-to-br from-black via-gray-900 to-black">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -66,7 +66,7 @@ export default function EcommerceProfileRedesign() {
                 className="w-full max-w-6xl flex flex-col md:flex-row gap-8"
             >
                 <div className="md:w-1/3 space-y-6">
-                    <Card className="bg-gray-800 border-gray-700 overflow-hidden">
+                    <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 overflow-hidden">
                         <CardContent className="p-6">
                             <motion.div
                                 initial={{ y: 20, opacity: 0 }}
@@ -80,7 +80,7 @@ export default function EcommerceProfileRedesign() {
                                 </Avatar>
                                 <div>
                                     <h2 className="text-2xl font-bold">Mohammad</h2>
-                                    <p className="text-gray-400">Premium Member</p>
+                                    <p className="text-gray-300">Premium Member</p>
                                 </div>
                             </motion.div>
                             <motion.div
@@ -95,7 +95,7 @@ export default function EcommerceProfileRedesign() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gray-800 border-gray-700">
+                    <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
                         <CardContent className="p-4">
                             <nav className="space-y-2">
                                 {menuItems.map((item, index) => (
@@ -138,7 +138,7 @@ export default function EcommerceProfileRedesign() {
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.5 }}
                         >
-                            <Card className="bg-gray-800 border-gray-700">
+                            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700">
                                 <CardContent className="p-6">
                                     <h3 className="text-2xl font-bold mb-4">{activeItem}</h3>
                                     {activeItem === 'Orders' && (
@@ -152,16 +152,17 @@ export default function EcommerceProfileRedesign() {
                                                     transition={{ duration: 0.3 }}
                                                 >
                                                     <div className="flex items-center">
-                                                        <Package className="w-10 h-10 mr-4 text-blue-400" />
+                                                        <Package className="w-10 h-10 mr-4 text-white" />
                                                         <div>
                                                             <h4 className="font-semibold">Order #{order.id}</h4>
-                                                            <p className="text-sm text-gray-400">Ordered on {order.date}</p>
+                                                            <p className="text-sm text-gray-300">Ordered on {order.date}</p>
                                                         </div>
                                                     </div>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => setSelectedOrder(order)}
+                                                        className="text-white border-white hover:bg-white hover:text-black"
                                                     >
                                                         View Details
                                                     </Button>
@@ -184,7 +185,7 @@ export default function EcommerceProfileRedesign() {
                                                     </div>
                                                     <div>
                                                         <h4 className="font-semibold">Wishlist Item {item}</h4>
-                                                        <p className="text-sm text-gray-400">$99.99</p>
+                                                        <p className="text-sm text-gray-300">$99.99</p>
                                                     </div>
                                                 </motion.div>
                                             ))}
@@ -194,19 +195,19 @@ export default function EcommerceProfileRedesign() {
                                         <div className="space-y-6">
                                             <div className="bg-gray-700 p-6 rounded-lg">
                                                 <h4 className="text-xl font-semibold mb-2">Current Points</h4>
-                                                <p className="text-4xl font-bold text-blue-400">1,250</p>
+                                                <p className="text-4xl font-bold text-white">1,250</p>
                                             </div>
                                             <div className="bg-gray-700 p-6 rounded-lg">
                                                 <h4 className="text-xl font-semibold mb-4">Progress to Next Reward</h4>
                                                 <div className="w-full bg-gray-600 rounded-full h-4 mb-2">
                                                     <motion.div
-                                                        className="bg-blue-400 h-4 rounded-full"
+                                                        className="bg-white h-4 rounded-full"
                                                         initial={{ width: 0 }}
                                                         animate={{ width: '70%' }}
                                                         transition={{ duration: 1, delay: 0.5 }}
                                                     ></motion.div>
                                                 </div>
-                                                <p className="text-sm text-gray-400">175 points to next reward</p>
+                                                <p className="text-sm text-gray-300">175 points to next reward</p>
                                             </div>
                                         </div>
                                     )}
@@ -225,7 +226,7 @@ export default function EcommerceProfileRedesign() {
                                                     transition={{ duration: 0.3, delay: index * 0.1 }}
                                                 >
                                                     <span className="flex items-center">
-                                                        <setting.icon className="w-6 h-6 mr-3 text-blue-400" />
+                                                        <setting.icon className="w-6 h-6 mr-3 text-white" />
                                                         {setting.label}
                                                     </span>
                                                     <ChevronRight className="w-5 h-5" />

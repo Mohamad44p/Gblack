@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import {Raleway} from "next/font/google";
+import { Raleway } from "next/font/google";
 import localFont from "next/font/local";
 import { Lenis } from "@/components/Lenis";
 import TopBar from "@/components/Header/TopBar";
 import Navbar from "@/components/Header/Navbar";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 
 const raleway = Raleway({
@@ -26,11 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${raleway.variable}`}>
-        <Lenis>
-          <TopBar/>
-          <Navbar/>
-          {children}
-        </Lenis>
+        <AuthProvider>
+          <Lenis>
+            <TopBar />
+            <Navbar />
+            {children}
+          </Lenis>
+        </AuthProvider>
       </body>
     </html>
   );

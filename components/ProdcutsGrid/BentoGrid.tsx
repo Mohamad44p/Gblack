@@ -6,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import useEmblaCarousel from 'embla-carousel-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Star, ShoppingCart, Sparkles, Zap, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Star, ShoppingCart, Sparkles, Zap, Plus, Tag } from 'lucide-react'
 
 interface Product {
   name: string
   brand: string
   price: string
+  salePrice: string
   rating: number
   image1: string
   image2: string
@@ -27,6 +28,7 @@ interface ShowcaseProps {
 
 const ProductCard = ({ product }: { product: Product }) => {
   const [isHovered, setIsHovered] = useState(false)
+  const isOnSale = product.salePrice !== product.price
 
   return (
     <motion.div
@@ -42,7 +44,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           <div className="relative w-full h-[300px] overflow-hidden">
             <motion.div
               initial={false}
-              animate={{ opacity: isHovered ? 0 : 1, scale: isHovered ? 1.1 : 1 }}
+              animate={{ opacity: isHovered ? 0 : 1 }}
               transition={{ duration: 0.3 }}
               className="absolute inset-0 z-10"
             >
@@ -56,7 +58,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             </motion.div>
             <motion.div
               initial={false}
-              animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 1.1 }}
+              animate={{ opacity: isHovered ? 1 : 0 }}
               transition={{ duration: 0.3 }}
               className="absolute inset-0 z-20"
             >
@@ -68,10 +70,16 @@ const ProductCard = ({ product }: { product: Product }) => {
                 className="transition-all duration-300 filter group-hover:brightness-110"
               />
             </motion.div>
+            {isOnSale && (
+              <div className="absolute top-2 left-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
+                <Tag className="w-3 h-3 mr-1" />
+                Sale
+              </div>
+            )}
           </div>
           <div className="p-4 flex-grow flex flex-col justify-between bg-black">
             <div>
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
@@ -79,7 +87,7 @@ const ProductCard = ({ product }: { product: Product }) => {
               >
                 {product.brand}
               </motion.div>
-              <motion.h3 
+              <motion.h3
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
@@ -87,24 +95,33 @@ const ProductCard = ({ product }: { product: Product }) => {
               >
                 {product.name}
               </motion.h3>
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
                 className="flex items-center mb-2"
               >
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < product.rating ? "text-white fill-current" : "text-white/20"}`} />
+                  <Star key={i} className={`w-4 h-4 ${i < product.rating ? "text-yellow-400 fill-current" : "text-white/20"}`} />
                 ))}
               </motion.div>
             </div>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
               className="flex items-center justify-between"
             >
-              <span className="text-xl font-bold text-white">{product.price}</span>
+              <div className="flex flex-col">
+                {isOnSale ? (
+                  <>
+                    <span className="text-xl font-bold text-white">{product.salePrice}</span>
+                    <span className="text-sm text-red-500 line-through">{product.price}</span>
+                  </>
+                ) : (
+                  <span className="text-xl font-bold text-white">{product.price}</span>
+                )}
+              </div>
               <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-white/80 transition-all duration-300">
                 <Plus className="w-4 h-4" />
               </Button>
@@ -132,7 +149,7 @@ const ProductCard = ({ product }: { product: Product }) => {
   )
 }
 
-export default function MinimalistProductShowcase({ title, products, featuredImage, featuredTitle, featuredDescription }: ShowcaseProps) {
+export function ProductShowcase({ title, products, featuredImage, featuredTitle, featuredDescription }: ShowcaseProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start', dragFree: true })
   const [scrollProgress, setScrollProgress] = useState(0)
 
@@ -188,7 +205,7 @@ export default function MinimalistProductShowcase({ title, products, featuredIma
                   <Sparkles className="inline-block mr-2 h-4 w-4" />
                   Featured Collection
                 </motion.div>
-                <motion.h3 
+                <motion.h3
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
@@ -196,7 +213,7 @@ export default function MinimalistProductShowcase({ title, products, featuredIma
                 >
                   {featuredTitle}
                 </motion.h3>
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
@@ -256,7 +273,7 @@ export default function MinimalistProductShowcase({ title, products, featuredIma
           ))}
         </div>
       </div>
-      <motion.div 
+      <motion.div
         className="mt-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
