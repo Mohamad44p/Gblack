@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingBag, Heart, Award, Settings, Package, CreditCard, MapPin, Bell, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { OrderDetailsModal } from '@/components/Profile/OrderDetailsModal'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 const menuItems = [
     { icon: ShoppingBag, label: 'Orders', count: 12 },
@@ -57,6 +59,32 @@ interface Order {
 export default function EcommerceProfileRedesign() {
     const [activeItem, setActiveItem] = useState('Orders')
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const { user, isLoggedIn, checkAuthStatus } = useAuth()
+    const router = useRouter()
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            setIsLoading(true)
+            const isAuthenticated = await checkAuthStatus();
+            if (!isAuthenticated) {
+                router.push('/login');
+            }
+            setIsLoading(false)
+        };
+
+        checkAuth();
+    }, [checkAuthStatus, router]);
+
+    if (isLoading) {
+        return <div className="min-h-screen flex items-center justify-center">
+            <p className="text-white">Loading...</p>
+        </div>
+    }
+
+    if (!isLoggedIn || !user) {
+        return null
+    }
     return (
         <div className="min-h-screen text-white flex items-center justify-center p-4 bg-gradient-to-br from-black via-gray-900 to-black">
             <motion.div
@@ -76,11 +104,10 @@ export default function EcommerceProfileRedesign() {
                             >
                                 <Avatar className="w-20 h-20 border-2 border-white">
                                     <AvatarImage src="/placeholder.svg?height=80&width=80" alt="User Avatar" />
-                                    <AvatarFallback>MH</AvatarFallback>
-                                </Avatar>
+                                    <AvatarFallback>{user.user_display_name ? user.user_display_name.charAt(0) : 'U'}</AvatarFallback>                                </Avatar>
                                 <div>
-                                    <h2 className="text-2xl font-bold">Mohammad</h2>
-                                    <p className="text-gray-300">Premium Member</p>
+                                    <h2 className="text-2xl font-bold">{user.user_display_name}</h2>
+                                    <p className="text-gray-300">{user.user_email}</p>
                                 </div>
                             </motion.div>
                             <motion.div

@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Raleway } from "next/font/google";
-import localFont from "next/font/local";
 import { Lenis } from "@/components/Lenis";
 import TopBar from "@/components/Header/TopBar";
 import Navbar from "@/components/Header/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
-
+import TransitionWrapper from "@/components/TransitionWrapper";
 
 const raleway = Raleway({
   subsets: ['latin'],
   weight: ['400'],
-  variable: '--font-berkshire-swash',
+  variable: '--font-raleway',
 })
 
 export const metadata: Metadata = {
@@ -31,7 +30,9 @@ export default function RootLayout({
           <Lenis>
             <TopBar />
             <Navbar />
-            {children}
+            <TransitionWrapper>
+              {children}
+            </TransitionWrapper>
           </Lenis>
         </AuthProvider>
       </body>

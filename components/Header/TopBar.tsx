@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { User, ShoppingBag, Heart, Facebook, Instagram, Twitter } from "lucide-react"
+import { User, ShoppingBag, Heart, Facebook, Instagram, Twitter, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,9 +13,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import SearchModal from "./SearchModal"
+import { useAuthCheck } from "@/lib/hooks/useAuthCheck"
+import { useAuth } from "@/contexts/AuthContext"
+import { useRouter } from "next/navigation"
 
 export default function TopBar() {
   const [lang, setLang] = useState<"en" | "ar">("en")
+  const { isLoggedIn, user, logout } = useAuth()
+  const router = useRouter()
+  const handleLogout = async () => {
+    await logout()
+    router.refresh()
+  }
 
   return (
     <motion.header
@@ -83,23 +92,44 @@ export default function TopBar() {
 
         <div className="flex items-center space-x-4">
           <div className="hidden md:flex space-x-2">
-            <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
-              <Link href="/sign-up">Register</Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
-              <Link href="/login">Login</Link>
-            </Button>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="focus:outline-none"
+                  >
+                    <User size={20} />
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <Link href="/profile" className="flex items-center">
+                      <User size={16} className="mr-2" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={handleLogout}>
+                    <span className="flex items-center">
+                      <LogOut size={16} className="mr-2" />
+                      Logout
+                    </span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div>
+                <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
+                  <Link href="/sign-up">Register</Link>
+                </Button>
+                <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
+                  <Link href="/login">Login</Link>
+                </Button>
+              </div>
+            )}
           </div>
           <SearchModal />
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="focus:outline-none"
-          >
-            <Link href="/profile">
-              <User size={20} />
-            </Link>
-          </motion.button>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

@@ -6,22 +6,27 @@ import { Search, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useDebounce } from "@/lib/hooks/use-debounce"
+import Image from "next/image"
 
-// Simulated product data (replace with actual data or API call)
-const products = [
-  { id: 1, name: "T-Shirt", category: "Clothing" },
-  { id: 2, name: "Jeans", category: "Clothing" },
-  { id: 3, name: "Sneakers", category: "Footwear" },
-  { id: 4, name: "Watch", category: "Accessories" },
-  { id: 5, name: "Backpack", category: "Bags" },
-]
+interface Product {
+  id: number
+  name: string
+  categories: { id: number; name: string }[]
+  images: { id: number; src: string }[]
+}
+
+interface Category {
+  id: number
+  name: string
+}
 
 export default function SearchModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [results, setResults] = useState([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const debouncedSearch = useDebounce(searchQuery, 300)
 
   useEffect(() => {
@@ -42,19 +47,42 @@ export default function SearchModal() {
   }, [isOpen])
 
   useEffect(() => {
-    if (debouncedSearch) {
-      setIsLoading(true)
-      // Simulate API call
-      setTimeout(() => {
-        const filteredResults = products.filter(product =>
-          product.name.toLowerCase().includes(debouncedSearch.toLowerCase())
-        )
-        setResults(filteredResults)
-        setIsLoading(false)
-      }, 500)
-    } else {
-      setResults([])
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories')
+        const data = await response.json()
+        if (data.success) {
+          setCategories(data.categories)
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+      }
     }
+
+    fetchCategories()
+  }, [])
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (debouncedSearch) {
+        setIsLoading(true)
+        try {
+          const response = await fetch(`/api/search-products?per_page=10&search=${encodeURIComponent(debouncedSearch)}`)
+          const data = await response.json()
+          if (data.success) {
+            setProducts(data.products)
+          }
+        } catch (error) {
+          console.error('Error fetching products:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      } else {
+        setProducts([])
+      }
+    }
+
+    fetchProducts()
   }, [debouncedSearch])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -125,9 +153,9 @@ export default function SearchModal() {
                   <div className="flex justify-center items-center py-4">
                     <Loader2 className="animate-spin" />
                   </div>
-                ) : results.length > 0 ? (
+                ) : products.length > 0 ? (
                   <ul className="space-y-2">
-                    {results.map((product) => (
+                    {products.map((product) => (
                       <motion.li
                         key={product.id}
                         initial={{ opacity: 0, y: 20 }}
@@ -136,10 +164,26 @@ export default function SearchModal() {
                         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                       >
                         <a href={`/product/${product.id}`} className="flex items-center">
-                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-md mr-3"></div>
+                          <div className="w-16 h-16 mr-3 relative overflow-hidden rounded-md">
+                            {product.images && product.images.length > 0 ? (
+                              <Image
+                                src={product.images[0].src}
+                                alt={product.name}
+                                width={64}
+                                height={64}
+                                objectFit="cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                No image
+                              </div>
+                            )}
+                          </div>
                           <div>
                             <h3 className="font-semibold text-gray-800 dark:text-white">{product.name}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{product.category}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {product.categories.map(cat => cat.name).join(', ')}
+                            </p>
                           </div>
                         </a>
                       </motion.li>

@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('')
+    const [usernameOrEmail, setUsernameOrEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -20,9 +19,11 @@ export default function LoginPage() {
         setError('')
         setIsLoading(true)
         try {
-            await login(email, password)
-            router.push('/')
+            const user = await login(usernameOrEmail, password)
+            console.log('Login successful:', user);
+            router.push('/') // Redirect to home page or dashboard
         } catch (err: any) {
+            console.error('Login error:', err);
             setError(err.message || 'An error occurred during login')
         } finally {
             setIsLoading(false)
@@ -47,15 +48,15 @@ export default function LoginPage() {
                         Your Account
                     </h1>
                     <div>
-                        <label htmlFor="email" className="block text-[#404628] text-xl font-extrabold mb-2">
-                            EMAIL
+                        <label htmlFor="usernameOrEmail" className="block text-[#404628] text-xl font-extrabold mb-2">
+                            USERNAME OR EMAIL
                         </label>
                         <Input
-                            id="email"
-                            type="email"
+                            id="usernameOrEmail"
+                            type="text"
                             className="w-full bg-transparent border-[#404628] border-opacity-50 text-[#3c4a2f]"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={usernameOrEmail}
+                            onChange={(e) => setUsernameOrEmail(e.target.value)}
                             required
                         />
                     </div>
@@ -72,23 +73,14 @@ export default function LoginPage() {
                             required
                         />
                     </div>
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         className="max-w-6xl bg-[#c2b280] hover:bg-[#a89a6b] text-[#404628] text-2xl font-medium py-2 px-4"
                         disabled={isLoading}
                     >
                         {isLoading ? 'Logging in...' : 'LOG IN'}
                     </Button>
                     {error && <p className="text-red-500">{error}</p>}
-                    <div className='border-t border-black' />
-                    <div className='flex items-center justify-between'>
-                        <Link href="/forgot-password" className="text-[#404628] text-xl">
-                            FORGOTTEN PASSWORD &#8599;
-                        </Link>
-                        <Link href="/sign-up" className="text-[#404628] text-xl underline underline-offset-8">
-                            CREATE AN ACCOUNT &#8599;
-                        </Link>
-                    </div>
                 </form>
             </div>
         </div>

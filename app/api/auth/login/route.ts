@@ -1,95 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server';
-import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import { sign } from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import axios from 'axios';
 
-const api = new WooCommerceRestApi({
-  url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,
-  consumerKey: process.env.WP_CONSUMER_KEY!,
-  consumerSecret: process.env.WP_CONSUMER_SECRET!,
-  version: "wc/v3",
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
-    }
-
-    console.log('Attempting to authenticate user:', email);
-
-    // Authenticate user using WordPress REST API
-    const authResponse = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/jwt-auth/v1/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username: email, password }),
+    const { username, password } = await request.json();
+    
+    const response = await api.post('/wp-json/jwt-auth/v1/token', {
+      username,
+      password,
     });
 
-    const authData = await authResponse.json();
+    if (response.data.token) {
+      cookies().set('auth', response.data.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7
+      });
 
-    if (!authResponse.ok) {
-      console.error('Authentication failed:', authData);
-      return NextResponse.json({ error: 'Invalid credentials', details: authData }, { status: 401 });
+      return NextResponse.json({ 
+        success: true, 
+        user: {
+          user_email: response.data.user_email,
+          user_nicename: response.data.user_nicename,
+          user_display_name: response.data.user_display_name
+        }
+      });
+    } else {
+      throw new Error('Login failed: No token received');
     }
-
-    console.log('User authenticated successfully');
-
-    // Fetch user details using the token
-    const userResponse = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/wp/v2/users/me`, {
-      headers: {
-        'Authorization': `Bearer ${authData.token}`,
-      },
-    });
-
-    const userData = await userResponse.json();
-
-    if (!userResponse.ok) {
-      console.error('Failed to fetch user data:', userData);
-      return NextResponse.json({ error: 'Failed to fetch user data', details: userData }, { status: 500 });
-    }
-
-    console.log('User data fetched successfully');
-
-    // Create a JWT token
-    const token = sign(
-      { 
-        userId: userData.id, 
-        email: userData.email 
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: '7d' }
-    );
-
-    // Set HTTP-only cookie
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    };
-
-    const response = NextResponse.json({
-      user: { 
-        id: userData.id,
-        email: userData.email, 
-        name: userData.name, 
-        firstName: userData.first_name,
-        lastName: userData.last_name,
-      }
-    }, { status: 200 });
-
-    response.cookies.set('auth_token', token, cookieOptions);
-
-    console.log('Login successful for user:', email);
-
-    return response;
-
   } catch (error: any) {
     console.error('Login error:', error.response?.data || error.message);
-    return NextResponse.json({ error: 'An error occurred during login', details: error.message }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: error.response?.data?.message || error.message || 'Invalid username or password'
+    }, { status: 401 });
   }
 }
