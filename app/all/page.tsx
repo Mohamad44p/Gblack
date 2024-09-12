@@ -15,6 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { useCart } from '@/contexts/CartContext'
 
 interface Product {
   id: number
@@ -38,6 +39,16 @@ const QuickViewModal = ({ product, onClose }: {
   product: Product,
   onClose: () => void
 }) => {
+  const { addToCart } = useCart()
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.src || '/BlurImage.jpg',
+      quantity: 1
+    })
+  }
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -92,7 +103,9 @@ const QuickViewModal = ({ product, onClose }: {
               </Badge>
             </div>
             <div className="flex gap-4">
-              <Button className="flex-1 bg-black hover:bg-white hover:text-black text-white">
+              <Button
+                onClick={() => handleAddToCart(product)}
+              className="flex-1 bg-black hover:bg-white hover:text-black text-white">
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
@@ -147,6 +160,16 @@ export default function AllProducts() {
   const [sortBy, setSortBy] = useState('date')
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+  const { addToCart } = useCart()
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.src || '/BlurImage.jpg',
+      quantity: 1
+    })
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -377,7 +400,9 @@ export default function AllProducts() {
                               <span className="ml-2 text-gray-400">{product.average_rating}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <Button className="flex-1 mr-2 bg-white text-black hover:bg-gray-200">
+                              <Button
+                                onClick={() => handleAddToCart(product)}
+                              className="flex-1 mr-2 bg-white text-black hover:bg-gray-200">
                                 <ShoppingCart className="w-4 h-4 mr-2" />
                                 Add to Cart
                               </Button>

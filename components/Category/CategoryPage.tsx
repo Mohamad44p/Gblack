@@ -2,34 +2,18 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart, Star, ChevronRight, X } from 'lucide-react'
+import { ShoppingCart, Heart, Star, X, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import Link from 'next/link'
 import Image from 'next/image'
+import { Product } from '@/types/product'
 
-interface Product {
-  id: number
-  name: string
-  price: string
-  regular_price: string
-  categories: { id: number; name: string; slug: string }[]
-  average_rating: string
-  images: { src: string }[]
-  description: string
-}
-
-interface Category {
-  id: number
-  name: string
-  slug: string
-}
-
-const QuickViewModal = ({ product, onClose }: {
-  product: Product,
+interface QuickViewModalProps {
+  product: Product
   onClose: () => void
-}) => {
+}
+
+const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -51,10 +35,11 @@ const QuickViewModal = ({ product, onClose }: {
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
           <X size={24} />
+          <span className="sr-only">Close</span>
         </button>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
-            <Image src={product.images[0]?.src || '/BlurImage.jpg'} alt={product.name} width={400} height={400} className="w-full h-auto rounded-lg" />
+            <Image src={product.images[0]?.src || '/placeholder.svg'} alt={product.name} width={400} height={400} className="w-full h-auto rounded-lg" />
           </div>
           <div className="md:w-1/2">
             <h2 className="text-3xl font-bold mb-4"
@@ -64,7 +49,7 @@ const QuickViewModal = ({ product, onClose }: {
                 WebkitTextFillColor: 'transparent'
               }}
             >{product.name}</h2>
-            <p className="text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: product.description }}></p>
+            <div className="text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: product.description }}></div>
             <div className="flex items-center mb-4">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-300'} fill-current`} />
@@ -84,12 +69,13 @@ const QuickViewModal = ({ product, onClose }: {
               </Badge>
             </div>
             <div className="flex gap-4">
-              <Button className="flex-1 bg-black hover:bg-white hover:text-black text-white">
+              <Button className="flex-1 bg-white text-black hover:bg-gray-200">
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
               <Button variant="outline" className="px-3 border-white hover:bg-blue-50 hover:text-black">
                 <Heart className="w-4 h-4" />
+                <span className="sr-only">Add to Wishlist</span>
               </Button>
             </div>
           </div>
@@ -99,64 +85,81 @@ const QuickViewModal = ({ product, onClose }: {
   )
 }
 
-const ProductSkeleton = () => (
-  <div className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm p-6">
-    <Skeleton className="w-full h-80 mb-4" />
-    <Skeleton className="w-3/4 h-8 mb-2" />
-    <Skeleton className="w-1/2 h-6 mb-4" />
-    <div className="flex justify-between items-center mb-4">
-      <Skeleton className="w-1/3 h-8" />
-      <Skeleton className="w-1/4 h-6 rounded-full" />
+const SkeletonProduct: React.FC = () => {
+  return (
+    <div className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-pulse">
+      <div className="relative overflow-hidden">
+        <div className="w-full h-80 bg-gray-700" />
+      </div>
+      <div className="p-6">
+        <div className="h-8 bg-gray-700 rounded mb-2" />
+        <div className="flex justify-between items-center mb-4">
+          <div className="h-8 w-24 bg-gray-700 rounded" />
+          <div className="h-6 w-20 bg-gray-700 rounded-full" />
+        </div>
+        <div className="flex items-center mb-4">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="w-5 h-5 bg-gray-700 rounded-full mr-1" />
+            ))}
+          </div>
+          <div className="ml-2 h-4 w-8 bg-gray-700 rounded" />
+        </div>
+        <div className="flex justify-between items-center">
+          <div className="h-10 w-32 bg-gray-700 rounded" />
+          <div className="h-10 w-10 bg-gray-700 rounded" />
+        </div>
+      </div>
     </div>
-    <div className="flex items-center mb-4">
-      {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} className="w-5 h-5 mr-1" />
-      ))}
-      <Skeleton className="w-10 h-5 ml-2" />
-    </div>
-    <div className="flex justify-between items-center">
-      <Skeleton className="w-2/3 h-10" />
-      <Skeleton className="w-10 h-10 rounded-full" />
-    </div>
-  </div>
-)
+  )
+}
 
-export default function AllHome() {
+interface CategoryPageProps {
+  initialProducts: Product[]
+  categorySlug: string
+}
+
+export default function CategoryPage({ initialProducts, categorySlug }: CategoryPageProps) {
   const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [selectedCategory, setSelectedCategory] = useState('All')
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState('date')
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, categoriesRes] = await Promise.all([
-          fetch('/api/products?per_page=20'),
-          fetch('/api/categories')
-        ])
-        
-        if (!productsRes.ok || !categoriesRes.ok) throw new Error('Failed to fetch data')
-        
-        const productsData = await productsRes.json()
-        const categoriesData = await categoriesRes.json()
-        
-        setProducts(productsData.products)
-        setCategories([{ id: 0, name: 'All', slug: 'all' }, ...categoriesData.categories])
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      } finally {
-        setLoading(false)
-      }
+    if (Array.isArray(initialProducts)) {
+      setProducts(initialProducts)
     }
+    setIsLoading(false)
+  }, [initialProducts])
 
-    fetchData()
-  }, [])
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-asc':
+        return parseFloat(a.price) - parseFloat(b.price)
+      case 'price-desc':
+        return parseFloat(b.price) - parseFloat(a.price)
+      case 'name':
+        return a.name.localeCompare(b.name)
+      case 'date':
+      default:
+        return new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
+    }
+  })
 
-  const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter(product => product.categories.some(cat => cat.name === selectedCategory))
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white overflow-hidden relative">
+        <div className="container mx-auto px-4 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, index) => (
+              <SkeletonProduct key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
@@ -167,72 +170,27 @@ export default function AllHome() {
         <div className="absolute inset-0 bg-dot-white/[0.2] -z-10" />
 
         <div className="container mx-auto px-4 py-16 relative z-10">
-          <motion.div
-            className="text-7xl font-extrabold mb-12 text-center"
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            {loading ? (
-              <Skeleton className="w-3/4 h-20 mx-auto" />
-            ) : (
-              <h1 style={{
-                background: 'linear-gradient(to right, #fff, #888)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>
-                Future Tech Emporium
-              </h1>
-            )}
-          </motion.div>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold capitalize">{categorySlug.replace('-', ' ')}</h1>
+            <select
+              className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="date">Newest</option>
+              <option value="name">Name</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
 
-          <motion.div
-            className="flex justify-center space-x-4 mb-16 flex-wrap"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            {loading ? (
-              [...Array(5)].map((_, index) => (
-                <Skeleton key={index} className="w-24 h-10 rounded-full mb-2" />
-              ))
-            ) : (
-              categories.map(category => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.name ? 'default' : 'outline'}
-                  onClick={() => setSelectedCategory(category.name)}
-                  className={`px-6 py-2 rounded-full text-lg font-semibold transition-all duration-300 mb-2 ${
-                    selectedCategory === category.name
-                      ? 'bg-white text-black'
-                      : 'bg-transparent text-white border-white hover:bg-white hover:text-black'
-                  }`}
-                >
-                  {category.name}
-                </Button>
-              ))
-            )}
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
-            layout
-          >
-            <AnimatePresence>
-              {loading ? (
-                [...Array(6)].map((_, index) => (
-                  <motion.div
-                    key={`skeleton-${index}`}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <ProductSkeleton />
-                  </motion.div>
-                ))
-              ) : (
-                filteredProducts.map(product => (
+          {sortedProducts.length > 0 ? (
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              layout
+            >
+              <AnimatePresence>
+                {sortedProducts.map(product => (
                   <motion.div
                     key={product.id}
                     layout
@@ -250,7 +208,7 @@ export default function AllHome() {
                       transition={{ duration: 0.3 }}
                     >
                       <div className="relative overflow-hidden">
-                        <Image src={product.images[0]?.src || '/BlurImage.jpg'} alt={product.name} width={400} height={320} className="w-full h-80 object-cover" />
+                        <Image src={product.images[0]?.src || '/placeholder.svg'} alt={product.name} width={400} height={400} className="w-full h-80 object-cover" />
                         <motion.div
                           className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           initial={{ opacity: 0 }}
@@ -289,29 +247,22 @@ export default function AllHome() {
                           </Button>
                           <Button variant="outline" className="px-3 border-white text-white hover:bg-white hover:text-black">
                             <Heart className="w-4 h-4" />
+                            <span className="sr-only">Add to Wishlist</span>
                           </Button>
                         </div>
                       </div>
                     </motion.div>
                   </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          <motion.div
-            className="mt-16 text-center"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <Button className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-full">
-              <Link href="/all">
-                View All Products
-              </Link>
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </Button>
-          </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          ) : (
+            <div className="text-center py-12">
+              <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-200">No products found</h3>
+              <p className="mt-1 text-sm text-gray-400">Try changing your filters or search criteria.</p>
+            </div>
+          )}
         </div>
       </div>
 

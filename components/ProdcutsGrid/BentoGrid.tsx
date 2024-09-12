@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button"
 import useEmblaCarousel from 'embla-carousel-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Star, ShoppingCart, Sparkles, Zap, Plus, Tag } from 'lucide-react'
+import { useCart } from '@/contexts/CartContext'
 
-interface Product {
+export interface Product {
+  id: number
   name: string
   brand: string
   price: string
@@ -26,10 +28,13 @@ interface ShowcaseProps {
   featuredDescription: string
 }
 
-const ProductCard = ({ product }: { product: Product }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const isOnSale = product.salePrice !== product.price
+interface ProductCardProps {
+  product: Product;
+  handleAddToCart: (product: Product) => void;
+}
 
+const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {  const [isHovered, setIsHovered] = useState(false)
+  const isOnSale = product.salePrice !== product.price
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -10 }}
@@ -137,7 +142,11 @@ const ProductCard = ({ product }: { product: Product }) => {
               transition={{ duration: 0.3 }}
               className="absolute bottom-10 inset-0 bg-black/80 flex items-center justify-center"
             >
-              <Button size="lg" className="bg-white z-[10000] text-black hover:bg-white/80 transition-all duration-300 rounded-full">
+            <Button 
+                size="lg" 
+                className="bg-white z-[10000] text-black hover:bg-white/80 transition-all duration-300 rounded-full"
+                onClick={() => handleAddToCart(product)}
+              >
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 Add to Cart
               </Button>
@@ -168,6 +177,16 @@ export function ProductShowcase({ title, products, featuredImage, featuredTitle,
 
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi])
+  const { addToCart } = useCart()
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.salePrice,
+      image: product.image1,
+      quantity: 1
+    })
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 bg-black text-white">
@@ -268,7 +287,7 @@ export function ProductShowcase({ title, products, featuredImage, featuredTitle,
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] xl:flex-[0_0_25%] px-2"
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} handleAddToCart={handleAddToCart} />
             </motion.div>
           ))}
         </div>

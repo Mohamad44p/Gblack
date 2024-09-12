@@ -5,9 +5,10 @@ import axios from 'axios';
 
 interface User {
   id: number;
-  user_email: string;
-  user_nicename: string;
-  user_display_name: string;
+  email: string;
+  name: string;
+  firstName: string;
+  lastName: string;
 }
 
 interface AuthContextType {
@@ -35,14 +36,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuthStatus = async (): Promise<boolean> => {
     if (!isLoading && isLoggedIn) return true;
     setIsLoading(true);
-    const token = localStorage.getItem('authToken');
-    const storedUser = localStorage.getItem('user');
 
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-      setIsLoggedIn(true);
-      setIsLoading(false);
-      return true;
+    try {
+      const response = await axios.get('/api/auth/verify');
+      if (response.data.success) {
+        setUser(response.data.user);
+        setIsLoggedIn(true);
+        setIsLoading(false);
+        return true;
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
     }
 
     setUser(null);
@@ -54,21 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (username: string, password: string): Promise<User | null> => {
     try {
       const response = await axios.post('/api/auth/login', { username, password });
-      const { success, user } = response.data;
-
-      if (success && user) {
-        const userData: User = {
-          id: 0,
-          user_email: user.user_email,
-          user_nicename: user.user_nicename,
-          user_display_name: user.user_display_name
-        };
-
-        localStorage.setItem('user', JSON.stringify(userData));
-
-        setUser(userData);
+      if (response.data.success) {
+        setUser(response.data.user);
         setIsLoggedIn(true);
-        return userData;
+        return response.data.user;
       } else {
         throw new Error('Login failed: Invalid response from server');
       }
@@ -90,8 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     try {
       await axios.post('/api/auth/logout');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
       setUser(null);
       setIsLoggedIn(false);
     } catch (error: any) {

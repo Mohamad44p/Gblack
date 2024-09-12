@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-export async function POST() {
+export async function GET() {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get('auth')?.value;

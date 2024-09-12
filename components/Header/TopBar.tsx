@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { User, ShoppingBag, Heart, Facebook, Instagram, Twitter, LogOut } from "lucide-react"
+import { User, Heart, Facebook, Instagram, Twitter, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import SearchModal from "./SearchModal"
 import { useAuthCheck } from "@/lib/hooks/useAuthCheck"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
+import CartSheet from "../Cart/CartSheet"
 
 export default function TopBar() {
   const [lang, setLang] = useState<"en" | "ar">("en")
@@ -137,16 +138,7 @@ export default function TopBar() {
           >
             <Heart size={20} />
           </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="focus:outline-none relative"
-          >
-            <ShoppingBag size={20} />
-            <span className="absolute -top-2 -right-2 bg-white text-black text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              0
-            </span>
-          </motion.button>
+          <CartSheet />
         </div>
       </div>
     </motion.header>
