@@ -13,8 +13,8 @@ export interface Product {
   id: number
   name: string
   brand: string
-  price: string
-  salePrice: string
+  price: number
+  salePrice: number
   rating: number
   image1: string
   image2: string
@@ -33,8 +33,12 @@ interface ProductCardProps {
   handleAddToCart: (product: Product) => void;
 }
 
-const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {  const [isHovered, setIsHovered] = useState(false)
+const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
+  const [isHovered, setIsHovered] = useState(false)
   const isOnSale = product.salePrice !== product.price
+  const formattedPrice = `$${product.price.toFixed(2)}`
+  const formattedSalePrice = `$${product.salePrice.toFixed(2)}`
+
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -10 }}
@@ -120,11 +124,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {  const
               <div className="flex flex-col">
                 {isOnSale ? (
                   <>
-                    <span className="text-xl font-bold text-white">{product.salePrice}</span>
-                    <span className="text-sm text-red-500 line-through">{product.price}</span>
+                    <span className="text-xl font-bold text-white">{formattedSalePrice}</span>
+                    <span className="text-sm text-red-500 line-through">{formattedPrice}</span>
                   </>
                 ) : (
-                  <span className="text-xl font-bold text-white">{product.price}</span>
+                  <span className="text-xl font-bold text-white">{formattedPrice}</span>
                 )}
               </div>
               <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-white/80 transition-all duration-300">
@@ -142,8 +146,8 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {  const
               transition={{ duration: 0.3 }}
               className="absolute bottom-10 inset-0 bg-black/80 flex items-center justify-center"
             >
-            <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-white z-[10000] text-black hover:bg-white/80 transition-all duration-300 rounded-full"
                 onClick={() => handleAddToCart(product)}
               >
@@ -182,7 +186,7 @@ export function ProductShowcase({ title, products, featuredImage, featuredTitle,
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.salePrice,
+      price: (product.salePrice || product.price).toString(),
       image: product.image1,
       quantity: 1
     })

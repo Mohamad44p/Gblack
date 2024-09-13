@@ -7,7 +7,7 @@ import ImagesShow from "@/components/ThirdSec/ImagesShow"
 import Loading from '@/components/Loading'
 import { Product } from '@/types/product'
 
-async function getProducts(perPage: number) {
+async function getProducts(perPage: number): Promise<{ products: Product[] }> {
   const res = await fetch(`http://localhost:3000/api/products?per_page=${perPage}`, { cache: 'no-store' })
   if (!res.ok) {
     throw new Error('Failed to fetch products')
@@ -20,11 +20,12 @@ function transformProduct(product: Product) {
     id: product.id,
     name: product.name,
     brand: product.categories[0]?.name || "Unknown Brand",
-    price: `$${product.regular_price}`,
-    salePrice: `$${product.price}`,
+    price: parseFloat(product.regular_price),
+    salePrice: parseFloat(product.price),
     rating: Math.floor(parseFloat(product.average_rating)),
     image1: product.images[0]?.src || "/BlurImage.jpg",
     image2: product.images[1]?.src || "/BlurImage.jpg",
+    totalSales: product.total_sales
   }
 }
 
@@ -35,12 +36,12 @@ async function ProductShowcases() {
     new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
   )
 
-  const sortedBySales = [...productsData.products].sort((a, b) =>
+  const sortedByTotalSales = [...productsData.products].sort((a, b) => 
     b.total_sales - a.total_sales
   )
 
   const newestProducts = sortedByDate.slice(0, 7).map(transformProduct)
-  const bestSellers = sortedBySales.slice(0, 7).map(transformProduct)
+  const bestSellers = sortedByTotalSales.slice(0, 7).map(transformProduct)
 
   return (
     <>

@@ -8,4 +8,5 @@ export interface Product {
   images: { src: string }[];
   description: string;
   date_created: string;
+  total_sales: number;
 }

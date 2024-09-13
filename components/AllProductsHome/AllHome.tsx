@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import Image from 'next/image'
-
+import { useCart } from '@/contexts/CartContext'
 interface Product {
   id: number
   name: string
@@ -30,6 +30,18 @@ const QuickViewModal = ({ product, onClose }: {
   product: Product,
   onClose: () => void
 }) => {
+  const { addToCart } = useCart()
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.src || '/BlurImage.jpg',
+      quantity: 1
+    })
+    onClose()
+  }
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -84,7 +96,10 @@ const QuickViewModal = ({ product, onClose }: {
               </Badge>
             </div>
             <div className="flex gap-4">
-              <Button className="flex-1 bg-black hover:bg-white hover:text-black text-white">
+              <Button
+                className="flex-1 bg-black hover:bg-white hover:text-black text-white"
+                onClick={handleAddToCart}
+              >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
@@ -128,6 +143,7 @@ export default function AllHome() {
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
+  const { addToCart } = useCart()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,12 +152,12 @@ export default function AllHome() {
           fetch('/api/products?per_page=20'),
           fetch('/api/categories')
         ])
-        
+
         if (!productsRes.ok || !categoriesRes.ok) throw new Error('Failed to fetch data')
-        
+
         const productsData = await productsRes.json()
         const categoriesData = await categoriesRes.json()
-        
+
         setProducts(productsData.products)
         setCategories([{ id: 0, name: 'All', slug: 'all' }, ...categoriesData.categories])
       } catch (error) {
@@ -153,6 +169,16 @@ export default function AllHome() {
 
     fetchData()
   }, [])
+
+  const handleAddToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.src || '/BlurImage.jpg',
+      quantity: 1
+    })
+  }
 
   const filteredProducts = selectedCategory === 'All'
     ? products
@@ -202,11 +228,10 @@ export default function AllHome() {
                   key={category.id}
                   variant={selectedCategory === category.name ? 'default' : 'outline'}
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`px-6 py-2 rounded-full text-lg font-semibold transition-all duration-300 mb-2 ${
-                    selectedCategory === category.name
-                      ? 'bg-white text-black'
-                      : 'bg-transparent text-white border-white hover:bg-white hover:text-black'
-                  }`}
+                  className={`px-6 py-2 rounded-full text-lg font-semibold transition-all duration-300 mb-2 ${selectedCategory === category.name
+                    ? 'bg-white text-black'
+                    : 'bg-transparent text-white border-white hover:bg-white hover:text-black'
+                    }`}
                 >
                   {category.name}
                 </Button>
@@ -283,7 +308,10 @@ export default function AllHome() {
                           <span className="ml-2 text-gray-400">{product.average_rating}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <Button className="flex-1 mr-2 bg-white text-black hover:bg-gray-200">
+                          <Button
+                            className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                            onClick={() => handleAddToCart(product)}
+                          >
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Add to Cart
                           </Button>

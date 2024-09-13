@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +33,7 @@ interface ShippingAddress {
 export default function EnhancedCheckout() {
   const { cart, clearCart, getCartTotal } = useCart()
   const { toast } = useToast()
+  const router = useRouter()
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     first_name: '',
     last_name: '',
@@ -110,6 +112,7 @@ export default function EnhancedCheckout() {
       })
 
       clearCart()
+      router.push(`/order-confirmation/${data.orderId}`)
     } catch (error) {
       console.error('Error creating order:', error)
       toast({

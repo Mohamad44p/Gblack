@@ -15,7 +15,8 @@
 }
 
 *::selection {
-  background-color: rgba(var(--foreground-rgb), 0.99);
+  background-color: #fff;
+  color: #000;
 }
 
 /* Lenis */
