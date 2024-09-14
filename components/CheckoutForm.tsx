@@ -1,16 +1,17 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/contexts/CartContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, ShoppingBag } from 'lucide-react'
+import { Loader2, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface ShippingZone {
@@ -19,9 +20,15 @@ interface ShippingZone {
   price: number
 }
 
-interface ShippingAddress {
+interface CustomerDetails {
   first_name: string
   last_name: string
+  email: string
+  phone: string
+  company: string
+}
+
+interface ShippingAddress {
   address_1: string
   address_2: string
   city: string
@@ -30,19 +37,36 @@ interface ShippingAddress {
   country: string
 }
 
+interface OrderDetails {
+  notes: string
+  gift_wrap: boolean
+  newsletter_signup: boolean
+}
+
 export default function EnhancedCheckout() {
   const { cart, clearCart, getCartTotal } = useCart()
   const { toast } = useToast()
   const router = useRouter()
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+  const [step, setStep] = useState(1)
+  const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     first_name: '',
     last_name: '',
+    email: '',
+    phone: '',
+    company: '',
+  })
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     address_1: '',
     address_2: '',
     city: '',
     state: '',
     postcode: '',
     country: '',
+  })
+  const [orderDetails, setOrderDetails] = useState<OrderDetails>({
+    notes: '',
+    gift_wrap: false,
+    newsletter_signup: false,
   })
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([])
   const [selectedZone, setSelectedZone] = useState<ShippingZone | null>(null)
@@ -69,9 +93,26 @@ export default function EnhancedCheckout() {
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    section: 'customer' | 'shipping' | 'order'
+  ) => {
     const { name, value } = e.target
-    setShippingAddress(prev => ({ ...prev, [name]: value }))
+    switch (section) {
+      case 'customer':
+        setCustomerDetails(prev => ({ ...prev, [name]: value }))
+        break
+      case 'shipping':
+        setShippingAddress(prev => ({ ...prev, [name]: value }))
+        break
+      case 'order':
+        setOrderDetails(prev => ({ ...prev, [name]: value }))
+        break
+    }
+  }
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setOrderDetails(prev => ({ ...prev, [name]: checked }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,9 +135,11 @@ export default function EnhancedCheckout() {
         },
         body: JSON.stringify({
           cart,
+          customerDetails,
           shippingAddress,
           shippingZone: selectedZone,
           paymentMethod: isCashOnDelivery ? 'cod' : 'bacs',
+          orderDetails,
         }),
       })
 
@@ -127,14 +170,13 @@ export default function EnhancedCheckout() {
 
   const totalWithShipping = getCartTotal() + (selectedZone?.price || 0)
 
-  return (
-    <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold mb-6 text-white">Checkout</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
           <Card className="text-white border-gray-800">
             <CardHeader>
-              <CardTitle>Shipping Information</CardTitle>
+              <CardTitle className="text-2xl">1. Customer Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -143,8 +185,8 @@ export default function EnhancedCheckout() {
                   <Input
                     id="first_name"
                     name="first_name"
-                    value={shippingAddress.first_name}
-                    onChange={handleInputChange}
+                    value={customerDetails.first_name}
+                    onChange={(e) => handleInputChange(e, 'customer')}
                     required
                     className="border-gray-700 text-white"
                   />
@@ -154,31 +196,75 @@ export default function EnhancedCheckout() {
                   <Input
                     id="last_name"
                     name="last_name"
-                    value={shippingAddress.last_name}
-                    onChange={handleInputChange}
+                    value={customerDetails.last_name}
+                    onChange={(e) => handleInputChange(e, 'customer')}
                     required
                     className="border-gray-700 text-white"
                   />
                 </div>
               </div>
               <div>
-                <Label htmlFor="address_1">Address Line 1</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="address_1"
-                  name="address_1"
-                  value={shippingAddress.address_1}
-                  onChange={handleInputChange}
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={customerDetails.email}
+                  onChange={(e) => handleInputChange(e, 'customer')}
                   required
                   className="border-gray-700 text-white"
                 />
               </div>
               <div>
-                <Label htmlFor="address_2">Address Line 2</Label>
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={customerDetails.phone}
+                  onChange={(e) => handleInputChange(e, 'customer')}
+                  required
+                  className="border-gray-700 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="company">Company (Optional)</Label>
+                <Input
+                  id="company"
+                  name="company"
+                  value={customerDetails.company}
+                  onChange={(e) => handleInputChange(e, 'customer')}
+                  className="border-gray-700 text-white"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )
+      case 2:
+        return (
+          <Card className="text-white border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-2xl">2. Shipping Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="address_1">Address Line 1</Label>
+                <Input
+                  id="address_1"
+                  name="address_1"
+                  value={shippingAddress.address_1}
+                  onChange={(e) => handleInputChange(e, 'shipping')}
+                  required
+                  className="border-gray-700 text-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="address_2">Address Line 2 (Optional)</Label>
                 <Input
                   id="address_2"
                   name="address_2"
                   value={shippingAddress.address_2}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(e, 'shipping')}
                   className="border-gray-700 text-white"
                 />
               </div>
@@ -189,18 +275,18 @@ export default function EnhancedCheckout() {
                     id="city"
                     name="city"
                     value={shippingAddress.city}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, 'shipping')}
                     required
                     className="border-gray-700 text-white"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state">State</Label>
+                  <Label htmlFor="state">State/Province</Label>
                   <Input
                     id="state"
                     name="state"
                     value={shippingAddress.state}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, 'shipping')}
                     required
                     className="border-gray-700 text-white"
                   />
@@ -208,12 +294,12 @@ export default function EnhancedCheckout() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="postcode">Postcode</Label>
+                  <Label htmlFor="postcode">Postcode/ZIP</Label>
                   <Input
                     id="postcode"
                     name="postcode"
                     value={shippingAddress.postcode}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, 'shipping')}
                     required
                     className="border-gray-700 text-white"
                   />
@@ -224,17 +310,27 @@ export default function EnhancedCheckout() {
                     id="country"
                     name="country"
                     value={shippingAddress.country}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, 'shipping')}
                     required
                     className="border-gray-700 text-white"
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        )
+      case 3:
+        return (
+          <Card className="text-white border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-2xl">3. Shipping & Payment</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="shipping-zone">Shipping Zone</Label>
+                <Label htmlFor="shipping-zone">Shipping Method</Label>
                 <Select onValueChange={(value) => setSelectedZone(shippingZones.find(zone => zone.id.toString() === value) || null)}>
                   <SelectTrigger className="border-gray-700 text-white">
-                    <SelectValue placeholder="Select a shipping zone" />
+                    <SelectValue placeholder="Select a shipping method" />
                   </SelectTrigger>
                   <SelectContent>
                     {shippingZones.map((zone) => (
@@ -253,23 +349,94 @@ export default function EnhancedCheckout() {
                 />
                 <Label htmlFor="cash-on-delivery">Cash on Delivery</Label>
               </div>
+              <div>
+                <Label htmlFor="notes">Order Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  value={orderDetails.notes}
+                  onChange={(e) => handleInputChange(e, 'order')}
+                  className="border-gray-700 text-white"
+                  placeholder="Any special instructions for your order?"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="gift-wrap"
+                  checked={orderDetails.gift_wrap}
+                  onCheckedChange={(checked) => handleCheckboxChange('gift_wrap', checked as boolean)}
+                />
+                <Label htmlFor="gift-wrap">Gift wrap ($5.00)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="newsletter-signup"
+                  checked={orderDetails.newsletter_signup}
+                  onCheckedChange={(checked) => handleCheckboxChange('newsletter_signup', checked as boolean)}
+                />
+                <Label htmlFor="newsletter-signup">Sign up for our newsletter</Label>
+              </div>
             </CardContent>
           </Card>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              'Place Order'
-            )}
-          </Button>
-        </form>
+        )
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-3xl font-bold mb-6 text-white">Checkout</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex space-x-2">
+              {[1, 2, 3].map((stepNumber) => (
+                <div
+                  key={stepNumber}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step === stepNumber ? 'bg-primary text-primary-foreground' : 'bg-gray-700 text-gray-300'
+                  }`}
+                >
+                  {stepNumber}
+                </div>
+              ))}
+            </div>
+            <div className="flex space-x-2">
+              <Button
+                onClick={() => setStep(step - 1)}
+                disabled={step === 1}
+                variant="outline"
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+              </Button>
+              {step < 3 ? (
+                <Button
+                  onClick={() => setStep(step + 1)}
+                  variant="outline"
+                >
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmit} disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Place Order'
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+          {renderStepContent()}
+        </div>
         <div className="lg:col-span-1">
           <Card className="text-white border-gray-800">
             <CardHeader>
-              <CardTitle className="flex items-center">
+              <CardTitle className="flex items-center text-2xl">
                 <ShoppingBag className="mr-2" />
                 Order Summary
               </CardTitle>
@@ -278,11 +445,10 @@ export default function EnhancedCheckout() {
               {cart.map((item) => (
                 <div key={item.id} className="flex items-center space-x-4">
                   <div className="relative w-16 h-16 rounded-md overflow-hidden">
-                    <Image
+                    <img
                       src={item.image}
                       alt={item.name}
-                      layout="fill"
-                      objectFit="cover"
+                      className="object-cover w-full h-full"
                     />
                   </div>
                   <div className="flex-grow">
@@ -303,9 +469,15 @@ export default function EnhancedCheckout() {
                   <span>Shipping</span>
                   <span>${selectedZone ? selectedZone.price.toFixed(2) : '0.00'}</span>
                 </div>
+                {orderDetails.gift_wrap && (
+                  <div className="flex justify-between mt-2">
+                    <span>Gift Wrap</span>
+                    <span>$5.00</span>
+                  </div>
+                )}
                 <div className="flex justify-between mt-4 text-lg font-bold">
                   <span>Total</span>
-                  <span>${totalWithShipping.toFixed(2)}</span>
+                  <span>${(totalWithShipping + (orderDetails.gift_wrap ? 5 : 0)).toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>

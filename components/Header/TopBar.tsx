@@ -17,11 +17,14 @@ import { useAuthCheck } from "@/lib/hooks/useAuthCheck"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import CartSheet from "../Cart/CartSheet"
+import { useWishlist } from "@/contexts/WishlistContext"
 
 export default function TopBar() {
   const [lang, setLang] = useState<"en" | "ar">("en")
   const { isLoggedIn, user, logout } = useAuth()
   const router = useRouter()
+  const { wishlist } = useWishlist()
+  
   const handleLogout = async () => {
     await logout()
     router.refresh()
@@ -131,13 +134,20 @@ export default function TopBar() {
             )}
           </div>
           <SearchModal />
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="focus:outline-none"
-          >
-            <Heart size={20} />
-          </motion.button>
+          <Link href="/wishlist">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="focus:outline-none relative"
+            >
+              <Heart size={20} />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
+            </motion.button>
+          </Link>
           <CartSheet />
         </div>
       </div>

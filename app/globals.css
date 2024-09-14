@@ -19,6 +19,8 @@
   color: #000;
 }
 
+
+
 /* Lenis */
 html.lenis,
 html.lenis body {
@@ -83,6 +85,7 @@ html.lenis body {
 
 body {
   font-family: var(--font-berkshire-swash);
+  background: #000;
 }
 
 body .font-neue-Light {

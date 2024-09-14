@@ -10,19 +10,41 @@ const api = new WooCommerceRestApi({
 
 export async function POST(request: NextRequest) {
   try {
-    const { cart, shippingAddress, shippingZone, paymentMethod } = await request.json();
+    const { cart, customerDetails, shippingAddress, shippingZone, paymentMethod, orderDetails } = await request.json();
 
     const lineItems = cart.map((item: any) => ({
       product_id: item.id,
       quantity: item.quantity,
     }));
 
-    const orderData = {
+    const orderData: {
+      payment_method: any;
+      payment_method_title: string;
+      set_paid: boolean;
+      billing: any;
+      shipping: any;
+      line_items: any;
+      shipping_lines: { method_id: string; method_title: any; total: any }[];
+      meta_data: { key: string; value: string }[];
+      customer_note: any;
+      fee_lines?: { name: string; total: string; tax_status: string; tax_class: string }[];
+    } = {
       payment_method: paymentMethod,
       payment_method_title: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer',
       set_paid: false,
-      billing: shippingAddress,
-      shipping: shippingAddress,
+      billing: {
+        ...shippingAddress,
+        first_name: customerDetails.first_name,
+        last_name: customerDetails.last_name,
+        email: customerDetails.email,
+        phone: customerDetails.phone,
+        company: customerDetails.company,
+      },
+      shipping: {
+        ...shippingAddress,
+        first_name: customerDetails.first_name,
+        last_name: customerDetails.last_name,
+      },
       line_items: lineItems,
       shipping_lines: [
         {
@@ -30,8 +52,30 @@ export async function POST(request: NextRequest) {
           method_title: shippingZone.name,
           total: shippingZone.price.toString()
         }
-      ]
+      ],
+      meta_data: [
+        {
+          key: "gift_wrap",
+          value: orderDetails.gift_wrap ? "Yes" : "No"
+        },
+        {
+          key: "newsletter_signup",
+          value: orderDetails.newsletter_signup ? "Yes" : "No"
+        }
+      ],
+      customer_note: orderDetails.notes
     };
+
+    if (orderDetails.gift_wrap) {
+      orderData.fee_lines = [
+        {
+          name: "Gift Wrap",
+          total: "5.00",
+          tax_status: "taxable",
+          tax_class: ""
+        }
+      ];
+    }
 
     const response = await api.post("orders", orderData);
 

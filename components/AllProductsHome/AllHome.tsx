@@ -9,11 +9,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
+import { WishlistButton } from '../WishlistButton'
+
 interface Product {
   id: number
   name: string
   price: string
   regular_price: string
+  sale_price: string
   categories: { id: number; name: string; slug: string }[]
   average_rating: string
   images: { src: string }[]
@@ -31,17 +34,19 @@ const QuickViewModal = ({ product, onClose }: {
   onClose: () => void
 }) => {
   const { addToCart } = useCart()
+  const isOnSale = product.sale_price !== '' && product.sale_price !== product.regular_price
 
   const handleAddToCart = () => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: isOnSale ? product.sale_price : product.regular_price,
       image: product.images[0]?.src || '/BlurImage.jpg',
       quantity: 1
     })
     onClose()
   }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -84,13 +89,26 @@ const QuickViewModal = ({ product, onClose }: {
               <span className="ml-2 text-gray-400">{product.average_rating}</span>
             </div>
             <div className="flex items-center justify-between mb-6">
-              <span className="text-3xl font-bold"
-                style={{
-                  background: 'linear-gradient(to right, #fff, #888)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >${product.price}</span>
+              {isOnSale ? (
+                <div>
+                  <span className="text-3xl font-bold mr-2"
+                    style={{
+                      background: 'linear-gradient(to right, #fff, #888)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}
+                  >${product.sale_price}</span>
+                  <span className="text-xl text-gray-400 line-through">${product.regular_price}</span>
+                </div>
+              ) : (
+                <span className="text-3xl font-bold"
+                  style={{
+                    background: 'linear-gradient(to right, #fff, #888)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}
+                >${product.regular_price}</span>
+              )}
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                 {product.categories[0]?.name || 'Uncategorized'}
               </Badge>
@@ -103,9 +121,12 @@ const QuickViewModal = ({ product, onClose }: {
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
-              <Button variant="outline" className="px-3 border-white hover:bg-blue-50 hover:text-black">
-                <Heart className="w-4 h-4" />
-              </Button>
+              <WishlistButton product={{
+                id: product.id,
+                name: product.name,
+                price: isOnSale ? product.sale_price : product.regular_price,
+                image: product.images[0]?.src || '/BlurImage.jpg'
+              }} />
             </div>
           </div>
         </div>
@@ -171,15 +192,16 @@ export default function AllHome() {
   }, [])
 
   const handleAddToCart = (product: Product) => {
+    const isOnSale = product.sale_price !== '' && product.sale_price !== product.regular_price
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: isOnSale ? product.sale_price : product.regular_price,
       image: product.images[0]?.src || '/BlurImage.jpg',
       quantity: 1
     })
   }
-
+  
   const filteredProducts = selectedCategory === 'All'
     ? products
     : products.filter(product => product.categories.some(cat => cat.name === selectedCategory))
@@ -257,72 +279,94 @@ export default function AllHome() {
                   </motion.div>
                 ))
               ) : (
-                filteredProducts.map(product => (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.5 }}
-                    className="relative group"
-                    onHoverStart={() => setHoveredProduct(product.id)}
-                    onHoverEnd={() => setHoveredProduct(null)}
-                  >
+                filteredProducts.map(product => {
+                  const isOnSale = product.sale_price !== '' && product.sale_price !== product.regular_price
+                  return (
                     <motion.div
-                      className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
-                      whileHover={{ scale: 1.05, rotateY: 5 }}
-                      transition={{ duration: 0.3 }}
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.5 }}
+                      className="relative group"
+                      onHoverStart={() => setHoveredProduct(product.id)}
+                      onHoverEnd={() => setHoveredProduct(null)}
                     >
-                      <div className="relative overflow-hidden">
-                        <Image src={product.images[0]?.src || '/BlurImage.jpg'} alt={product.name} width={400} height={320} className="w-full h-80 object-cover" />
-                        <motion.div
-                          className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: hoveredProduct === product.id ? 1 : 0 }}
-                        >
-                          <Button
-                            className="bg-white text-black hover:bg-gray-200"
-                            onClick={() => setSelectedProduct(product)}
+                      <motion.div
+                        className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+                        whileHover={{ scale: 1.05, rotateY: 5 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="relative overflow-hidden">
+                          <Image src={product.images[0]?.src || '/BlurImage.jpg'} alt={product.name} width={400} height={320} className="w-full h-80 object-cover" />
+                          {isOnSale && (
+                            <Badge className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-full">
+                              Sale
+                            </Badge>
+                          )}
+                          <motion.div
+                            className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: hoveredProduct === product.id ? 1 : 0 }}
                           >
-                            Quick View
-                          </Button>
-                        </motion.div>
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-2xl font-bold mb-2">{product.name}</h3>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-3xl font-bold" style={{
-                            background: 'linear-gradient(to right, #fff, #888)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent'
-                          }}>${product.price}</span>
-                          <Badge variant="secondary" className="bg-white text-black px-3 py-1 rounded-full">
-                            {product.categories[0]?.name || 'Uncategorized'}
-                          </Badge>
+                            <Button
+                              className="bg-white text-black hover:bg-gray-200"
+                              onClick={() => setSelectedProduct(product)}
+                            >
+                              Quick View
+                            </Button>
+                          </motion.div>
                         </div>
-                        <div className="flex items-center mb-4">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-600'} fill-current`} />
-                          ))}
-                          <span className="ml-2 text-gray-400">{product.average_rating}</span>
+                        <div className="p-6">
+                          <h3 className="text-2xl font-bold mb-2">{product.name}</h3>
+                          <div className="flex justify-between items-center mb-4">
+                            {isOnSale ? (
+                              <div>
+                                <span className="text-3xl font-bold mr-2" style={{
+                                  background: 'linear-gradient(to right, #fff, #888)',
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent'
+                                }}>${product.sale_price}</span>
+                                <span className="text-xl text-gray-400 line-through">${product.regular_price}</span>
+                              </div>
+                            ) : (
+                              <span className="text-3xl font-bold" style={{
+                                background: 'linear-gradient(to right, #fff, #888)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent'
+                              }}>${product.regular_price}</span>
+                            )}
+                            <Badge variant="secondary" className="bg-white text-black px-3 py-1 rounded-full">
+                              {product.categories[0]?.name || 'Uncategorized'}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center mb-4">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-600'} fill-current`} />
+                            ))}
+                            <span className="ml-2 text-gray-400">{product.average_rating}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <Button
+                              className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                              onClick={() => handleAddToCart(product)}
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                            <WishlistButton product={{
+                              id: product.id,
+                              name: product.name,
+                              price: isOnSale ? product.sale_price : product.regular_price,
+                              image: product.images[0]?.src || '/BlurImage.jpg'
+                            }} />
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <Button
-                            className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                            onClick={() => handleAddToCart(product)}
-                          >
-                            <ShoppingCart className="w-4 h-4 mr-2" />
-                            Add to Cart
-                          </Button>
-                          <Button variant="outline" className="px-3 border-white text-white hover:bg-white hover:text-black">
-                            <Heart className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
+                      </motion.div>
                     </motion.div>
-                  </motion.div>
-                ))
+                  )
+                })
               )}
             </AnimatePresence>
           </motion.div>

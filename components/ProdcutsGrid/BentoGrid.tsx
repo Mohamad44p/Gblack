@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import useEmblaCarousel from 'embla-carousel-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Star, ShoppingCart, Sparkles, Zap, Plus, Tag } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Star, ShoppingCart, Sparkles, Zap, Plus, Tag, Heart } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
+import { WishlistButton } from '../WishlistButton'
+import { openCart } from '@/lib/hooks/events'
 
 export interface Product {
   id: number
@@ -131,9 +133,12 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   <span className="text-xl font-bold text-white">{formattedPrice}</span>
                 )}
               </div>
-              <Button variant="outline" size="icon" className="rounded-full bg-white text-black hover:bg-white/80 transition-all duration-300">
-                <Plus className="w-4 h-4" />
-              </Button>
+              <WishlistButton product={{
+                id: product.id,
+                name: product.name,
+                price: isOnSale ? product.salePrice.toString() : product.price.toString(),
+                image: product.image1
+              }} />
             </motion.div>
           </div>
         </CardContent>
@@ -144,7 +149,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute bottom-10 inset-0 bg-black/80 flex items-center justify-center"
+              className="absolute inset-0 bg-black/80 flex items-center justify-center"
             >
               <Button
                 size="lg"
@@ -190,6 +195,7 @@ export function ProductShowcase({ title, products, featuredImage, featuredTitle,
       image: product.image1,
       quantity: 1
     })
+    openCart()
   }
 
   return (

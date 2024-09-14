@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag, X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -13,14 +14,15 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet"
 import Link from 'next/link'
+import { OPEN_CART_EVENT } from '@/lib/hooks/events'
 
 export default function CartSheet() {
   const { cart, removeFromCart, updateCartItemQuantity, clearCart, getCartTotal, getCartCount } = useCart()
   const [isOpen, setIsOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const scrollPositionRef = useRef(0)
 
   useEffect(() => {
     setMounted(true)
@@ -33,8 +35,49 @@ export default function CartSheet() {
     }
   }
 
+  useEffect(() => {
+    const handleOpenCart = () => setIsOpen(true)
+    window.addEventListener(OPEN_CART_EVENT, handleOpenCart)
+    return () => window.removeEventListener(OPEN_CART_EVENT, handleOpenCart)
+  }, [])
+
+  const handleClose = useCallback((event: React.MouseEvent) => {
+    event.preventDefault()
+    scrollPositionRef.current = window.scrollY
+    setIsOpen(false)
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current)
+      }, 0)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          scrollPositionRef.current = window.scrollY
+          setTimeout(() => setIsOpen(false), 0)
+        } else {
+          setIsOpen(true)
+        }
+      }}
+    >
       <SheetTrigger asChild>
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -122,11 +165,9 @@ export default function CartSheet() {
             </Button>
           </Link>
           <div className="flex space-x-4">
-            <SheetClose asChild>
-              <Button variant="outline" className="flex-1">
-                Continue Shopping
-              </Button>
-            </SheetClose>
+            <Button variant="outline" className="flex-1" onClick={handleClose}>
+              Continue Shopping
+            </Button>
             {cart.length > 0 && (
               <Button variant="destructive" className="flex-1" onClick={clearCart}>
                 Clear Cart

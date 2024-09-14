@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import TransitionWrapper from "@/components/TransitionWrapper";
 import { CartProvider } from "@/contexts/CartContext";
 import { Toaster } from "@/components/ui/toaster"
+import { WishlistProvider } from "@/contexts/WishlistContext";
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -28,19 +29,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${raleway.variable}`}>
-        <AuthProvider>
-          <CartProvider>
-
-            <Lenis>
-              <TopBar />
-              <Navbar />
-              <TransitionWrapper>
-                {children}
-                <Toaster />
-              </TransitionWrapper>
-            </Lenis>
-          </CartProvider>
-        </AuthProvider>
+        <Lenis>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <TopBar />
+                <Navbar />
+                <TransitionWrapper>
+                  {children}
+                  <Toaster />
+                </TransitionWrapper>
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </Lenis>
       </body>
     </html>
   );
