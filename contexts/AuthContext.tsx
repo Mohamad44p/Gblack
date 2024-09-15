@@ -27,41 +27,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [lastChecked, setLastChecked] = useState<number>(0);
 
   useEffect(() => {
     checkAuthStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAuthStatus = async (): Promise<boolean> => {
-    if (!isLoading && isLoggedIn) return true;
+    const now = Date.now();
+    if (now - lastChecked < 60000) { // Check only once per minute
+      return isLoggedIn;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await axios.get('/api/auth/verify');
-      if (response.data.success) {
-        setUser(response.data.user);
-        setIsLoggedIn(true);
-        setIsLoading(false);
-        return true;
+      const storedUser = localStorage.getItem('user');
+      const storedToken = localStorage.getItem('token');
+
+      if (storedUser && storedToken) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        const response = await axios.get('/api/auth/verify');
+        if (response.data.success) {
+          setUser(JSON.parse(storedUser));
+          setIsLoggedIn(true);
+          setLastChecked(now);
+          setIsLoading(false);
+          return true;
+        } else {
+          clearAuthData();
+        }
+      } else {
+        clearAuthData();
       }
     } catch (error) {
       console.error('Token verification failed:', error);
+      clearAuthData();
     }
 
+    setIsLoading(false);
+    setLastChecked(now);
+    return false;
+  };
+
+  const clearAuthData = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    axios.defaults.headers.common['Authorization'] = '';
     setUser(null);
     setIsLoggedIn(false);
-    setIsLoading(false);
-    return false;
   };
 
   const login = async (username: string, password: string): Promise<User | null> => {
     try {
       const response = await axios.post('/api/auth/login', { username, password });
       if (response.data.success) {
-        setUser(response.data.user);
+        const { user, token } = response.data;
+        setUser(user);
         setIsLoggedIn(true);
-        return response.data.user;
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', token);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setLastChecked(Date.now());
+        return user;
       } else {
         throw new Error('Login failed: Invalid response from server');
       }
@@ -83,8 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async (): Promise<void> => {
     try {
       await axios.post('/api/auth/logout');
-      setUser(null);
-      setIsLoggedIn(false);
+      clearAuthData();
     } catch (error: any) {
       console.error('Logout error:', error.response?.data || error.message);
     }

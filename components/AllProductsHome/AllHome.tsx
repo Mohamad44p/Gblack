@@ -10,6 +10,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/contexts/CartContext'
 import { WishlistButton } from '../WishlistButton'
+import { openCart } from '@/lib/hooks/events'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { toast } from '@/hooks/use-toast'
 
 interface Product {
   id: number
@@ -21,6 +24,7 @@ interface Product {
   average_rating: string
   images: { src: string }[]
   description: string
+  attributes: { name: string; options: string[] }[]
 }
 
 interface Category {
@@ -34,15 +38,27 @@ const QuickViewModal = ({ product, onClose }: {
   onClose: () => void
 }) => {
   const { addToCart } = useCart()
+  const [selectedSize, setSelectedSize] = useState('')
   const isOnSale = product.sale_price !== '' && product.sale_price !== product.regular_price
+  const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
 
   const handleAddToCart = () => {
+    if (sizeAttribute && sizeAttribute.options.length > 0 && !selectedSize) {
+      toast({
+        title: "Size required",
+        description: "Please select a size before adding to cart.",
+        variant: "destructive",
+      })
+      return
+    }
+
     addToCart({
       id: product.id,
       name: product.name,
       price: isOnSale ? product.sale_price : product.regular_price,
       image: product.images[0]?.src || '/BlurImage.jpg',
-      quantity: 1
+      quantity: 1,
+      size: selectedSize
     })
     onClose()
   }
@@ -113,6 +129,23 @@ const QuickViewModal = ({ product, onClose }: {
                 {product.categories[0]?.name || 'Uncategorized'}
               </Badge>
             </div>
+            {sizeAttribute && sizeAttribute.options.length > 0 && (
+              <div className="mb-6">
+                <label htmlFor="size-select" className="block text-sm font-medium text-gray-400 mb-2">
+                  Select Size
+                </label>
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sizeAttribute.options.map((size) => (
+                      <SelectItem key={size} value={size}>{size}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex gap-4">
               <Button
                 className="flex-1 bg-black hover:bg-white hover:text-black text-white"
@@ -193,13 +226,20 @@ export default function AllHome() {
 
   const handleAddToCart = (product: Product) => {
     const isOnSale = product.sale_price !== '' && product.sale_price !== product.regular_price
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: isOnSale ? product.sale_price : product.regular_price,
-      image: product.images[0]?.src || '/BlurImage.jpg',
-      quantity: 1
-    })
+    const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
+
+    if (sizeAttribute && sizeAttribute.options.length > 0) {
+      setSelectedProduct(product)
+    } else {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: isOnSale ? product.sale_price : product.regular_price,
+        image: product.images[0]?.src || '/BlurImage.jpg',
+        quantity: 1
+      })
+      openCart()
+    }
   }
   
   const filteredProducts = selectedCategory === 'All'

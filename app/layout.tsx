@@ -9,6 +9,7 @@ import TransitionWrapper from "@/components/TransitionWrapper";
 import { CartProvider } from "@/contexts/CartContext";
 import { Toaster } from "@/components/ui/toaster"
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import AnimatedFooter from "@/components/Footer";
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -38,6 +39,7 @@ export default function RootLayout({
                 <TransitionWrapper>
                   {children}
                   <Toaster />
+                  <AnimatedFooter/>
                 </TransitionWrapper>
               </WishlistProvider>
             </CartProvider>

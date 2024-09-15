@@ -15,20 +15,10 @@ export async function POST(request: NextRequest) {
     const lineItems = cart.map((item: any) => ({
       product_id: item.id,
       quantity: item.quantity,
+      meta_data: item.size ? [{ key: 'Size', value: item.size }] : [],
     }));
 
-    const orderData: {
-      payment_method: any;
-      payment_method_title: string;
-      set_paid: boolean;
-      billing: any;
-      shipping: any;
-      line_items: any;
-      shipping_lines: { method_id: string; method_title: any; total: any }[];
-      meta_data: { key: string; value: string }[];
-      customer_note: any;
-      fee_lines?: { name: string; total: string; tax_status: string; tax_class: string }[];
-    } = {
+    const orderData: any = {
       payment_method: paymentMethod,
       payment_method_title: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer',
       set_paid: false,
@@ -63,7 +53,8 @@ export async function POST(request: NextRequest) {
           value: orderDetails.newsletter_signup ? "Yes" : "No"
         }
       ],
-      customer_note: orderDetails.notes
+      customer_note: orderDetails.notes,
+      fee_lines: []
     };
 
     if (orderDetails.gift_wrap) {

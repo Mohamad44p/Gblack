@@ -22,33 +22,26 @@ export async function POST(request: Request) {
     });
 
     if (response.data.token) {
-      const token = jwt.sign(
-        { 
-          user_email: response.data.user_email,
-          user_nicename: response.data.user_nicename,
-          user_display_name: response.data.user_display_name
-        },
-        JWT_SECRET,
-        { expiresIn: '7d' }
-      );
+      const wpToken = response.data.token;
 
-      cookies().set('auth', token, {
+      cookies().set('auth', wpToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
         path: '/',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
+        maxAge: 60 * 60 * 24 * 7
       });
 
       return NextResponse.json({ 
         success: true, 
         user: {
           id: response.data.user_id,
-          user_email: response.data.user_email,
-          user_nicename: response.data.user_nicename,
-          user_display_name: response.data.user_display_name
+          email: response.data.user_email,
+          name: response.data.user_nicename,
+          firstName: response.data.user_firstname,
+          lastName: response.data.user_lastname
         },
-        token: token
+        token: wpToken
       });
     } else {
       throw new Error('Login failed: No token received');

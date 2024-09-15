@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface WishlistItem {
+  attributes: any;
+  attributes: any;
   id: number;
   name: string;
   price: string;

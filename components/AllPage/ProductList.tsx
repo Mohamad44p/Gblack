@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -29,6 +30,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useCart } from '@/contexts/CartContext'
+import { openCart } from '@/lib/hooks/events'
+import { toast } from '@/hooks/use-toast'
 
 interface Product {
   id: number
@@ -57,14 +60,29 @@ const ITEMS_PER_PAGE = 12
 
 const QuickViewModal = ({ product, onClose }: { product: Product, onClose: () => void }) => {
   const { addToCart } = useCart()
-  const handleAddToCart = (product: Product) => {
+  const [selectedSize, setSelectedSize] = useState('')
+  const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
+
+  const handleAddToCart = () => {
+    if (sizeAttribute && sizeAttribute.options.length > 0 && !selectedSize) {
+      toast({
+        title: "Size required",
+        description: "Please select a size before adding to cart.",
+        variant: "destructive",
+      })
+      return
+    }
+
     addToCart({
       id: product.id,
       name: product.name,
       price: product.sale_price || product.price,
       image: product.images[0]?.src || '/placeholder.svg',
-      quantity: 1
+      quantity: 1,
+      size: selectedSize
     })
+    onClose()
+    openCart()
   }
 
   return (
@@ -92,7 +110,7 @@ const QuickViewModal = ({ product, onClose }: { product: Product, onClose: () =>
         </button>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
-            <img src={product.images[0]?.src || '/placeholder.svg'} alt={product.name} className="w-full h-auto rounded-lg" />
+            <img src={product.images[0]?.src || '/BlurImage.jpg'} alt={product.name} className="w-full h-auto rounded-lg" />
           </div>
           <div className="md:w-1/2">
             <h2 className="text-3xl font-bold mb-4"
@@ -122,9 +140,27 @@ const QuickViewModal = ({ product, onClose }: { product: Product, onClose: () =>
                 {product.categories[0]?.name || 'Uncategorized'}
               </Badge>
             </div>
+            {sizeAttribute && sizeAttribute.options.length > 0 && (
+              <div className="mb-4">
+                <label htmlFor="size-select" className="block text-sm font-medium text-gray-300 mb-2">
+                  Select Size
+                </label>
+                <select
+                  id="size-select"
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-md bg-black text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a size</option>
+                  {sizeAttribute.options.map((size) => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="flex gap-4">
               <Button
-                onClick={() => handleAddToCart(product)}
+                onClick={handleAddToCart}
                 className="flex-1 bg-white hover:bg-gray-200 text-black"
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
@@ -193,13 +229,19 @@ export default function ProductList({ initialProducts, initialCategories }: { in
 
 
   const handleAddToCart = (product: Product) => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.sale_price || product.price,
-      image: product.images[0]?.src || '/placeholder.svg',
-      quantity: 1
-    })
+    const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
+    if (sizeAttribute && sizeAttribute.options.length > 0) {
+      setSelectedProduct(product)
+    } else {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.sale_price || product.price,
+        image: product.images[0]?.src || '/placeholder.svg',
+        quantity: 1
+      })
+      openCart()
+    }
   }
 
   const filteredProducts = products

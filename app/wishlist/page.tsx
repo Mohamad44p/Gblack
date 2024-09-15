@@ -5,17 +5,12 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingCart, Eye, Star, Tag } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from '@/hooks/use-toast';
 
 interface WishlistItem {
   id: number;
@@ -25,20 +20,47 @@ interface WishlistItem {
   brand?: string;
   rating?: number;
   salePrice?: string;
+  attributes?: { name: string; options: string[] }[];
 }
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const [selectedSizes, setSelectedSizes] = useState<{ [key: number]: string }>({});
 
   const handleAddToCart = (item: WishlistItem) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-      quantity: 1
+    const sizeAttribute = item.attributes?.find(attr => attr.name === 'Size');
+    if (sizeAttribute && sizeAttribute.options.length > 0) {
+      const selectedSize = selectedSizes[item.id];
+      if (!selectedSize) {
+        toast({
+          title: "Size required",
+          description: "Please select a size before adding to cart.",
+          variant: "destructive",
+        });
+        return;
+      }
+      addToCart({
+        id: item.id,
+        name: item.name,
+        price: item.salePrice || item.price,
+        image: item.image,
+        quantity: 1,
+        size: selectedSize,
+      });
+    } else {
+      addToCart({
+        id: item.id,
+        name: item.name,
+        price: item.salePrice || item.price,
+        image: item.image,
+        quantity: 1,
+      });
+    }
+    toast({
+      title: "Added to cart",
+      description: `${item.name} has been added to your cart.`,
     });
   };
 
@@ -119,7 +141,14 @@ export default function WishlistPage() {
                                       <p className="text-lg font-semibold mb-2">{item.brand}</p>
                                       <div className="flex items-center mb-2">
                                         {[...Array(5)].map((_, i) => (
-                                          <Star key={i} className={`w-4 h-4 ${i < (item.rating || 0) ? "text-yellow-400 fill-current" : "text-white/20"}`} />
+                                          <Star
+                                            key={i}
+                                            className={`w-4 h-4 ${
+                                              i < (item.rating || 0)
+                                                ? "text-yellow-400 fill-current"
+                                                : "text-white/20"
+                                            }`}
+                                          />
                                         ))}
                                       </div>
                                       <p className="text-xl font-bold mb-2">
@@ -132,6 +161,28 @@ export default function WishlistPage() {
                                           <span>${item.price}</span>
                                         )}
                                       </p>
+                                      {item.attributes?.find((attr: { name: string; }) => attr.name === 'Size') && (
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-400 mb-2">
+                                            Select Size
+                                          </label>
+                                          <Select
+                                            value={selectedSizes[item.id] || ''}
+                                            onValueChange={(value) => setSelectedSizes({ ...selectedSizes, [item.id]: value })}
+                                          >
+                                            <SelectTrigger className="w-full">
+                                              <SelectValue placeholder="Choose a size" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {item.attributes.find((attr: { name: string; }) => attr.name === 'Size')?.options.map((size: string) => (
+                                                <SelectItem key={size} value={size}>
+                                                  {size}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      )}
                                       <Button
                                         className="w-full mt-4 bg-white text-black hover:bg-white/80 transition-all duration-300"
                                         onClick={() => handleAddToCart(item)}
@@ -156,7 +207,12 @@ export default function WishlistPage() {
                       </h3>
                       <div className="flex items-center mb-2">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-4 h-4 ${i < (item.rating || 0) ? "text-yellow-400 fill-current" : "text-white/20"}`} />
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < (item.rating || 0) ? "text-yellow-400 fill-current" : "text-white/20"
+                            }`}
+                          />
                         ))}
                       </div>
                     </div>

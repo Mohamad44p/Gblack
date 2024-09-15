@@ -366,7 +366,7 @@ export default function EnhancedCheckout() {
                   checked={orderDetails.gift_wrap}
                   onCheckedChange={(checked) => handleCheckboxChange('gift_wrap', checked as boolean)}
                 />
-                <Label htmlFor="gift-wrap">Gift wrap ($5.00)</Label>
+                <Label htmlFor="gift-wrap">Gift wrap ($5)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -386,52 +386,38 @@ export default function EnhancedCheckout() {
 
   return (
     <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold mb-6 text-white">Checkout</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex space-x-2">
-              {[1, 2, 3].map((stepNumber) => (
-                <div
-                  key={stepNumber}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    step === stepNumber ? 'bg-primary text-primary-foreground' : 'bg-gray-700 text-gray-300'
-                  }`}
-                >
-                  {stepNumber}
-                </div>
-              ))}
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                onClick={() => setStep(step - 1)}
-                disabled={step === 1}
-                variant="outline"
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-              </Button>
+      <h1 className="text-3xl font-bold mb-8 text-center">Checkout</h1>
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <form onSubmit={handleSubmit}>
+            {renderStepContent()}
+            <div className="mt-6 flex justify-between">
+              {step > 1 && (
+                <Button type="button" onClick={() => setStep(step - 1)} variant="outline">
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                </Button>
+              )}
               {step < 3 ? (
-                <Button
-                  onClick={() => setStep(step + 1)}
-                  variant="outline"
-                >
+                <Button type="button" onClick={() => setStep(step + 1)} className="ml-auto">
                   Next <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button onClick={handleSubmit} disabled={isLoading}>
+                <Button type="submit" className="ml-auto" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing...
+                      Processing
                     </>
                   ) : (
-                    'Place Order'
+                    <>
+                      Place Order
+                      <ShoppingBag className="ml-2 h-4 w-4" />
+                    </>
                   )}
                 </Button>
               )}
             </div>
-          </div>
-          {renderStepContent()}
+          </form>
         </div>
         <div className="lg:col-span-1">
           <Card className="text-white border-gray-800">
@@ -454,6 +440,7 @@ export default function EnhancedCheckout() {
                   <div className="flex-grow">
                     <h3 className="font-semibold">{item.name}</h3>
                     <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
+                    {item.size && <p className="text-sm text-gray-400">Size: {item.size}</p>}
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
@@ -467,7 +454,7 @@ export default function EnhancedCheckout() {
                 </div>
                 <div className="flex justify-between mt-2">
                   <span>Shipping</span>
-                  <span>${selectedZone ? selectedZone.price.toFixed(2) : '0.00'}</span>
+                  <span>{selectedZone ? `$${selectedZone.price.toFixed(2)}` : 'TBD'}</span>
                 </div>
                 {orderDetails.gift_wrap && (
                   <div className="flex justify-between mt-2">

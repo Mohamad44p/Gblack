@@ -15,17 +15,14 @@ async function getProducts(perPage: number): Promise<{ products: Product[] }> {
   return res.json()
 }
 
-function transformProduct(product: Product) {
+function transformProduct(product: Product): Product {
   return {
-    id: product.id,
-    name: product.name,
+    ...product,
     brand: product.categories[0]?.name || "Unknown Brand",
-    price: parseFloat(product.regular_price),
-    salePrice: parseFloat(product.price),
+    salePrice: parseFloat(product.sale_price || product.price),
     rating: Math.floor(parseFloat(product.average_rating)),
     image1: product.images[0]?.src || "/BlurImage.jpg",
     image2: product.images[1]?.src || "/BlurImage.jpg",
-    totalSales: product.total_sales
   }
 }
 
@@ -36,7 +33,7 @@ async function ProductShowcases() {
     new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
   )
 
-  const sortedByTotalSales = [...productsData.products].sort((a, b) => 
+  const sortedByTotalSales = [...productsData.products].sort((a, b) =>
     b.total_sales - a.total_sales
   )
 

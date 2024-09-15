@@ -20,6 +20,10 @@ interface OrderDetails {
     name: string
     quantity: number
     total: string
+    meta_data: Array<{
+      key: string
+      value: string
+    }>
   }>
   shipping: {
     first_name: string
@@ -34,6 +38,7 @@ interface OrderDetails {
 
 export default function OrderConfirmation({ params }: { params: { id: string } }) {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
+  const [totalWithExtras, setTotalWithExtras] = useState<string>('0')
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
@@ -44,6 +49,11 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
         if (!response.ok) throw new Error('Failed to fetch order details')
         const data = await response.json()
         setOrderDetails(data)
+        const orderTotal = parseFloat(data.total)
+        const shippingTotal = parseFloat(data.shipping_total)
+        const giftWrapFee = data.meta_data.find((meta: any) => meta.key === 'gift_wrap')?.value === 'Yes' ? 5 : 0
+        const newTotal = (orderTotal + shippingTotal + giftWrapFee).toFixed(2)
+        setTotalWithExtras(newTotal)
       } catch (error) {
         console.error('Error fetching order details:', error)
       } finally {
@@ -195,7 +205,12 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
               <TableBody>
                 {orderDetails.line_items.map((item, index) => (
                   <TableRow key={index} className="border-b border-stone-700">
-                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {item.name}
+                      {item.meta_data.find((meta: any) => meta.key === 'Size') && (
+                        <span className="text-sm text-gray-400"> (Size: {item.meta_data.find((meta: any) => meta.key === 'Size')?.value})</span>
+                      )}
+                    </TableCell>
                     <TableCell>{item.quantity}</TableCell>
                     <TableCell className="text-right">${item.total}</TableCell>
                   </TableRow>

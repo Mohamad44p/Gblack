@@ -8,18 +8,59 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Star, ShoppingCart, Sparkles, Zap, Plus, Tag, Heart } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
-import { WishlistButton } from '../WishlistButton'
+import { WishlistButton } from '@/components/WishlistButton'
 import { openCart } from '@/lib/hooks/events'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { toast } from '@/hooks/use-toast'
 
 export interface Product {
   id: number
   name: string
-  brand: string
-  price: number
-  salePrice: number
-  rating: number
-  image1: string
-  image2: string
+  slug: string
+  permalink: string
+  date_created: string
+  type: string
+  description: string
+  short_description: string
+  price: string
+  regular_price: string
+  sale_price: string
+  on_sale: boolean
+  purchasable: boolean
+  total_sales: number
+  virtual: boolean
+  downloadable: boolean
+  categories: Array<{
+    id: number
+    name: string
+    slug: string
+  }>
+  tags: Array<any>
+  images: Array<{
+    id: number
+    src: string
+    name: string
+    alt: string
+  }>
+  attributes: Array<{
+    id: number
+    name: string
+    position: number
+    visible: boolean
+    variation: boolean
+    options: string[]
+  }>
+  average_rating: string
+  rating_count: number
+  stock_status: string
 }
 
 interface ShowcaseProps {
@@ -31,15 +72,40 @@ interface ShowcaseProps {
 }
 
 interface ProductCardProps {
-  product: Product;
-  handleAddToCart: (product: Product) => void;
+  product: Product
+  handleAddToCart: (product: Product, size?: string) => void
 }
 
 const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false)
-  const isOnSale = product.salePrice !== product.price
-  const formattedPrice = `$${product.price.toFixed(2)}`
-  const formattedSalePrice = `$${product.salePrice.toFixed(2)}`
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedSize, setSelectedSize] = useState('')
+  const isOnSale = product.on_sale
+  const formattedPrice = `$${parseFloat(product.regular_price).toFixed(2)}`
+  const formattedSalePrice = `$${parseFloat(product.sale_price || product.price).toFixed(2)}`
+  const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
+
+  const handleAddToCartClick = () => {
+    if (sizeAttribute && sizeAttribute.options.length > 0) {
+      setIsModalOpen(true)
+    } else {
+      handleAddToCart(product)
+    }
+  }
+
+  const handleSizeSelection = () => {
+    if (selectedSize) {
+      handleAddToCart(product, selectedSize)
+      setIsModalOpen(false)
+      setSelectedSize('')
+    } else {
+      toast({
+        title: "Size required",
+        description: "Please select a size before adding to cart.",
+        variant: "destructive",
+      })
+    }
+  }
 
   return (
     <motion.div
@@ -60,27 +126,29 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               className="absolute inset-0 z-10"
             >
               <Image
-                src={product.image1}
-                alt={product.name}
+                src={product.images[0].src}
+                alt={product.images[0].alt || product.name}
                 layout="fill"
                 objectFit="cover"
                 className="transition-all duration-300 filter group-hover:brightness-110"
               />
             </motion.div>
-            <motion.div
-              initial={false}
-              animate={{ opacity: isHovered ? 1 : 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 z-20"
-            >
-              <Image
-                src={product.image2}
-                alt={`${product.name} - alternate view`}
-                layout="fill"
-                objectFit="cover"
-                className="transition-all duration-300 filter group-hover:brightness-110"
-              />
-            </motion.div>
+            {product.images[1] && (
+              <motion.div
+                initial={false}
+                animate={{ opacity: isHovered ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 z-20"
+              >
+                <Image
+                  src={product.images[1].src}
+                  alt={product.images[1].alt || `${product.name} - alternate view`}
+                  layout="fill"
+                  objectFit="cover"
+                  className="transition-all duration-300 filter group-hover:brightness-110"
+                />
+              </motion.div>
+            )}
             {isOnSale && (
               <div className="absolute top-2 left-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
                 <Tag className="w-3 h-3 mr-1" />
@@ -96,7 +164,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 transition={{ duration: 0.3 }}
                 className="text-sm text-white/60 mb-1 font-medium"
               >
-                {product.brand}
+                {product.categories[0]?.name || "Uncategorized"}
               </motion.div>
               <motion.h3
                 initial={{ opacity: 0, y: 10 }}
@@ -113,7 +181,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 className="flex items-center mb-2"
               >
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < product.rating ? "text-yellow-400 fill-current" : "text-white/20"}`} />
+                  <Star key={i} className={`w-4 h-4 ${i < parseInt(product.average_rating) ? "text-yellow-400 fill-current" : "text-white/20"}`} />
                 ))}
               </motion.div>
             </div>
@@ -136,8 +204,8 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               <WishlistButton product={{
                 id: product.id,
                 name: product.name,
-                price: isOnSale ? product.salePrice.toString() : product.price.toString(),
-                image: product.image1
+                price: isOnSale ? product.sale_price : product.regular_price,
+                image: product.images[0].src
               }} />
             </motion.div>
           </div>
@@ -154,7 +222,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               <Button
                 size="lg"
                 className="bg-white z-[10000] text-black hover:bg-white/80 transition-all duration-300 rounded-full"
-                onClick={() => handleAddToCart(product)}
+                onClick={handleAddToCartClick}
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 Add to Cart
@@ -163,6 +231,32 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
           )}
         </AnimatePresence>
       </Card>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-black text-white border border-white/20">
+          <DialogHeader>
+            <DialogTitle>Select a Size</DialogTitle>
+            <DialogDescription>
+              Please select a size before adding the item to your cart.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <RadioGroup value={selectedSize} onValueChange={setSelectedSize}>
+              {sizeAttribute && sizeAttribute.options.map((size) => (
+                <div key={size} className="flex items-center space-x-2">
+                  <RadioGroupItem value={size} id={`size-${size}`} />
+                  <Label htmlFor={`size-${size}`}>{size}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSizeSelection}>
+              Add to Cart
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }
@@ -187,13 +281,14 @@ export function ProductShowcase({ title, products, featuredImage, featuredTitle,
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi])
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi])
   const { addToCart } = useCart()
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: Product, size?: string) => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: (product.salePrice || product.price).toString(),
-      image: product.image1,
-      quantity: 1
+      price: (product.sale_price || product.price),
+      image: product.images[0].src,
+      quantity: 1,
+      size: size
     })
     openCart()
   }

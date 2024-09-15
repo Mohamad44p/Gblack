@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -117,6 +116,7 @@ export default function CartSheet() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg truncate">{item.name}</h3>
                       <p className="text-sm text-muted-foreground mt-1">${parseFloat(item.price).toFixed(2)}</p>
+                      {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>}
                       <div className="flex items-center mt-2">
                         <Button
                           variant="outline"
@@ -139,6 +139,7 @@ export default function CartSheet() {
                     </div>
                     <div className="flex flex-col items-end space-y-2">
                       <span className="font-semibold">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                      {item.size && <p className="text-sm text-muted-foreground">Size: {item.size}</p>}
                       <Button
                         variant="ghost"
                         size="icon"

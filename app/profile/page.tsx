@@ -59,18 +59,15 @@ interface Order {
 export default function EcommerceProfileRedesign() {
     const [activeItem, setActiveItem] = useState('Orders')
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const { user, isLoggedIn, checkAuthStatus } = useAuth()
+    const { user, isLoggedIn, isLoading, checkAuthStatus } = useAuth()
     const router = useRouter()
-    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const checkAuth = async () => {
-            setIsLoading(true)
             const isAuthenticated = await checkAuthStatus();
             if (!isAuthenticated) {
                 router.push('/login');
             }
-            setIsLoading(false)
         };
 
         checkAuth();
@@ -85,6 +82,7 @@ export default function EcommerceProfileRedesign() {
     if (!isLoggedIn || !user) {
         return null
     }
+
     return (
         <div className="min-h-screen text-white flex items-center justify-center p-4 bg-gradient-to-br from-black via-gray-900 to-black">
             <motion.div
@@ -93,6 +91,7 @@ export default function EcommerceProfileRedesign() {
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-6xl flex flex-col md:flex-row gap-8"
             >
+                {/* Profile section */}
                 <div className="md:w-1/3 space-y-6">
                     <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 overflow-hidden">
                         <CardContent className="p-6">
@@ -104,10 +103,11 @@ export default function EcommerceProfileRedesign() {
                             >
                                 <Avatar className="w-20 h-20 border-2 border-white">
                                     <AvatarImage src="/placeholder.svg?height=80&width=80" alt="User Avatar" />
-                                    <AvatarFallback>{user.user_display_name ? user.user_display_name.charAt(0) : 'U'}</AvatarFallback>                                </Avatar>
+                                    <AvatarFallback>{user.firstName ? user.firstName.charAt(0) : 'U'}</AvatarFallback>
+                                </Avatar>
                                 <div>
-                                    <h2 className="text-2xl font-bold">{user.user_display_name}</h2>
-                                    <p className="text-gray-300">{user.user_email}</p>
+                                    <h2 className="text-2xl font-bold">{user.name}</h2>
+                                    <p className="text-gray-300">{user.email}</p>
                                 </div>
                             </motion.div>
                             <motion.div
@@ -156,6 +156,7 @@ export default function EcommerceProfileRedesign() {
                     </Card>
                 </div>
 
+                {/* Content section */}
                 <div className="md:w-2/3">
                     <AnimatePresence mode="wait">
                         <motion.div

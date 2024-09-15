@@ -2,18 +2,38 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart, Star, X, AlertCircle } from 'lucide-react'
+import { ShoppingCart, Heart, Star, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Image from 'next/image'
 import { Product } from '@/types/product'
+import { useCart } from '@/contexts/CartContext'
+import { toast } from '@/hooks/use-toast'
 
 interface QuickViewModalProps {
   product: Product
   onClose: () => void
+  onAddToCart: (product: Product, size: string) => void
 }
 
-const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose }) => {
+const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAddToCart }) => {
+  const [selectedSize, setSelectedSize] = useState('')
+  const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
+
+  const handleAddToCart = () => {
+    if (sizeAttribute && !selectedSize) {
+      toast({
+        title: "Size required",
+        description: "Please select a size before adding to cart.",
+        variant: "destructive",
+      })
+      return
+    }
+    onAddToCart(product, selectedSize)
+    onClose()
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -68,8 +88,22 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose }) => 
                 {product.categories[0]?.name || 'Uncategorized'}
               </Badge>
             </div>
+            {sizeAttribute && (
+              <div className="mb-4">
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sizeAttribute.options.map((size) => (
+                      <SelectItem key={size} value={size}>{size}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex gap-4">
-              <Button className="flex-1 bg-white text-black hover:bg-gray-200">
+              <Button className="flex-1 bg-white text-black hover:bg-gray-200" onClick={handleAddToCart}>
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
@@ -125,6 +159,9 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [sortBy, setSortBy] = useState('date')
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const productsPerPage = 9
+  const { addToCart } = useCart()
 
   useEffect(() => {
     if (Array.isArray(initialProducts)) {
@@ -146,6 +183,27 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
         return new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
     }
   })
+
+  const indexOfLastProduct = currentPage * productsPerPage
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage
+  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct)
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+
+  const handleAddToCart = (product: Product, size: string) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0]?.src || '/placeholder.svg',
+      quantity: 1,
+      size: size
+    })
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    })
+  }
 
   if (isLoading) {
     return (
@@ -184,13 +242,13 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
             </select>
           </div>
 
-          {sortedProducts.length > 0 ? (
+          {currentProducts.length > 0 ? (
             <motion.div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               layout
             >
               <AnimatePresence>
-                {sortedProducts.map(product => (
+                {currentProducts.map(product => (
                   <motion.div
                     key={product.id}
                     layout
@@ -241,7 +299,7 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
                           <span className="ml-2 text-gray-400">{product.average_rating}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <Button className="flex-1 mr-2 bg-white text-black hover:bg-gray-200">
+                          <Button className="flex-1 mr-2 bg-white text-black hover:bg-gray-200" onClick={() => setSelectedProduct(product)}>
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Add to Cart
                           </Button>
@@ -263,6 +321,32 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
               <p className="mt-1 text-sm text-gray-400">Try changing your filters or search criteria.</p>
             </div>
           )}
+
+          <div className="mt-8 flex justify-center">
+            <Button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="mr-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            {[...Array(Math.ceil(sortedProducts.length / productsPerPage))].map((_, index) => (
+              <Button
+                key={index}
+                onClick={() => paginate(index + 1)}
+                className={`mx-1 ${currentPage === index + 1 ? 'bg-white text-black' : ''}`}
+              >
+                {index + 1}
+              </Button>
+            ))}
+            <Button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === Math.ceil(sortedProducts.length / productsPerPage)}
+              className="ml-2"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -271,6 +355,7 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
           <QuickViewModal
             product={selectedProduct}
             onClose={() => setSelectedProduct(null)}
+            onAddToCart={handleAddToCart}
           />
         )}
       </AnimatePresence>
