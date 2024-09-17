@@ -15,6 +15,7 @@ interface WishlistButtonProps {
     average_rating: string;
     rating_count: number;
     attributes?: { name: string; options: string[] }[];
+    short_description: string;
   };
 }
 

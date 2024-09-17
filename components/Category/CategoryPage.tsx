@@ -1,25 +1,45 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingCart, Heart, Star, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import Image from 'next/image'
-import { Product } from '@/types/product'
-import { useCart } from '@/contexts/CartContext'
-import { toast } from '@/hooks/use-toast'
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ShoppingCart,
+  Heart,
+  Star,
+  X,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Image from "next/image";
+import { Product } from "@/types/product";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/hooks/use-toast";
+import { WishlistButton } from "../WishlistButton";
+import Link from "next/link";
 
 interface QuickViewModalProps {
-  product: Product
-  onClose: () => void
-  onAddToCart: (product: Product, size: string) => void
+  product: Product;
+  onClose: () => void;
+  onAddToCart: (product: Product, size: string) => void;
 }
 
-const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAddToCart }) => {
-  const [selectedSize, setSelectedSize] = useState('')
-  const sizeAttribute = product.attributes.find(attr => attr.name === 'Size')
+const QuickViewModal: React.FC<QuickViewModalProps> = ({
+  product,
+  onClose,
+  onAddToCart,
+}) => {
+  const [selectedSize, setSelectedSize] = useState("");
+  const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
 
   const handleAddToCart = () => {
     if (sizeAttribute && !selectedSize) {
@@ -27,12 +47,12 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
         title: "Size required",
         description: "Please select a size before adding to cart.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    onAddToCart(product, selectedSize)
-    onClose()
-  }
+    onAddToCart(product, selectedSize);
+    onClose();
+  };
 
   return (
     <motion.div
@@ -59,33 +79,62 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
         </button>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
-            <Image src={product.images[0]?.src || '/placeholder.svg'} alt={product.name} width={400} height={400} className="w-full h-auto rounded-lg" />
+            <Image
+              src={product.images[0]?.src || "/placeholder.svg"}
+              alt={product.name}
+              width={400}
+              height={400}
+              className="w-full h-auto rounded-lg"
+            />
           </div>
           <div className="md:w-1/2">
-            <h2 className="text-3xl font-bold mb-4"
-              style={{
-                background: 'linear-gradient(to right, #fff, #888)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
-            >{product.name}</h2>
-            <div className="text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: product.description }}></div>
+            <Link href={`/product/${product.id}`}>
+              <h2
+                className="text-3xl font-bold mb-4"
+                style={{
+                  background: "linear-gradient(to right, #fff, #888)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {product.name}
+              </h2>
+            </Link>
+            <div
+              className="text-gray-300 mb-4"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            ></div>
             <div className="flex items-center mb-4">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-300'} fill-current`} />
+                <Star
+                  key={i}
+                  className={`w-5 h-5 ${
+                    i < Math.floor(parseFloat(product.average_rating))
+                      ? "text-yellow-400"
+                      : "text-gray-300"
+                  } fill-current`}
+                />
               ))}
-              <span className="ml-2 text-gray-400">{product.average_rating}</span>
+              <span className="ml-2 text-gray-400">
+                {product.average_rating}
+              </span>
             </div>
             <div className="flex items-center justify-between mb-6">
-              <span className="text-3xl font-bold"
+              <span
+                className="text-3xl font-bold"
                 style={{
-                  background: 'linear-gradient(to right, #fff, #888)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
+                  background: "linear-gradient(to right, #fff, #888)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
                 }}
-              >${product.price}</span>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                {product.categories[0]?.name || 'Uncategorized'}
+              >
+                ${product.price}
+              </span>
+              <Badge
+                variant="secondary"
+                className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+              >
+                {product.categories[0]?.name || "Uncategorized"}
               </Badge>
             </div>
             {sizeAttribute && (
@@ -96,18 +145,26 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
                   </SelectTrigger>
                   <SelectContent>
                     {sizeAttribute.options.map((size) => (
-                      <SelectItem key={size} value={size}>{size}</SelectItem>
+                      <SelectItem key={size} value={size}>
+                        {size}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             )}
             <div className="flex gap-4">
-              <Button className="flex-1 bg-white text-black hover:bg-gray-200" onClick={handleAddToCart}>
+              <Button
+                className="flex-1 bg-white text-black hover:bg-gray-200"
+                onClick={handleAddToCart}
+              >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
               </Button>
-              <Button variant="outline" className="px-3 border-white hover:bg-blue-50 hover:text-black">
+              <Button
+                variant="outline"
+                className="px-3 border-white hover:bg-blue-50 hover:text-black"
+              >
                 <Heart className="w-4 h-4" />
                 <span className="sr-only">Add to Wishlist</span>
               </Button>
@@ -116,8 +173,8 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
         </div>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
 const SkeletonProduct: React.FC = () => {
   return (
@@ -145,65 +202,74 @@ const SkeletonProduct: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface CategoryPageProps {
-  initialProducts: Product[]
-  categorySlug: string
+  initialProducts: Product[];
+  categorySlug: string;
 }
 
-export default function CategoryPage({ initialProducts, categorySlug }: CategoryPageProps) {
-  const [products, setProducts] = useState<Product[]>([])
-  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [sortBy, setSortBy] = useState('date')
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const productsPerPage = 9
-  const { addToCart } = useCart()
+export default function CategoryPage({
+  initialProducts,
+  categorySlug,
+}: CategoryPageProps) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [sortBy, setSortBy] = useState("date");
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 9;
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (Array.isArray(initialProducts)) {
-      setProducts(initialProducts)
+      setProducts(initialProducts);
     }
-    setIsLoading(false)
-  }, [initialProducts])
+    setIsLoading(false);
+  }, [initialProducts]);
 
   const sortedProducts = [...products].sort((a, b) => {
     switch (sortBy) {
-      case 'price-asc':
-        return parseFloat(a.price) - parseFloat(b.price)
-      case 'price-desc':
-        return parseFloat(b.price) - parseFloat(a.price)
-      case 'name':
-        return a.name.localeCompare(b.name)
-      case 'date':
+      case "price-asc":
+        return parseFloat(a.price) - parseFloat(b.price);
+      case "price-desc":
+        return parseFloat(b.price) - parseFloat(a.price);
+      case "name":
+        return a.name.localeCompare(b.name);
+      case "date":
       default:
-        return new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
+        return (
+          new Date(b.date_created).getTime() -
+          new Date(a.date_created).getTime()
+        );
     }
-  })
+  });
 
-  const indexOfLastProduct = currentPage * productsPerPage
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage
-  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct)
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = sortedProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const handleAddToCart = (product: Product, size: string) => {
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0]?.src || '/placeholder.svg',
+      image: product.images[0]?.src || "/placeholder.svg",
       quantity: 1,
-      size: size
-    })
+      size: size,
+    });
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
-    })
-  }
+    });
+  };
 
   if (isLoading) {
     return (
@@ -216,7 +282,7 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -229,7 +295,9 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
 
         <div className="container mx-auto px-4 py-16 relative z-10">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold capitalize">{categorySlug.replace('-', ' ')}</h1>
+            <h1 className="text-4xl font-bold capitalize">
+              {categorySlug.replace("-", " ")}
+            </h1>
             <select
               className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
               value={sortBy}
@@ -248,7 +316,7 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
               layout
             >
               <AnimatePresence>
-                {currentProducts.map(product => (
+                {currentProducts.map((product) => (
                   <motion.div
                     key={product.id}
                     layout
@@ -266,11 +334,19 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
                       transition={{ duration: 0.3 }}
                     >
                       <div className="relative overflow-hidden">
-                        <Image src={product.images[0]?.src || '/placeholder.svg'} alt={product.name} width={400} height={400} className="w-full h-80 object-cover" />
+                        <Image
+                          src={product.images[0]?.src || "/placeholder.svg"}
+                          alt={product.name}
+                          width={400}
+                          height={400}
+                          className="w-full h-80 object-cover"
+                        />
                         <motion.div
                           className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           initial={{ opacity: 0 }}
-                          animate={{ opacity: hoveredProduct === product.id ? 1 : 0 }}
+                          animate={{
+                            opacity: hoveredProduct === product.id ? 1 : 0,
+                          }}
                         >
                           <Button
                             className="bg-white text-black hover:bg-gray-200"
@@ -281,32 +357,67 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
                         </motion.div>
                       </div>
                       <div className="p-6">
-                        <h3 className="text-2xl font-bold mb-2">{product.name}</h3>
+                        <Link href={`/product/${product.id}`}>
+                          <h3 className="text-2xl font-bold mb-2">
+                            {product.name}
+                          </h3>
+                        </Link>
                         <div className="flex justify-between items-center mb-4">
-                          <span className="text-3xl font-bold" style={{
-                            background: 'linear-gradient(to right, #fff, #888)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent'
-                          }}>${product.price}</span>
-                          <Badge variant="secondary" className="bg-white text-black px-3 py-1 rounded-full">
-                            {product.categories[0]?.name || 'Uncategorized'}
+                          <span
+                            className="text-3xl font-bold"
+                            style={{
+                              background:
+                                "linear-gradient(to right, #fff, #888)",
+                              WebkitBackgroundClip: "text",
+                              WebkitTextFillColor: "transparent",
+                            }}
+                          >
+                            ${product.price}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="bg-white text-black px-3 py-1 rounded-full"
+                          >
+                            {product.categories[0]?.name || "Uncategorized"}
                           </Badge>
                         </div>
                         <div className="flex items-center mb-4">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-600'} fill-current`} />
+                            <Star
+                              key={i}
+                              className={`w-5 h-5 ${
+                                i <
+                                Math.floor(parseFloat(product.average_rating))
+                                  ? "text-yellow-400"
+                                  : "text-gray-600"
+                              } fill-current`}
+                            />
                           ))}
-                          <span className="ml-2 text-gray-400">{product.average_rating}</span>
+                          <span className="ml-2 text-gray-400">
+                            {product.average_rating}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <Button className="flex-1 mr-2 bg-white text-black hover:bg-gray-200" onClick={() => setSelectedProduct(product)}>
+                          <Button
+                            className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                            onClick={() => setSelectedProduct(product)}
+                          >
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Add to Cart
                           </Button>
-                          <Button variant="outline" className="px-3 border-white text-white hover:bg-white hover:text-black">
-                            <Heart className="w-4 h-4" />
-                            <span className="sr-only">Add to Wishlist</span>
-                          </Button>
+                          <WishlistButton
+                            product={{
+                              id: product.id,
+                              name: product.name,
+                              price: product.price,
+                              image:
+                                product.images[0]?.src || "/placeholder.svg",
+                              average_rating: product.average_rating,
+                              rating_count: product.ratingCount,
+                              attributes: product.attributes,
+                              short_description: product.short_description,
+                            }}
+                          />
                         </div>
                       </div>
                     </motion.div>
@@ -317,8 +428,12 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
           ) : (
             <div className="text-center py-12">
               <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-200">No products found</h3>
-              <p className="mt-1 text-sm text-gray-400">Try changing your filters or search criteria.</p>
+              <h3 className="mt-2 text-sm font-medium text-gray-200">
+                No products found
+              </h3>
+              <p className="mt-1 text-sm text-gray-400">
+                Try changing your filters or search criteria.
+              </p>
             </div>
           )}
 
@@ -330,18 +445,25 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            {[...Array(Math.ceil(sortedProducts.length / productsPerPage))].map((_, index) => (
-              <Button
-                key={index}
-                onClick={() => paginate(index + 1)}
-                className={`mx-1 ${currentPage === index + 1 ? 'bg-white text-black' : ''}`}
-              >
-                {index + 1}
-              </Button>
-            ))}
+            {[...Array(Math.ceil(sortedProducts.length / productsPerPage))].map(
+              (_, index) => (
+                <Button
+                  key={index}
+                  onClick={() => paginate(index + 1)}
+                  className={`mx-1 ${
+                    currentPage === index + 1 ? "bg-white text-black" : ""
+                  }`}
+                >
+                  {index + 1}
+                </Button>
+              )
+            )}
             <Button
               onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === Math.ceil(sortedProducts.length / productsPerPage)}
+              disabled={
+                currentPage ===
+                Math.ceil(sortedProducts.length / productsPerPage)
+              }
               className="ml-2"
             >
               <ChevronRight className="w-4 h-4" />
@@ -360,5 +482,5 @@ export default function CategoryPage({ initialProducts, categorySlug }: Category
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

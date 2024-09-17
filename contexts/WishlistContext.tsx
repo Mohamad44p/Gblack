@@ -13,6 +13,7 @@ interface WishlistItem {
   rating?: number;
   salePrice?: string;
   attributes: { name: string; options: string[] }[];
+  short_description: string;
 }
 
 interface WishlistContextType {

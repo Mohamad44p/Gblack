@@ -1,4 +1,3 @@
-// app/components/ErrorBoundary.tsx
 'use client'
 
 import { useEffect } from 'react'
@@ -15,7 +14,7 @@ export default function ErrorBoundary({
   }, [error])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[200px] bg-red-50 rounded-lg p-4">
+    <div className="flex flex-col items-center justify-center min-h-[100vh] bg-red-50 rounded-lg p-4">
       <h2 className="text-lg font-semibold text-red-800 mb-2">
         {error.message === 'Failed to fetch products'
           ? 'Unable to load products at this time'
