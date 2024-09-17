@@ -16,6 +16,16 @@ interface WooCommerceProduct {
   images: Array<{ id: number; src: string; alt: string }>;
   attributes: Array<{ id: number; name: string; options: string[] }>;
   variations: number[];
+  average_rating: string;
+  rating_count: number;
+}
+
+interface Review {
+  id: number;
+  review: string;
+  rating: number;
+  reviewer: string;
+  date_created: string;
 }
 
 const api = new WooCommerceRestApi({
@@ -32,6 +42,18 @@ async function getProduct(id: string) {
   } catch (error) {
     console.error("Error fetching product:", error);
     return null;
+  }
+}
+
+async function getReviews(productId: number) {
+  try {
+    const { data } = await api.get(`products/reviews`, {
+      product: productId,
+    });
+    return data;
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    return [];
   }
 }
 
@@ -60,21 +82,33 @@ export default async function ProductPage({
     notFound();
   }
 
+  const reviews = await getReviews(product.id);
+  
+  const totalRating = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0);
+  const averageRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(2) : "0.00";
+  const ratingCount = reviews.length;
+
+  const updatedProduct = {
+    ...product,
+    average_rating: averageRating,
+    rating_count: ratingCount,
+  };
+
   const relatedProducts = await getRelatedProducts(product.categories[0]?.id, product.id);
 
-const formattedProducts = relatedProducts.map((product: WooCommerceProduct) => ({
+  const formattedProducts = relatedProducts.map((product: WooCommerceProduct) => ({
     id: product.id,
     name: product.name,
     brand: product.categories[0]?.name || '',
     description: product.short_description,
     price: product.price,
     images: product.images
-}));
+  }));
 
   return (
     <section className="min-h-screen w-full">
       <section>
-        <SingleProductPage product={product} />
+        <SingleProductPage product={updatedProduct} />
       </section>
       <section>
         <AlsoLikePr products={formattedProducts} />

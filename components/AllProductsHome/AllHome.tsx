@@ -21,10 +21,13 @@ interface Product {
   regular_price: string
   sale_price: string
   categories: { id: number; name: string; slug: string }[]
-  average_rating: string
   images: { src: string }[]
   description: string
   attributes: { name: string; options: string[] }[]
+  average_rating: string
+  rating: number
+  ratingCount: number
+  stock_status: string
 }
 
 interface Category {
@@ -90,19 +93,32 @@ const QuickViewModal = ({ product, onClose }: {
             <Image src={product.images[0]?.src || '/BlurImage.jpg'} alt={product.name} width={400} height={400} className="w-full h-auto rounded-lg" />
           </div>
           <div className="md:w-1/2">
-            <h2 className="text-3xl font-bold mb-4"
-              style={{
-                background: 'linear-gradient(to right, #fff, #888)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
-            >{product.name}</h2>
+            <Link
+              href={`/products/${product.id}`}
+              className='cursor-pointer'
+            >
+              <h2 className="text-3xl font-bold mb-4"
+                style={{
+                  background: 'linear-gradient(to right, #fff, #888)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}
+              >{product.name}</h2>
+            </Link>
             <p className="text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: product.description }}></p>
             <div className="flex items-center mb-4">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-300'} fill-current`} />
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${i < Math.round(product.rating)
+                    ? "text-yellow-400 fill-current"
+                    : "text-white/20"
+                    }`}
+                />
               ))}
-              <span className="ml-2 text-gray-400">{product.average_rating}</span>
+              <span className="ml-2 text-sm text-white/60">
+                ({product.ratingCount > 0 ? product.ratingCount : 'No ratings yet'})
+              </span>
             </div>
             <div className="flex items-center justify-between mb-6">
               {isOnSale ? (
@@ -158,7 +174,9 @@ const QuickViewModal = ({ product, onClose }: {
                 id: product.id,
                 name: product.name,
                 price: isOnSale ? product.sale_price : product.regular_price,
-                image: product.images[0]?.src || '/BlurImage.jpg'
+                image: product.images[0]?.src || '/BlurImage.jpg',
+                average_rating: product.average_rating,
+                rating_count: product.ratingCount,
               }} />
             </div>
           </div>
@@ -212,7 +230,21 @@ export default function AllHome() {
         const productsData = await productsRes.json()
         const categoriesData = await categoriesRes.json()
 
-        setProducts(productsData.products)
+        const productIds = productsData.products.map((product: Product) => product.id)
+        const ratingsRes = await fetch(`/api/product-ratings?ids=${productIds.join(',')}`)
+        const ratingsData = await ratingsRes.json()
+
+        const transformedProducts = productsData.products.map((product: Product) => {
+          const productRating = ratingsData[product.id] || { average_rating: "0.00", rating_count: 0 };
+          return {
+            ...product,
+            rating: parseFloat(productRating.average_rating) || 0,
+            ratingCount: productRating.rating_count || 0,
+            average_rating: productRating.average_rating || "0.00"
+          };
+        });
+
+        setProducts(transformedProducts)
         setCategories([{ id: 0, name: 'All', slug: 'all' }, ...categoriesData.categories])
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -241,7 +273,7 @@ export default function AllHome() {
       openCart()
     }
   }
-  
+
   const filteredProducts = selectedCategory === 'All'
     ? products
     : products.filter(product => product.categories.some(cat => cat.name === selectedCategory))
@@ -359,7 +391,9 @@ export default function AllHome() {
                           </motion.div>
                         </div>
                         <div className="p-6">
+                          <Link href={`/product/${product.id}`}>
                           <h3 className="text-2xl font-bold mb-2">{product.name}</h3>
+                          </Link>
                           <div className="flex justify-between items-center mb-4">
                             {isOnSale ? (
                               <div>
@@ -383,9 +417,17 @@ export default function AllHome() {
                           </div>
                           <div className="flex items-center mb-4">
                             {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-600'} fill-current`} />
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${i < Math.round(product.rating)
+                                  ? "text-yellow-400 fill-current"
+                                  : "text-white/20"
+                                  }`}
+                              />
                             ))}
-                            <span className="ml-2 text-gray-400">{product.average_rating}</span>
+                            <span className="ml-2 text-sm text-white/60">
+                              ({product.ratingCount > 0 ? product.ratingCount : 'No ratings yet'})
+                            </span>
                           </div>
                           <div className="flex justify-between items-center">
                             <Button
@@ -399,7 +441,9 @@ export default function AllHome() {
                               id: product.id,
                               name: product.name,
                               price: isOnSale ? product.sale_price : product.regular_price,
-                              image: product.images[0]?.src || '/BlurImage.jpg'
+                              image: product.images[0]?.src || '/BlurImage.jpg',
+                              average_rating: product.average_rating,
+                              rating_count: product.ratingCount,
                             }} />
                           </div>
                         </div>

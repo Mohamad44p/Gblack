@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images:{
-        domains: ['localhost' , 'http://localhost/wordpress' , 'http://localhost/wordpress/wp-content/uploads']
+        domains: ['lightpink-oryx-206000.hostingersite.com']
     }
 };
 

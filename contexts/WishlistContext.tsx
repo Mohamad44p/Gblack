@@ -3,15 +3,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface WishlistItem {
-  attributes: any;
-  attributes: any;
   id: number;
   name: string;
   price: string;
   image: string;
   brand?: string;
+  average_rating: string;
+  rating_count: number;
   rating?: number;
   salePrice?: string;
+  attributes: { name: string; options: string[] }[];
 }
 
 interface WishlistContextType {
@@ -58,6 +59,6 @@ export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (context === undefined) {
     throw new Error('useWishlist must be used within a WishlistProvider');
-  }
+  } 
   return context;
 };

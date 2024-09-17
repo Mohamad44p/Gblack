@@ -107,9 +107,8 @@ export default function SingleProductPage({
     });
     toast({
       title: "Added to cart",
-      description: `${quantity} x ${product.name} (Size: ${
-        selectedSize || "N/A"
-      }) added to your cart.`,
+      description: `${quantity} x ${product.name} (Size: ${selectedSize || "N/A"
+        }) added to your cart.`,
     });
     openCart();
   };
@@ -267,63 +266,86 @@ export default function SingleProductPage({
                       ? product.sale_price
                       : product.regular_price,
                     image: product.images[0]?.src || "/BlurImage.jpg",
+                    average_rating: product.average_rating,
+                    rating_count: product.rating_count,
+                    attributes: product.attributes,
                   }}
                 />
                 <Button variant="outline" size="icon" onClick={handleShare}>
                   <Share2 className="h-5 w-5" />
                 </Button>
               </div>
-
-              <Tabs defaultValue="description" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="description">Description</TabsTrigger>
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="shipping">Shipping</TabsTrigger>
-                </TabsList>
-                <TabsContent value="description" className="mt-4">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                  />
-                </TabsContent>
-                <TabsContent value="details" className="mt-4">
-                  <ul className="list-disc pl-5">
-                    <li>SKU: {product.sku}</li>
-                    <li>Weight: {product.weight}</li>
-                    <li>
-                      Dimensions: {product.dimensions.length} x{" "}
-                      {product.dimensions.width} x {product.dimensions.height}
-                    </li>
-                    {product.attributes.map((attr) => (
-                      <li key={attr.id}>
-                        {attr.name}: {attr.options.join(", ")}
-                      </li>
-                    ))}
-                  </ul>
-                </TabsContent>
-                <TabsContent value="shipping" className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Shipping Zones and Rates:
-                  </h3>
-                  {shippingZones.map((zone) => (
-                    <div key={zone.id} className="mb-2">
-                      <p>
-                        <strong>{zone.name}:</strong> ${zone.price.toFixed(2)}
-                      </p>
-                    </div>
-                  ))}
-                  <p className="mt-4">
-                    Free standard shipping on orders over $100. Expedited and
-                    international shipping options available at checkout. Please
-                    allow 1-3 business days for processing.
-                  </p>
-                </TabsContent>
-              </Tabs>
+              <div>
+                <Button size={"lg"} variant={"secondary"}>
+                  Contact Us
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="min-h-screen">
-        <ProductReviews productId={product.id} />
+        <div>
+          <Tabs defaultValue="details" className="w-full max-w-screen-lg mx-auto my-32 bg-black text-white">
+            <TabsList className="w-full border-b border-gray-800 bg-black">
+              {["details", "reviews", "shipping"].map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  className="flex-1 py-4 text-sm font-semibold uppercase tracking-wide text-gray-400 hover:text-white border-b-2 border-transparent data-[state=active]:border-white data-[state=active]:text-white transition-colors"
+                >
+                  {tab === "shipping" ? "Shipping & Returns" : tab}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <TabsContent value="details" className="mt-6 p-6 bg-zinc-950 rounded-b-lg">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Product Details</h3>
+                <ul className="list-disc pl-5 space-y-2 text-gray-300">
+                  <li>SKU: {product.sku}</li>
+                  <li>Weight: {product.weight}</li>
+                  <li>
+                    Dimensions: {product.dimensions.length} x {product.dimensions.width} x {product.dimensions.height}
+                  </li>
+                  {product.attributes.map((attr) => (
+                    <li key={attr.id}>
+                      {attr.name}: {attr.options.join(", ")}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4">
+                  <h4 className="text-md font-semibold mb-2">Description</h4>
+                  <div className="text-gray-300" dangerouslySetInnerHTML={{ __html: product.description }} />
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="reviews" className="mt-6 p-6 bg-zinc-950 rounded-b-lg">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Product Reviews</h3>
+                <ProductReviews productId={product.id} />
+              </div>
+            </TabsContent>
+            <TabsContent value="shipping" className="mt-6 p-6 bg-zinc-950 rounded-b-lg">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Shipping & Returns</h3>
+                <h4 className="text-md font-semibold text-gray-300">Shipping Zones and Rates:</h4>
+                {shippingZones.map((zone) => (
+                  <div key={zone.id} className="flex justify-between items-center border-b border-gray-700 pb-2">
+                    <span className="text-gray-300">{zone.name}:</span>
+                    <span className="text-gray-300">${zone.price.toFixed(2)}</span>
+                  </div>
+                ))}
+                <p className="mt-4 text-gray-300">
+                  Free standard shipping on orders over $100. Expedited and international shipping
+                  options available at checkout. Please allow 1-3 business days for processing.
+                </p>
+                <h4 className="text-md font-semibold mt-6 text-gray-300">Returns Policy</h4>
+                <p className="text-gray-300">
+                  We offer a 30-day return policy for most items. Please refer to our full returns
+                  policy for more details and exclusions.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </>
   );

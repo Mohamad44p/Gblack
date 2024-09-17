@@ -12,6 +12,9 @@ interface WishlistButtonProps {
     name: string;
     price: string;
     image: string;
+    average_rating: string;
+    rating_count: number;
+    attributes?: { name: string; options: string[] }[];
   };
 }
 
@@ -31,7 +34,10 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({ product }) => {
           description: `${product.name} has been removed from your wishlist.`,
         });
       } else {
-        await addToWishlist(product);
+        await addToWishlist({
+          ...product,
+          attributes: product.attributes || [],
+        });
         toast({
           title: "Added to wishlist",
           description: `${product.name} has been added to your wishlist.`,
@@ -48,16 +54,23 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({ product }) => {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <Button
       variant="outline"
       size="icon"
-      className={`rounded-full cursor-pointer ${inWishlist ? 'bg-red-500 text-white cursor-pointer' : 'bg-white cursor-pointer text-black'} hover:bg-white/80 cursor-pointer transition-all duration-300`}
+      className={`rounded-full ${inWishlist
+          ? 'bg-red-500 text-white hover:bg-red-600'
+          : 'bg-white text-black hover:bg-gray-100'
+        } transition-all duration-300`}
       onClick={handleClick}
       disabled={isLoading}
+      aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
     >
-      <Heart className="w-4 h-4 cursor-pointer" fill={inWishlist ? 'currentColor' : 'none'} />
+      <Heart
+        className={`w-4 h-4 ${isLoading ? 'animate-pulse' : ''}`}
+        fill={inWishlist ? 'currentColor' : 'none'}
+      />
     </Button>
   );
 };

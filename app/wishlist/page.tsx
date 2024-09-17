@@ -18,9 +18,11 @@ interface WishlistItem {
   price: string;
   image: string;
   brand?: string;
+  average_rating: string;
+  rating_count: number;
   rating?: number;
   salePrice?: string;
-  attributes?: { name: string; options: string[] }[];
+  attributes: { name: string; options: string[] }[];
 }
 
 export default function WishlistPage() {
@@ -143,13 +145,15 @@ export default function WishlistPage() {
                                         {[...Array(5)].map((_, i) => (
                                           <Star
                                             key={i}
-                                            className={`w-4 h-4 ${
-                                              i < (item.rating || 0)
-                                                ? "text-yellow-400 fill-current"
-                                                : "text-white/20"
-                                            }`}
+                                            className={`w-4 h-4 ${i < Math.round(parseFloat(item.average_rating))
+                                              ? "text-yellow-400 fill-current"
+                                              : "text-white/20"
+                                              }`}
                                           />
                                         ))}
+                                        <span className="ml-2 text-sm text-white/60">
+                                          ({item.rating_count})
+                                        </span>
                                       </div>
                                       <p className="text-xl font-bold mb-2">
                                         {item.salePrice ? (
@@ -209,11 +213,15 @@ export default function WishlistPage() {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${
-                              i < (item.rating || 0) ? "text-yellow-400 fill-current" : "text-white/20"
-                            }`}
+                            className={`w-4 h-4 ${i < Math.round(parseFloat(item.average_rating))
+                                ? "text-yellow-400 fill-current"
+                                : "text-white/20"
+                              }`}
                           />
                         ))}
+                        <span className="ml-2 text-sm text-white/60">
+                          ({item.rating_count})
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">

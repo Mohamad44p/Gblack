@@ -59,8 +59,9 @@ export interface Product {
     options: string[]
   }>
   average_rating: string
-  rating_count: number
+  ratingCount: number
   stock_status: string
+  rating?: number
 }
 
 interface ShowcaseProps {
@@ -181,8 +182,9 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 className="flex items-center mb-2"
               >
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < parseInt(product.average_rating) ? "text-yellow-400 fill-current" : "text-white/20"}`} />
+                  <Star key={i} className={`w-4 h-4 ${i < Math.round(product.rating ?? 0) ? "text-yellow-400 fill-current" : "text-white/20"}`} />
                 ))}
+                <span className="ml-2 text-sm text-white/60">({product.ratingCount})</span>
               </motion.div>
             </div>
             <motion.div
@@ -205,7 +207,9 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 id: product.id,
                 name: product.name,
                 price: isOnSale ? product.sale_price : product.regular_price,
-                image: product.images[0].src
+                image: product.images[0].src,
+                average_rating: product.average_rating,
+                rating_count: product.ratingCount
               }} />
             </motion.div>
           </div>

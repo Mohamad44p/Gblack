@@ -36,7 +36,7 @@ export interface Product {
     options: string[]
   }>
   average_rating: string
-  rating_count: number
+  ratingCount: number
   stock_status: string
   brand?: string
   salePrice?: number
