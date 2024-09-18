@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart,
@@ -208,26 +208,29 @@ const SkeletonProduct: React.FC = () => {
 interface CategoryPageProps {
   initialProducts: Product[];
   categorySlug: string;
+  currentPage: number;
+  totalProducts: number;
+  productsPerPage: number;
 }
 
 export default function CategoryPage({
   initialProducts,
   categorySlug,
+  currentPage,
+  totalProducts,
+  productsPerPage,
 }: CategoryPageProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [sortBy, setSortBy] = useState("date");
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 9;
+  const [isLoading, setIsLoading] = useState(false);
   const { addToCart } = useCart();
 
+  const totalPages = Math.ceil(totalProducts / productsPerPage);
+
   useEffect(() => {
-    if (Array.isArray(initialProducts)) {
-      setProducts(initialProducts);
-    }
-    setIsLoading(false);
+    setProducts(initialProducts);
   }, [initialProducts]);
 
   const sortedProducts = [...products].sort((a, b) => {
@@ -247,16 +250,7 @@ export default function CategoryPage({
     }
   });
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = sortedProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
-
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  const handleAddToCart = (product: Product, size: string) => {
+  const handleAddToCart = useCallback((product: Product, size: string) => {
     addToCart({
       id: product.id,
       name: product.name,
@@ -269,7 +263,7 @@ export default function CategoryPage({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
     });
-  };
+  }, [addToCart]);
 
   if (isLoading) {
     return (
@@ -298,25 +292,29 @@ export default function CategoryPage({
             <h1 className="text-4xl font-bold capitalize">
               {categorySlug.replace("-", " ")}
             </h1>
-            <select
-              className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="date">Newest</option>
-              <option value="name">Name</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
+            <div>
+              <label htmlFor="sort-select" className="sr-only">Sort by</label>
+              <select
+                id="sort-select"
+                className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="date">Newest</option>
+                <option value="name">Name</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+              </select>
+            </div>
           </div>
 
-          {currentProducts.length > 0 ? (
+          {sortedProducts.length > 0 ? (
             <motion.div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               layout
             >
               <AnimatePresence>
-                {currentProducts.map((product) => (
+                {sortedProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
                     layout
@@ -340,6 +338,7 @@ export default function CategoryPage({
                           width={400}
                           height={400}
                           className="w-full h-80 object-cover"
+                          priority={index === 0}
                         />
                         <motion.div
                           className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -439,32 +438,38 @@ export default function CategoryPage({
 
           <div className="mt-8 flex justify-center">
             <Button
-              onClick={() => paginate(currentPage - 1)}
+              onClick={() => {
+                const newPage = currentPage - 1;
+                window.location.href = `?page=${newPage}`;
+              }}
               disabled={currentPage === 1}
               className="mr-2"
+              aria-label="Previous page"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            {[...Array(Math.ceil(sortedProducts.length / productsPerPage))].map(
-              (_, index) => (
-                <Button
-                  key={index}
-                  onClick={() => paginate(index + 1)}
-                  className={`mx-1 ${
-                    currentPage === index + 1 ? "bg-white text-black" : ""
-                  }`}
-                >
-                  {index + 1}
-                </Button>
-              )
-            )}
+            {[...Array(totalPages)].map((_, index) => (
+              <Button
+                key={index}
+                onClick={() => {
+                  const newPage = index + 1;
+                  window.location.href = `?page=${newPage}`;
+                }}
+                className={`mx-1 ${
+                  currentPage === index + 1 ? "bg-white text-black" : ""
+                }`}
+              >
+                {index + 1}
+              </Button>
+            ))}
             <Button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={
-                currentPage ===
-                Math.ceil(sortedProducts.length / productsPerPage)
-              }
+              onClick={() => {
+                const newPage = currentPage + 1;
+                window.location.href = `?page=${newPage}`;
+              }}
+              disabled={currentPage === totalPages}
               className="ml-2"
+              aria-label="Next page"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>

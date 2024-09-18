@@ -1,8 +1,17 @@
+import { cache } from 'react'
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import CategoryPage from "@/components/Category/CategoryPage";
+import dynamic from "next/dynamic";
+import Head from 'next/head'
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import { Product } from "@/types/product";
+import { unstable_noStore as noStore } from 'next/cache'
+
+const CategoryPage = dynamic(() => import("@/components/Category/CategoryPage"), {
+  loading: () => <div>Loading...</div>,
+});
+
+const ErrorFallback = dynamic(() => import('@/components/ErrorFallback'));
 
 const api = new WooCommerceRestApi({
   url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,
@@ -11,7 +20,12 @@ const api = new WooCommerceRestApi({
   version: "wc/v3",
 });
 
-async function getProducts(slug: string): Promise<Product[]> {
+const getProductsCached = cache(async (
+  slug: string,
+  page: number,
+  perPage: number
+): Promise<{ products: Product[]; total: number }> => {
+  noStore()
   try {
     const { data: categories } = await api.get("products/categories", { slug });
 
@@ -20,28 +34,59 @@ async function getProducts(slug: string): Promise<Product[]> {
     }
 
     const categoryId = categories[0].id;
-    const { data: products } = await api.get("products", {
+    const { data: products, headers } = await api.get("products", {
       category: categoryId,
-      per_page: 20,
+      per_page: perPage,
+      page: page,
     });
 
-    return products;
+    const total = parseInt(headers["x-wp-total"], 10);
+
+    return { products, total };
   } catch (error) {
     console.error("Error fetching products:", error);
     throw new Error("Failed to fetch products");
   }
-}
+});
+
 
 export default async function BrowseCategory({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { page?: string };
 }) {
-  const products = await getProducts(params.slug);
+  noStore()
+  const page = parseInt(searchParams.page ?? "1", 10);
+  const perPage = 9;
 
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <CategoryPage initialProducts={products} categorySlug={params.slug} />
-    </Suspense>
-  );
+  try {
+    const { products, total } = await getProductsCached(params.slug, page, perPage);
+
+    return (
+      <>
+        <Head>
+          <title>{`${params.slug} Products | Your Store Name`}</title>
+          <meta name="description" content={`Browse our collection of ${params.slug} products.`} />
+        </Head>
+        <Suspense fallback={<div>Loading...</div>}>
+          <CategoryPage
+            initialProducts={products}
+            categorySlug={params.slug}
+            currentPage={page}
+            totalProducts={total}
+            productsPerPage={perPage}
+          />
+        </Suspense>
+      </>
+    );
+  } catch (error) {
+    console.error('Failed to fetch products:', error);
+    return <ErrorFallback resetErrorBoundary={
+      () => {
+        
+      }
+    } error={new Error("Failed to load products. Please try again later.")} />;
+  }
 }

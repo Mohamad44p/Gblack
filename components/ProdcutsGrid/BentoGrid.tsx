@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -101,15 +101,15 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
   ).toFixed(2)}`;
   const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
 
-  const handleAddToCartClick = () => {
+  const handleAddToCartClick = useCallback(() => {
     if (sizeAttribute && sizeAttribute.options.length > 0) {
       setIsModalOpen(true);
     } else {
       handleAddToCart(product);
     }
-  };
+  }, [sizeAttribute, handleAddToCart, product]);
 
-  const handleSizeSelection = () => {
+  const handleSizeSelection = useCallback(() => {
     if (selectedSize) {
       handleAddToCart(product, selectedSize);
       setIsModalOpen(false);
@@ -121,7 +121,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
         variant: "destructive",
       });
     }
-  };
+  }, [selectedSize, handleAddToCart, product]);
 
   return (
     <Card
@@ -369,13 +369,17 @@ export function ProductShowcase({
     if (!emblaApi) return;
     const progress = Math.max(0, Math.min(1, emblaApi.scrollProgress()));
     setScrollProgress(progress * 100);
-  }, [emblaApi, setScrollProgress]);
+  }, [emblaApi]);
 
   useEffect(() => {
     if (!emblaApi) return;
     onScroll();
     emblaApi.on("scroll", onScroll);
     emblaApi.on("reInit", onScroll);
+    return () => {
+      emblaApi.off("scroll", onScroll);
+      emblaApi.off("reInit", onScroll);
+    };
   }, [emblaApi, onScroll]);
 
   const scrollPrev = useCallback(
@@ -387,17 +391,36 @@ export function ProductShowcase({
     [emblaApi]
   );
   const { addToCart } = useCart();
-  const handleAddToCart = (product: Product, size?: string) => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.sale_price || product.price,
-      image: product.images[0].src,
-      quantity: 1,
-      size: size,
-    });
-    openCart();
-  };
+  const handleAddToCart = useCallback(
+    (product: Product, size?: string) => {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.sale_price || product.price,
+        image: product.images[0].src,
+        quantity: 1,
+        size: size,
+      });
+      openCart();
+    },
+    [addToCart]
+  );
+
+  const memoizedProducts = useMemo(
+    () =>
+      products.map((product, index) => (
+        <motion.div
+          key={product.id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] xl:flex-[0_0_25%] px-2"
+        >
+          <ProductCard product={product} handleAddToCart={handleAddToCart} />
+        </motion.div>
+      )),
+    [products, handleAddToCart]
+  );
 
   return (
     <div className="container mx-auto px-4 py-12 bg-black text-white">
@@ -422,6 +445,8 @@ export function ProductShowcase({
               layout="fill"
               objectFit="cover"
               className="absolute inset-0 z-0"
+              sizes="100vw"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>
             <CardContent className="p-10 relative h-full z-20 flex items-center">
@@ -432,8 +457,11 @@ export function ProductShowcase({
                   transition={{ delay: 0.2, duration: 0.5 }}
                   className="mb-4 bg-white/10 backdrop-filter backdrop-blur-sm text-white text-sm font-semibold py-2 px-6 rounded-full inline-block"
                 >
-                  <Sparkles className="inline-block mr-2 h-4 w-4" />
-                  Featured Collection
+                  <Sparkles
+                    className="inline-block mr-2 h-4 w-4"
+                    aria-hidden="true"
+                  />
+                  <span>Featured Collection</span>
                 </motion.div>
                 <motion.h3
                   initial={{ opacity: 0, y: 20 }}
@@ -460,8 +488,8 @@ export function ProductShowcase({
                     size="lg"
                     className="bg-white text-black hover:bg-white/80 transition-all duration-300 rounded-full"
                   >
-                    <Zap className="mr-2 h-5 w-5" />
-                    Explore Now
+                    <Zap className="mr-2 h-5 w-5" aria-hidden="true" />
+                    <span>Explore Now</span>
                   </Button>
                 </motion.div>
               </div>
@@ -476,38 +504,25 @@ export function ProductShowcase({
           size="lg"
           className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-all duration-300 rounded-full"
           onClick={scrollPrev}
+          aria-label="Previous products"
         >
-          <ChevronLeft className="h-6 w-6 mr-2" />
-          Previous
+          <ChevronLeft className="h-6 w-6 mr-2" aria-hidden="true" />
+          <span>Previous</span>
         </Button>
         <Button
           variant="outline"
           size="lg"
           className="bg-white/10 text-white border-white/20 hover:bg-white/20 transition-all duration-300 rounded-full"
           onClick={scrollNext}
+          aria-label="Next products"
         >
-          Next
-          <ChevronRight className="h-6 w-6 ml-2" />
+          <span>Next</span>
+          <ChevronRight className="h-6 w-6 ml-2" aria-hidden="true" />
         </Button>
       </div>
 
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
-          {products.map((product, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] xl:flex-[0_0_25%] px-2"
-            >
-              <ProductCard
-                product={product}
-                handleAddToCart={handleAddToCart}
-              />
-            </motion.div>
-          ))}
-        </div>
+        <div className="flex">{memoizedProducts}</div>
       </div>
       <motion.div
         className="mt-8"

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import SingleProductPage from "@/components/singel/ProductPage";
 import AlsoLikePr from "@/components/singel/AlsoLike/AlsoLikePr";
+import { unstable_noStore as noStore } from 'next/cache'
 
 interface WooCommerceProduct {
   id: number;
@@ -36,6 +37,7 @@ const api = new WooCommerceRestApi({
 });
 
 async function getProduct(id: string) {
+  noStore()
   try {
     const { data } = await api.get(`products/${id}`);
     return data;
@@ -46,6 +48,7 @@ async function getProduct(id: string) {
 }
 
 async function getReviews(productId: number) {
+  noStore()
   try {
     const { data } = await api.get(`products/reviews`, {
       product: productId,
@@ -58,6 +61,7 @@ async function getReviews(productId: number) {
 }
 
 async function getRelatedProducts(categoryId: number, currentProductId: number) {
+  noStore()
   try {
     const { data } = await api.get("products", {
       category: categoryId,
@@ -76,6 +80,7 @@ export default async function ProductPage({
 }: {
   params: { id: string };
 }) {
+  noStore()
   const product = await getProduct(params.id);
 
   if (!product) {

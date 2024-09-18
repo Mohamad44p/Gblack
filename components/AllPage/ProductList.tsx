@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart,
@@ -77,7 +77,7 @@ const QuickViewModal = ({
   const [selectedSize, setSelectedSize] = useState("");
   const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     if (sizeAttribute && sizeAttribute.options.length > 0 && !selectedSize) {
       toast({
         title: "Size required",
@@ -97,7 +97,7 @@ const QuickViewModal = ({
     });
     onClose();
     openCart();
-  };
+  }, [addToCart, onClose, product, selectedSize, sizeAttribute]);
 
   return (
     <motion.div
@@ -286,77 +286,90 @@ export default function ProductList({
     setProducts(initialProducts);
   }, [initialProducts]);
 
-  const handleAddToCart = (product: Product) => {
-    const sizeAttribute = product.attributes.find(
-      (attr) => attr.name === "Size"
-    );
-    if (sizeAttribute && sizeAttribute.options.length > 0) {
-      setSelectedProduct(product);
-    } else {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.sale_price || product.price,
-        image: product.images[0]?.src || "/placeholder.svg",
-        quantity: 1,
-      });
-      openCart();
-    }
-  };
-
-  const filteredProducts = products
-    .filter((product) => {
-      const categoryMatch =
-        selectedCategory === "All" ||
-        product.categories.some((cat) => cat.name === selectedCategory);
-
-      const priceMatch =
-        parseFloat(product.sale_price || product.price) >= priceRange[0] &&
-        parseFloat(product.sale_price || product.price) <= priceRange[1];
-
-      const genderMatch =
-        selectedGender === "All" ||
-        product.attributes.some(
-          (attr) =>
-            attr.name === "Gender" && attr.options.includes(selectedGender)
-        );
-
-      const stockMatch =
-        stockFilter === "All" ||
-        (stockFilter === "In Stock" && product.stock_status === "instock") ||
-        (stockFilter === "Out of Stock" &&
-          product.stock_status === "outofstock");
-      const saleMatch =
-        saleFilter === "All" ||
-        (saleFilter === "On Sale" && product.on_sale) ||
-        (saleFilter === "Regular Price" && !product.on_sale);
-
-      return (
-        categoryMatch && priceMatch && genderMatch && stockMatch && saleMatch
+  const handleAddToCart = useCallback(
+    (product: Product) => {
+      const sizeAttribute = product.attributes.find(
+        (attr) => attr.name === "Size"
       );
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "price-asc":
-          return (
-            parseFloat(a.sale_price || a.price) -
-            parseFloat(b.sale_price || b.price)
-          );
-        case "price-desc":
-          return (
-            parseFloat(b.sale_price || b.price) -
-            parseFloat(a.sale_price || a.price)
-          );
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "date":
-        default:
-          return (
-            new Date(b.date_created).getTime() -
-            new Date(a.date_created).getTime()
-          );
+      if (sizeAttribute && sizeAttribute.options.length > 0) {
+        setSelectedProduct(product);
+      } else {
+        addToCart({
+          id: product.id,
+          name: product.name,
+          price: product.sale_price || product.price,
+          image: product.images[0]?.src || "/placeholder.svg",
+          quantity: 1,
+        });
+        openCart();
       }
-    });
+    },
+    [addToCart]
+  );
+
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        const categoryMatch =
+          selectedCategory === "All" ||
+          product.categories.some((cat) => cat.name === selectedCategory);
+
+        const priceMatch =
+          parseFloat(product.sale_price || product.price) >= priceRange[0] &&
+          parseFloat(product.sale_price || product.price) <= priceRange[1];
+
+        const genderMatch =
+          selectedGender === "All" ||
+          product.attributes.some(
+            (attr) =>
+              attr.name === "Gender" && attr.options.includes(selectedGender)
+          );
+
+        const stockMatch =
+          stockFilter === "All" ||
+          (stockFilter === "In Stock" && product.stock_status === "instock") ||
+          (stockFilter === "Out of Stock" &&
+            product.stock_status === "outofstock");
+        const saleMatch =
+          saleFilter === "All" ||
+          (saleFilter === "On Sale" && product.on_sale) ||
+          (saleFilter === "Regular Price" && !product.on_sale);
+
+        return (
+          categoryMatch && priceMatch && genderMatch && stockMatch && saleMatch
+        );
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case "price-asc":
+            return (
+              parseFloat(a.sale_price || a.price) -
+              parseFloat(b.sale_price || b.price)
+            );
+          case "price-desc":
+            return (
+              parseFloat(b.sale_price || b.price) -
+              parseFloat(a.sale_price || a.price)
+            );
+          case "name":
+            return a.name.localeCompare(b.name);
+          case "date":
+          default:
+            return (
+              new Date(b.date_created).getTime() -
+              new Date(a.date_created).getTime()
+            );
+        }
+      });
+  }, [
+    products,
+    selectedCategory,
+    priceRange,
+    selectedGender,
+    stockFilter,
+    saleFilter,
+    sortBy,
+  ]);
 
   const totalPages = Math.max(
     1,
@@ -367,24 +380,19 @@ export default function ProductList({
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(event.target.value);
-    if (event.target.id === "minPrice") {
-      setPriceRange([value, Math.max(value, priceRange[1])]);
-    } else {
-      setPriceRange([Math.min(value, priceRange[0]), value]);
-    }
-  };
+  const handlePriceChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = parseInt(event.target.value);
+      if (event.target.id === "minPrice") {
+        setPriceRange([value, Math.max(value, priceRange[1])]);
+      } else {
+        setPriceRange([Math.min(value, priceRange[0]), value]);
+      }
+    },
+    [priceRange]
+  );
 
-  const handleAccordionChange = (value: string) => {
-    setOpenAccordionItems((prev) =>
-      prev.includes(value)
-        ? prev.filter((item) => item !== value)
-        : [...prev, value]
-    );
-  };
-
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSelectedCategory("All");
     setPriceRange([0, 1000]);
     setSelectedGender("All");
@@ -392,7 +400,7 @@ export default function ProductList({
     setSaleFilter("All");
     setSortBy("date");
     setCurrentPage(1);
-  };
+  }, []);
 
   const FilterContent = () => (
     <Accordion

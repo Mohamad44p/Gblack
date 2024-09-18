@@ -1,14 +1,22 @@
 import { Suspense } from 'react'
-import AllHome from "@/components/AllProductsHome/AllHome"
 import { ProductShowcase } from "@/components/ProdcutsGrid/BentoGrid"
 import SecSection from "@/components/Sec/SecSection"
 import Carousel from "@/components/slider/Carousel"
 import ImagesShow from "@/components/ThirdSec/ImagesShow"
 import Loading from '@/components/Loading'
 import { Product } from '@/types/product'
+import dynamic from 'next/dynamic'
+import { unstable_noStore as noStore } from 'next/cache'
+
+const DynamicAllHome = dynamic(() => import("@/components/AllProductsHome/AllHome"), {
+  loading: () => <Loading />,
+})
 
 async function getProducts(perPage: number): Promise<{ products: Product[] }> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?per_page=${perPage}`, { cache: 'no-store' })
+  noStore()
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?per_page=${perPage}`, { 
+    next: { revalidate: 3600 }
+  })
   if (!res.ok) {
     throw new Error('Failed to fetch products')
   }
@@ -16,8 +24,11 @@ async function getProducts(perPage: number): Promise<{ products: Product[] }> {
 }
 
 async function getProductRatings(productIds: number[]): Promise<{ [key: number]: { average_rating: string, rating_count: number } }> {
+  noStore()
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product-ratings?ids=${productIds.join(',')}`, { cache: 'no-store' })
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product-ratings?ids=${productIds.join(',')}`, { 
+      next: { revalidate: 3600 }
+    })
     if (!res.ok) {
       console.error('Failed to fetch product ratings:', await res.text())
       return {}
@@ -81,13 +92,14 @@ async function ProductShowcases() {
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <h1 className="sr-only">Welcome to GBLACK - Your Fashion Destination</h1>
       <Carousel />
       <SecSection />
       <ImagesShow />
       <Suspense fallback={<Loading />}>
         <ProductShowcases />
       </Suspense>
-      <AllHome />
+      <DynamicAllHome />
     </main>
   )
 }

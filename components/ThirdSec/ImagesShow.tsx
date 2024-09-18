@@ -1,59 +1,72 @@
-/* eslint-disable @next/next/no-img-element */
-'use client'
+"use client";
 
-import { useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { ReactLenis } from '@studio-freight/react-lenis'
-import ImageAnimation from "./GblackImage"
+import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ReactLenis } from "@studio-freight/react-lenis";
+import ImageAnimation from "./GblackImage";
+import Image from "next/image";
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger);
 
-export default function Component() {
+export default function ImprovedComponent() {
+  const mainRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
+    if (!mainRef.current) return;
+
     const scrollTriggerSettings = {
-      trigger: ".main",
+      trigger: mainRef.current,
       start: "top 25%",
       toggleActions: "play reverse play reverse",
-    }
+    };
 
-    const leftXValues = [-800, -900, -400]
-    const rightXValues = [800, 900, 400]
-    const leftRotationValues = [-30, -20, -35]
-    const rightRotationValues = [30, 20, 35]
-    const yValues = [100, -150, -400]
+    const leftXValues = [-800, -900, -400];
+    const rightXValues = [800, 900, 400];
+    const leftRotationValues = [-30, -20, -35];
+    const rightRotationValues = [30, 20, 35];
+    const yValues = [100, -150, -400];
 
-    gsap.utils.toArray(".row").forEach((row: any, index) => {
-      const cardLeft = row.querySelector(".card-left")
-      const cardRight = row.querySelector(".card-right")
+    const rows = mainRef.current.querySelectorAll(".row");
+    rows.forEach((row, index) => {
+      const cardLeft = row.querySelector(".card-left");
+      const cardRight = row.querySelector(".card-right");
 
       gsap.to(cardLeft, {
         x: leftXValues[index],
         scrollTrigger: {
-          trigger: ".main",
+          trigger: mainRef.current,
           start: "top center",
           end: "150% bottom",
           scrub: true,
           onUpdate: (self) => {
-            const progress = self.progress
-            if (cardLeft && cardLeft.style) {
-              cardLeft.style.transform = `translateX(${progress * leftXValues[index]}px) translateY(${progress * yValues[index]}px) rotate(${progress * leftRotationValues[index]}deg)`
+            const progress = self.progress;
+            if (cardLeft instanceof HTMLElement) {
+              cardLeft.style.transform = `translateX(${
+                progress * leftXValues[index]
+              }px) translateY(${progress * yValues[index]}px) rotate(${
+                progress * leftRotationValues[index]
+              }deg)`;
             }
-            if (cardRight && cardRight.style) {
-              cardRight.style.transform = `translateX(${progress * rightXValues[index]}px) translateY(${progress * yValues[index]}px) rotate(${progress * rightRotationValues[index]}deg)`
+            if (cardRight instanceof HTMLElement) {
+              cardRight.style.transform = `translateX(${
+                progress * rightXValues[index]
+              }px) translateY(${progress * yValues[index]}px) rotate(${
+                progress * rightRotationValues[index]
+              }deg)`;
             }
           },
         },
-      })
-    })
+      });
+    });
 
     gsap.to(".logo", {
       scale: 1,
       duration: 0.5,
       ease: "power1.out",
       scrollTrigger: scrollTriggerSettings,
-    })
+    });
 
     gsap.to(".line p", {
       y: 0,
@@ -61,7 +74,7 @@ export default function Component() {
       ease: "power1.out",
       stagger: 0.1,
       scrollTrigger: scrollTriggerSettings,
-    })
+    });
 
     gsap.to("button", {
       y: 0,
@@ -70,36 +83,43 @@ export default function Component() {
       ease: "power1.out",
       delay: 0.25,
       scrollTrigger: scrollTriggerSettings,
-    })
+    });
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
-    }
-  }, [])
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, []);
 
   const generateRows = () => {
-    const rows = []
+    const rows = [];
     for (let i = 1; i <= 3; i++) {
       rows.push(
         <div className="row" key={i}>
           <div className="card card-left">
-            <img
+            <Image
               src={`/images/Rotated/img-${2 * i - 1}.jpg`}
               alt=""
-              width={100}
-              height={100}
+              width={1800}
+              height={1900}
               className="img"
+              loading="lazy"
             />
           </div>
           <div className="card card-right">
-            <img src={`/images/Rotated/img-${2 * i}.jpg`}
-              alt="" width={100} height={100} className="img" />
+            <Image
+              src={`/images/Rotated/img-${2 * i}.jpg`}
+              alt=""
+              width={1800}
+              height={1900}
+              className="img"
+              loading="lazy"
+            />
           </div>
         </div>
-      )
+      );
     }
-    return rows
-  }
+    return rows;
+  };
 
   return (
     <ReactLenis root>
@@ -107,12 +127,22 @@ export default function Component() {
         <ImageAnimation />
       </section>
 
-      <section className="main section overflow-y-hidden">
+      <section
+        ref={mainRef}
+        className="main section overflow-y-hidden"
+        aria-label="Product Showcase"
+      >
         <div className="main-content">
           <div className="logo">
-            <img src="/images/Rotated/logo.jpg" alt="" width={100} height={100} className="img" />
+            <Image
+              src="/images/Rotated/logo.jpg"
+              alt="Company Logo"
+              width={100}
+              height={100}
+              className="img"
+            />
           </div>
-          <div className="copy">
+          <div className="copy" aria-label="Product Description">
             <div className="line">
               <p>Explore Our Wide Range of Products</p>
             </div>
@@ -124,14 +154,12 @@ export default function Component() {
             </div>
           </div>
           <div className="btn">
-            <Button>
-              Explore Now
-            </Button>
+            <Button>Explore Now</Button>
           </div>
         </div>
 
         {generateRows()}
       </section>
     </ReactLenis>
-  )
+  );
 }

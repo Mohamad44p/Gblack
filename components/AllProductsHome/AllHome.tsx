@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Heart, Star, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -251,7 +251,7 @@ const ProductSkeleton = () => (
   </div>
 );
 
-export default function AllHome() {
+export default function ImprovedAllHome() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -260,85 +260,92 @@ export default function AllHome() {
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, categoriesRes] = await Promise.all([
-          fetch("/api/products?per_page=20"),
-          fetch("/api/categories"),
-        ]);
+  const fetchData = useCallback(async () => {
+    try {
+      const [productsRes, categoriesRes] = await Promise.all([
+        fetch("/api/products?per_page=20"),
+        fetch("/api/categories"),
+      ]);
 
-        if (!productsRes.ok || !categoriesRes.ok)
-          throw new Error("Failed to fetch data");
+      if (!productsRes.ok || !categoriesRes.ok)
+        throw new Error("Failed to fetch data");
 
-        const productsData = await productsRes.json();
-        const categoriesData = await categoriesRes.json();
+      const productsData = await productsRes.json();
+      const categoriesData = await categoriesRes.json();
 
-        const productIds = productsData.products.map(
-          (product: Product) => product.id
-        );
-        const ratingsRes = await fetch(
-          `/api/product-ratings?ids=${productIds.join(",")}`
-        );
-        const ratingsData = await ratingsRes.json();
+      const productIds = productsData.products.map(
+        (product: Product) => product.id
+      );
+      const ratingsRes = await fetch(
+        `/api/product-ratings?ids=${productIds.join(",")}`
+      );
+      const ratingsData = await ratingsRes.json();
 
-        const transformedProducts = productsData.products.map(
-          (product: Product) => {
-            const productRating = ratingsData[product.id] || {
-              average_rating: "0.00",
-              rating_count: 0,
-            };
-            return {
-              ...product,
-              rating: parseFloat(productRating.average_rating) || 0,
-              ratingCount: productRating.rating_count || 0,
-              average_rating: productRating.average_rating || "0.00",
-            };
-          }
-        );
+      const transformedProducts = productsData.products.map(
+        (product: Product) => {
+          const productRating = ratingsData[product.id] || {
+            average_rating: "0.00",
+            rating_count: 0,
+          };
+          return {
+            ...product,
+            rating: parseFloat(productRating.average_rating) || 0,
+            ratingCount: productRating.rating_count || 0,
+            average_rating: productRating.average_rating || "0.00",
+          };
+        }
+      );
 
-        setProducts(transformedProducts);
-        setCategories([
-          { id: 0, name: "All", slug: "all" },
-          ...categoriesData.categories,
-        ]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      setProducts(transformedProducts);
+      setCategories([
+        { id: 0, name: "All", slug: "all" },
+        ...categoriesData.categories,
+      ]);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleAddToCart = (product: Product) => {
-    const isOnSale =
-      product.sale_price !== "" && product.sale_price !== product.regular_price;
-    const sizeAttribute = product.attributes.find(
-      (attr) => attr.name === "Size"
-    );
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    if (sizeAttribute && sizeAttribute.options.length > 0) {
-      setSelectedProduct(product);
-    } else {
-      addToCart({
-        id: product.id,
-        name: product.name,
-        price: isOnSale ? product.sale_price : product.regular_price,
-        image: product.images[0]?.src || "/BlurImage.jpg",
-        quantity: 1,
-      });
-      openCart();
-    }
-  };
+  const handleAddToCart = useCallback(
+    (product: Product) => {
+      const isOnSale =
+        product.sale_price !== "" &&
+        product.sale_price !== product.regular_price;
+      const sizeAttribute = product.attributes.find(
+        (attr) => attr.name === "Size"
+      );
 
-  const filteredProducts =
-    selectedCategory === "All"
-      ? products
-      : products.filter((product) =>
-          product.categories.some((cat) => cat.name === selectedCategory)
-        );
+      if (sizeAttribute && sizeAttribute.options.length > 0) {
+        setSelectedProduct(product);
+      } else {
+        addToCart({
+          id: product.id,
+          name: product.name,
+          price: isOnSale ? product.sale_price : product.regular_price,
+          image: product.images[0]?.src || "/BlurImage.jpg",
+          quantity: 1,
+        });
+        openCart();
+      }
+    },
+    [addToCart]
+  );
+
+  const filteredProducts = useMemo(
+    () =>
+      selectedCategory === "All"
+        ? products
+        : products.filter((product) =>
+            product.categories.some((cat) => cat.name === selectedCategory)
+          ),
+    [products, selectedCategory]
+  );
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
@@ -350,7 +357,7 @@ export default function AllHome() {
 
         <div className="container mx-auto px-4 py-16 relative z-10">
           <motion.div
-            className="text-7xl font-extrabold mb-12 text-center"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-12 text-center"
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -390,7 +397,7 @@ export default function AllHome() {
                       selectedCategory === category.name ? "default" : "outline"
                     }
                     onClick={() => setSelectedCategory(category.name)}
-                    className={`px-6 py-2 rounded-full text-lg font-semibold transition-all duration-300 mb-2 ${
+                    className={`px-4 sm:px-6 py-2 rounded-full text-base sm:text-lg font-semibold transition-all duration-300 mb-2 ${
                       selectedCategory === category.name
                         ? "bg-white text-black"
                         : "bg-transparent text-white border-white hover:bg-white hover:text-black"
@@ -402,7 +409,7 @@ export default function AllHome() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12"
             layout
           >
             <AnimatePresence>
@@ -418,7 +425,7 @@ export default function AllHome() {
                       <ProductSkeleton />
                     </motion.div>
                   ))
-                : filteredProducts.map((product) => {
+                : filteredProducts.map((product: Product) => {
                     const isOnSale =
                       product.sale_price !== "" &&
                       product.sale_price !== product.regular_price;
@@ -446,6 +453,7 @@ export default function AllHome() {
                               width={400}
                               height={320}
                               className="w-full h-80 object-cover"
+                              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                             />
                             {isOnSale && (
                               <Badge className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-full">
@@ -472,7 +480,7 @@ export default function AllHome() {
                               href={`/product/${product.id}`}
                               className="block"
                             >
-                              <h3 className="text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
+                              <h3 className="text-xl sm:text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
                                 {product.name}
                               </h3>
                             </Link>
@@ -480,7 +488,7 @@ export default function AllHome() {
                               {isOnSale ? (
                                 <div>
                                   <span
-                                    className="text-3xl font-bold mr-2"
+                                    className="text-2xl sm:text-3xl font-bold mr-2"
                                     style={{
                                       background:
                                         "linear-gradient(to right, #fff, #888)",
@@ -490,13 +498,13 @@ export default function AllHome() {
                                   >
                                     ${product.sale_price}
                                   </span>
-                                  <span className="text-xl text-gray-400 line-through">
+                                  <span className="text-lg sm:text-xl text-gray-400 line-through">
                                     ${product.regular_price}
                                   </span>
                                 </div>
                               ) : (
                                 <span
-                                  className="text-3xl font-bold"
+                                  className="text-2xl sm:text-3xl font-bold"
                                   style={{
                                     background:
                                       "linear-gradient(to right, #fff, #888)",
@@ -523,6 +531,7 @@ export default function AllHome() {
                                       ? "text-yellow-400 fill-current"
                                       : "text-white/20"
                                   }`}
+                                  aria-hidden="true"
                                 />
                               ))}
                               <span className="ml-2 text-sm text-white/60">
@@ -538,8 +547,11 @@ export default function AllHome() {
                                 className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
                                 onClick={() => handleAddToCart(product)}
                               >
-                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                Add to Cart
+                                <ShoppingCart
+                                  className="w-4 h-4 mr-2"
+                                  aria-hidden="true"
+                                />
+                                <span>Add to Cart</span>
                               </Button>
                               <WishlistButton
                                 product={{
@@ -570,9 +582,9 @@ export default function AllHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <Button className="px-8 py-3 text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-full">
+            <Button className="px-6 sm:px-8 py-3 text-base sm:text-lg font-semibold bg-white text-black hover:bg-gray-200 rounded-full">
               <Link href="/all">View All Products</Link>
-              <ChevronRight className="ml-2 w-5 h-5" />
+              <ChevronRight className="ml-2 w-5 h-5" aria-hidden="true" />
             </Button>
           </motion.div>
         </div>
