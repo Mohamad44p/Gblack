@@ -118,7 +118,9 @@ export default function AnimatedFooter() {
                             <Link href="#" className="text-sm hover:text-gray-300">Terms of Use</Link>
                             <Link href="#" className="text-sm hover:text-gray-300">Trust</Link>
                         </div>
-                        <p className="text-sm">&copy; 2024 Significo. All rights reserved.</p>
+                        <p className="text-sm">&copy;
+                            {new Date().getFullYear()} {" "}
+                            GBLACK. All rights reserved.</p>
                         <div className="flex space-x-4">
                             <Link href="#" className="hover:text-gray-300"><Instagram size={20} /></Link>
                             <Link href="#" className="hover:text-gray-300"><Linkedin size={20} /></Link>

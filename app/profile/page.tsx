@@ -6,81 +6,122 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingBag, Heart, Award, Settings, Package, CreditCard, MapPin, Bell, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Heart, Award, Settings, Package, CreditCard, MapPin, Bell, ChevronRight, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { OrderDetailsModal } from '@/components/Profile/OrderDetailsModal'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import { WishlistProvider, useWishlist } from '@/contexts/WishlistContext'
+import { useToast } from '@/hooks/use-toast'
+
+interface OrderItem {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
+interface Order {
+    id: number;
+    date_created: string;
+    status: string;
+    total: string;
+    line_items: OrderItem[];
+}
+
+interface WishlistItem {
+    id: number;
+    name: string;
+    price: string;
+    image: string;
+    average_rating: string;
+    rating_count: number;
+    attributes: { name: string; options: string[] }[];
+    short_description: string;
+}
 
 const menuItems = [
-    { icon: ShoppingBag, label: 'Orders', count: 12 },
-    { icon: Heart, label: 'Wishlist', count: 24 },
+    { icon: ShoppingBag, label: 'Orders', count: 0 },
+    { icon: Heart, label: 'Wishlist', count: 0 },
     { icon: Award, label: 'Rewards', count: 1250 },
     { icon: Settings, label: 'Settings' },
 ]
 
-const sampleOrders = [
-    {
-        id: 1001,
-        date: '2023-05-15',
-        items: [
-            { id: 1, name: 'Wireless Earbuds', price: 79.99, image: '/assets/img2.jpeg' },
-            { id: 2, name: 'Smartphone Case', price: 19.99, image: '/assets/img4.jpeg' },
-        ],
-        total: 99.98,
-    },
-    {
-        id: 1002,
-        date: '2023-06-02',
-        items: [
-            { id: 3, name: 'Fitness Tracker', price: 89.99, image: '/assets/img6.jpeg' },
-        ],
-        total: 89.99,
-    },
-    {
-        id: 1003,
-        date: '2023-06-20',
-        items: [
-            { id: 4, name: 'Bluetooth Speaker', price: 59.99, image: '/assets/img2.jpeg' },
-            { id: 5, name: 'Power Bank', price: 29.99, image: '/assets/img3.jpeg' },
-            { id: 6, name: 'USB-C Cable', price: 9.99, image: '/assets/img5.jpeg' },
-        ],
-        total: 99.97,
-    },
-]
-
-interface Order {
-    id: number;
-    date: string;
-    items: { id: number; name: string; price: number; image: string; }[];
-    total: number;
-}
-
-export default function EcommerceProfileRedesign() {
-    const [activeItem, setActiveItem] = useState('Orders')
+function EcommerceProfileRedesignContent() {
+    const [activeItem, setActiveItem] = useState('Orders');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const { user, isLoggedIn, isLoading, checkAuthStatus } = useAuth()
-    const router = useRouter()
+    const [orders, setOrders] = useState<Order[]>([]);
+    const { user, isLoggedIn, isLoading, checkAuthStatus } = useAuth();
+    const router = useRouter();
+    const { wishlist, removeFromWishlist } = useWishlist();
+    const { toast } = useToast();
 
     useEffect(() => {
         const checkAuth = async () => {
             const isAuthenticated = await checkAuthStatus();
             if (!isAuthenticated) {
                 router.push('/login');
+            } else {
+                fetchOrders();
             }
         };
 
         checkAuth();
     }, [checkAuthStatus, router]);
 
+    useEffect(() => {
+        menuItems[0].count = orders.length;
+        menuItems[1].count = wishlist.length;
+    }, [orders, wishlist]);
+
+    const fetchOrders = async () => {
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+          console.log('Fetching orders for user ID:', userId);
+          try {
+            const response = await fetch(`/api/ordersuser?userId=${userId}`);
+            if (!response.ok) {
+              throw new Error('Failed to fetch orders');
+            }
+            const data = await response.json();
+            setOrders(data);
+          } catch (error) {
+            console.error('Error fetching orders:', error);
+            toast({
+              title: "Error",
+              description: "Failed to fetch orders. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          console.error('User ID is undefined'); // Debugging log
+          toast({
+            title: "Error",
+            description: "User ID is undefined. Please try again.",
+            variant: "destructive",
+          });
+        }
+      };
+
+
+    const handleRemoveFromWishlist = (productId: number) => {
+        removeFromWishlist(productId);
+        toast({
+            title: "Removed from wishlist",
+            description: "The item has been removed from your wishlist.",
+        });
+    };
+
     if (isLoading) {
-        return <div className="min-h-screen flex items-center justify-center">
-            <p className="text-white">Loading...</p>
-        </div>
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-white">Loading...</p>
+            </div>
+        );
     }
 
     if (!isLoggedIn || !user) {
-        return null
+        return null;
     }
 
     return (
@@ -91,7 +132,6 @@ export default function EcommerceProfileRedesign() {
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-6xl flex flex-col md:flex-row gap-8"
             >
-                {/* Profile section */}
                 <div className="md:w-1/3 space-y-6">
                     <Card className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 overflow-hidden">
                         <CardContent className="p-6">
@@ -156,7 +196,6 @@ export default function EcommerceProfileRedesign() {
                     </Card>
                 </div>
 
-                {/* Content section */}
                 <div className="md:w-2/3">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -171,7 +210,7 @@ export default function EcommerceProfileRedesign() {
                                     <h3 className="text-2xl font-bold mb-4">{activeItem}</h3>
                                     {activeItem === 'Orders' && (
                                         <div className="space-y-4">
-                                            {sampleOrders.map((order) => (
+                                            {orders.map((order) => (
                                                 <motion.div
                                                     key={order.id}
                                                     className="bg-gray-700 p-4 rounded-lg flex items-center justify-between"
@@ -183,7 +222,7 @@ export default function EcommerceProfileRedesign() {
                                                         <Package className="w-10 h-10 mr-4 text-white" />
                                                         <div>
                                                             <h4 className="font-semibold">Order #{order.id}</h4>
-                                                            <p className="text-sm text-gray-300">Ordered on {order.date}</p>
+                                                            <p className="text-sm text-gray-300">Ordered on {new Date(order.date_created).toLocaleDateString()}</p>
                                                         </div>
                                                     </div>
                                                     <Button
@@ -200,21 +239,30 @@ export default function EcommerceProfileRedesign() {
                                     )}
                                     {activeItem === 'Wishlist' && (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {[1, 2, 3, 4].map((item) => (
+                                            {wishlist.map((item: WishlistItem, index) => (
                                                 <motion.div
-                                                    key={item}
-                                                    className="bg-gray-700 p-4 rounded-lg flex items-center"
+                                                    key={item.id}
+                                                    className="bg-gray-700 p-4 rounded-lg flex flex-col"
                                                     initial={{ opacity: 0, scale: 0.9 }}
                                                     animate={{ opacity: 1, scale: 1 }}
-                                                    transition={{ duration: 0.3, delay: item * 0.1 }}
+                                                    transition={{ duration: 0.3, delay: index * 0.1 }}
                                                 >
-                                                    <div className="w-16 h-16 bg-gray-600 rounded-lg mr-4 flex items-center justify-center text-2xl font-bold">
-                                                        {item}
+                                                    <div className="flex items-center mb-2">
+                                                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg mr-4" />
+                                                        <div>
+                                                            <h4 className="font-semibold">{item.name}</h4>
+                                                            <p className="text-sm text-gray-300">${item.price}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <h4 className="font-semibold">Wishlist Item {item}</h4>
-                                                        <p className="text-sm text-gray-300">$99.99</p>
-                                                    </div>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleRemoveFromWishlist(item.id)}
+                                                        className="text-white border-white hover:bg-white hover:text-black mt-2"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Remove
+                                                    </Button>
                                                 </motion.div>
                                             ))}
                                         </div>
@@ -271,8 +319,16 @@ export default function EcommerceProfileRedesign() {
             <OrderDetailsModal
                 isOpen={!!selectedOrder}
                 onClose={() => setSelectedOrder(null)}
-                order={selectedOrder || sampleOrders[0]}
+                order={selectedOrder}
             />
         </div>
+    )
+}
+
+export default function EcommerceProfileRedesign() {
+    return (
+        <WishlistProvider>
+            <EcommerceProfileRedesignContent />
+        </WishlistProvider>
     )
 }

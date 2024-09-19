@@ -88,7 +88,7 @@ export default async function ProductPage({
   }
 
   const reviews = await getReviews(product.id);
-  
+
   const totalRating = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0);
   const averageRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(2) : "0.00";
   const ratingCount = reviews.length;
@@ -107,7 +107,12 @@ export default async function ProductPage({
     brand: product.categories[0]?.name || '',
     description: product.short_description,
     price: product.price,
-    images: product.images
+    regular_price: product.regular_price,
+    sale_price: product.sale_price,
+    images: product.images,
+    average_rating: product.average_rating,
+    rating_count: product.rating_count,
+    attributes: product.attributes,
   }));
 
   return (
@@ -116,7 +121,12 @@ export default async function ProductPage({
         <SingleProductPage product={updatedProduct} />
       </section>
       <section>
-        <AlsoLikePr products={formattedProducts} />
+        <AlsoLikePr
+          featuredDescription="You may also like"
+          featuredImage="/assets/img9.jpeg"
+          featuredTitle="Featured Products"
+          products={formattedProducts}
+        />
       </section>
     </section>
   );

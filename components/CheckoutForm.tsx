@@ -127,6 +127,8 @@ export default function EnhancedCheckout() {
     }
     setIsLoading(true)
 
+    const user = localStorage.getItem('user')
+    const userId = localStorage.getItem('userId')
     try {
       const response = await fetch('/api/create-order', {
         method: 'POST',
@@ -140,6 +142,8 @@ export default function EnhancedCheckout() {
           shippingZone: selectedZone,
           paymentMethod: isCashOnDelivery ? 'cod' : 'bacs',
           orderDetails,
+          user: user ? JSON.parse(user) : null,
+          userId,
         }),
       })
 

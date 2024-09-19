@@ -7,10 +7,9 @@ import Loading from '@/components/Loading'
 import { Product } from '@/types/product'
 import dynamic from 'next/dynamic'
 import { unstable_noStore as noStore } from 'next/cache'
+import ImprovedAllHome from '@/components/AllProductsHome/AllHome'
 
-const DynamicAllHome = dynamic(() => import("@/components/AllProductsHome/AllHome"), {
-  loading: () => <Loading />,
-})
+
 
 async function getProducts(perPage: number): Promise<{ products: Product[] }> {
   noStore()
@@ -99,7 +98,7 @@ export default function Home() {
       <Suspense fallback={<Loading />}>
         <ProductShowcases />
       </Suspense>
-      <DynamicAllHome />
+      <ImprovedAllHome />
     </main>
   )
 }

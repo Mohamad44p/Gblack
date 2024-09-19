@@ -10,17 +10,27 @@ const api = new WooCommerceRestApi({
 
 export async function POST(request: NextRequest) {
   try {
-    const { cart, customerDetails, shippingAddress, shippingZone, paymentMethod, orderDetails } = await request.json();
+    const {
+      cart,
+      customerDetails,
+      shippingAddress,
+      shippingZone,
+      paymentMethod,
+      orderDetails,
+      user,
+      userId,
+    } = await request.json();
 
     const lineItems = cart.map((item: any) => ({
       product_id: item.id,
       quantity: item.quantity,
-      meta_data: item.size ? [{ key: 'Size', value: item.size }] : [],
+      meta_data: item.size ? [{ key: "Size", value: item.size }] : [],
     }));
 
     const orderData: any = {
       payment_method: paymentMethod,
-      payment_method_title: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Bank Transfer',
+      payment_method_title:
+        paymentMethod === "cod" ? "Cash on Delivery" : "Bank Transfer",
       set_paid: false,
       billing: {
         ...shippingAddress,
@@ -40,39 +50,46 @@ export async function POST(request: NextRequest) {
         {
           method_id: "flat_rate",
           method_title: shippingZone.name,
-          total: shippingZone.price.toString()
-        }
+          total: shippingZone.price.toString(),
+        },
       ],
       meta_data: [
         {
           key: "gift_wrap",
-          value: orderDetails.gift_wrap ? "Yes" : "No"
+          value: orderDetails.gift_wrap ? "Yes" : "No",
         },
         {
           key: "newsletter_signup",
-          value: orderDetails.newsletter_signup ? "Yes" : "No"
-        }
+          value: orderDetails.newsletter_signup ? "Yes" : "No",
+        },
       ],
       customer_note: orderDetails.notes,
-      fee_lines: []
+      fee_lines: [],
     };
 
+    if (userId) {
+      orderData.customer_id = parseInt(userId);
+    }
     if (orderDetails.gift_wrap) {
       orderData.fee_lines = [
         {
           name: "Gift Wrap",
           total: "5.00",
           tax_status: "taxable",
-          tax_class: ""
-        }
+          tax_class: "",
+        },
       ];
     }
 
+    console.log("Order Data:", orderData);
     const response = await api.post("orders", orderData);
 
     return NextResponse.json({ orderId: response.data.id }, { status: 201 });
   } catch (error) {
-    console.error('Error creating order:', error);
-    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+    console.error("Error creating order:", error);
+    return NextResponse.json(
+      { error: "Failed to create order" },
+      { status: 500 }
+    );
   }
 }

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 interface User {
   id: number;
@@ -35,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAuthStatus = async (): Promise<boolean> => {
     const now = Date.now();
-    if (now - lastChecked < 60000) { // Check only once per minute
+    if (now - lastChecked < 60000) {
       return isLoggedIn;
     }
 
@@ -73,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearAuthData = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     axios.defaults.headers.common['Authorization'] = '';
     setUser(null);
     setIsLoggedIn(false);
@@ -83,10 +85,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await axios.post('/api/auth/login', { username, password });
       if (response.data.success) {
         const { user, token } = response.data;
-        setUser(user);
+        const decodedToken: any = jwtDecode(token);
+        const userId = decodedToken.data.user.id;
+
+        setUser({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName
+        });
         setIsLoggedIn(true);
         localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('token', token);
+        localStorage.setItem('userId', userId);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         setLastChecked(Date.now());
         return user;
