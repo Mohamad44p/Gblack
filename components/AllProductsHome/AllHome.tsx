@@ -19,28 +19,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { toast } from "@/hooks/use-toast";
-
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  regular_price: string;
-  sale_price: string;
-  categories: { id: number; name: string; slug: string }[];
-  images: { src: string }[];
-  description: string;
-  attributes: { name: string; options: string[] }[];
-  average_rating: string;
-  rating: number;
-  ratingCount: number;
-  stock_status: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
+import { Product } from "@/types/product";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const QuickViewModal = ({
   product,
@@ -55,7 +35,7 @@ const QuickViewModal = ({
     product.sale_price !== "" && product.sale_price !== product.regular_price;
   const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     if (sizeAttribute && sizeAttribute.options.length > 0 && !selectedSize) {
       toast({
         title: "Size required",
@@ -74,7 +54,7 @@ const QuickViewModal = ({
       size: selectedSize,
     });
     onClose();
-  };
+  }, [addToCart, isOnSale, onClose, product, selectedSize, sizeAttribute]);
 
   return (
     <motion.div
@@ -95,6 +75,7 @@ const QuickViewModal = ({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          aria-label="Close modal"
         >
           <X size={24} />
         </button>
@@ -130,10 +111,11 @@ const QuickViewModal = ({
                 <Star
                   key={i}
                   className={`w-4 h-4 ${
-                    i < Math.round(product.rating)
+                    i < Math.round(product.rating ?? 0)
                       ? "text-yellow-400 fill-current"
                       : "text-white/20"
                   }`}
+                  aria-hidden="true"
                 />
               ))}
               <span className="ml-2 text-sm text-white/60">
@@ -207,7 +189,7 @@ const QuickViewModal = ({
                 className="flex-1 bg-black hover:bg-white hover:text-black text-white"
                 onClick={handleAddToCart}
               >
-                <ShoppingCart className="w-4 h-4 mr-2" />
+                <ShoppingCart className="w-4 h-4 mr-2" aria-hidden="true" />
                 Add to Cart
               </Button>
               <WishlistButton
@@ -250,6 +232,12 @@ const ProductSkeleton = () => (
     </div>
   </div>
 );
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 export default function ImprovedAllHome() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -303,6 +291,11 @@ export default function ImprovedAllHome() {
       ]);
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load products. Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -527,7 +520,7 @@ export default function ImprovedAllHome() {
                                 <Star
                                   key={i}
                                   className={`w-4 h-4 ${
-                                    i < Math.round(product.rating)
+                                    i < Math.round(product.rating ?? 0)
                                       ? "text-yellow-400 fill-current"
                                       : "text-white/20"
                                   }`}

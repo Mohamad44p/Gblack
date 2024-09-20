@@ -51,9 +51,10 @@ function Double({ categories }: DoubleCategoryProps) {
             <Image
               src={category.src}
               alt={category.name}
-              layout="fill"
-              objectFit="cover"
-              className="transition-transform duration-500 ease-in-out hover:scale-105"
+              fill
+              blurDataURL="/BlurImage.jpg"
+              placeholder="blur"
+              className="transition-transform object-cover duration-500 ease-in-out hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect, createElement } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { User, Heart, Facebook, Instagram, Twitter, LogOut } from "lucide-react"
+import { User, Heart, LogOut } from "lucide-react"
+import * as LucideIcons from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,18 +14,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import SearchModal from "./SearchModal"
-import { useAuthCheck } from "@/lib/hooks/useAuthCheck"
 import { useAuth } from "@/contexts/AuthContext"
 import { useRouter } from "next/navigation"
 import CartSheet from "../Cart/CartSheet"
 import { useWishlist } from "@/contexts/WishlistContext"
+
+interface SocialLink {
+  id: number;
+  name: string;
+  url: string;
+  platform: string;
+}
 
 export default function TopBar() {
   const [lang, setLang] = useState<"en" | "ar">("en")
   const { isLoggedIn, user, logout } = useAuth()
   const router = useRouter()
   const { wishlist } = useWishlist()
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      try {
+        const response = await fetch('/api/get-social-links');
+        if (response.ok) {
+          const data = await response.json();
+          setSocialLinks(data);
+        } else {
+          console.error('Failed to fetch social links');
+        }
+      } catch (error) {
+        console.error('Error fetching social links:', error);
+      }
+    };
+
+    fetchSocialLinks();
+  }, []);
+
   const handleLogout = async () => {
     await logout()
     router.refresh()
@@ -32,7 +58,7 @@ export default function TopBar() {
 
   return (
     <motion.header
-      className="bg-black text-white py-4 px-6"
+      className="bg-black hidden md:block text-white py-4 px-6"
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
@@ -51,36 +77,23 @@ export default function TopBar() {
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="hidden md:flex space-x-4">
-            <motion.a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-gray-300"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Facebook size={18} />
-            </motion.a>
-            <motion.a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-gray-300"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Instagram size={18} />
-            </motion.a>
-            <motion.a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-gray-300"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <Twitter size={18} />
-            </motion.a>
+            {socialLinks.map((link) => {
+              const IconComponent = LucideIcons[link.platform as keyof typeof LucideIcons] || LucideIcons.Link;
+              return (
+                <motion.a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-gray-300 transition-colors duration-200"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  {createElement(IconComponent as React.ComponentType<LucideIcons.LucideProps>, { size: 20, className: "hover:text-primary" })}
+                  <span className="sr-only">{link.name}</span>
+                </motion.a>
+              );
+            })}
           </div>
         </div>
 

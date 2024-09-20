@@ -643,7 +643,7 @@ export default function ProductList({
                             <div className="relative overflow-hidden">
                               <img
                                 src={
-                                  product.images[0]?.src || "/placeholder.svg"
+                                  product.images[0]?.src || "/BlurImage.jpg"
                                 }
                                 alt={product.name}
                                 className="w-full h-80 object-cover"

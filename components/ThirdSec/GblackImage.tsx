@@ -116,8 +116,10 @@ export default function Component() {
             <Image
               src={`/assets/img${(i % 6) + 1}.jpeg`}
               alt={`Image ${i + 1}`}
-              layout="fill"
-              objectFit="cover"
+              fill
+              blurDataURL="/assets/BlurImage.jpg"
+              placeholder="blur"
+              className="object-cover w-full h-full"
             />
           </div>
         ))}

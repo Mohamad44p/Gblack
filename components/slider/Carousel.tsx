@@ -97,7 +97,7 @@ export default function ImprovedCarousel() {
         clearTimeout(timeoutRef.current);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
 
   useEffect(() => {
@@ -213,9 +213,10 @@ export default function ImprovedCarousel() {
             <Image
               src={item.imgSrc}
               alt={item.title}
-              layout="fill"
-              objectFit="cover"
-              className="transition-transform group-hover:scale-110"
+              fill
+              blurDataURL="/BlurImage.jpg"
+              placeholder="blur"
+              className="transition-transform object-cover w-full h-full group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 p-2">
               <p className="text-xs font-medium absolute bottom-4 text-white md:text-sm">

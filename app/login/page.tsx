@@ -21,7 +21,7 @@ export default function LoginPage() {
         try {
             const user = await login(usernameOrEmail, password)
             console.log('Login successful:', user);
-            router.push('/') // Redirect to home page or dashboard
+            router.push('/')
         } catch (err: any) {
             console.error('Login error:', err);
             setError(err.message || 'An error occurred during login')

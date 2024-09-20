@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Adjust this endpoint based on your WooCommerce Wishlist plugin
     const response = await api.get(`wishlist/get_by_user/${userId}`);
     return NextResponse.json(response.data);
   } catch (error) {

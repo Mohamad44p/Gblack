@@ -55,7 +55,7 @@ export default function Navbar() {
   const dropdownNavItems = allNavItems.slice(5)
 
   return (
-    <nav className="bg-black text-white py-4 px-6 border-t border-gray-800">
+    <nav className="bg-black hidden md:block text-white py-4 px-6 border-t border-gray-800">
       <div className="container mx-auto">
         <div className="hidden md:flex justify-center space-x-8 items-center">
           {visibleNavItems.map((item, index) => (

@@ -137,9 +137,9 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
           <Image
             src={product.images[0].src}
             alt={product.images[0].alt || product.name}
-            layout="fill"
-            objectFit="cover"
-            className="transition-all duration-300 hover:scale-105"
+            fill
+            priority
+            className="transition-all object-cover w-full h-full duration-300 hover:scale-105"
           />
           {isOnSale && (
             <div className="absolute top-2 left-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
@@ -259,9 +259,9 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               <Image
                 src={product.images[0].src}
                 alt={product.images[0].alt || product.name}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-lg"
+                fill
+                priority
+                className="rounded-lg object-cover w-full h-full"
               />
             </div>
             <div className="flex flex-col justify-between">
@@ -442,10 +442,8 @@ export function ProductShowcase({
             <Image
               src={featuredImage}
               alt="Featured product"
-              layout="fill"
-              objectFit="cover"
-              className="absolute inset-0 z-0"
-              sizes="100vw"
+              fill
+              className="absolute inset-0 z-0 object-cover w-full h-full"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>

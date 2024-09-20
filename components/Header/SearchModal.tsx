@@ -170,7 +170,7 @@ export default function SearchModal() {
                                 alt={product.name}
                                 width={64}
                                 height={64}
-                                objectFit="cover"
+                                className="object-cover w-full h-full"
                               />
                             ) : (
                               <div className="w-full h-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-500">
