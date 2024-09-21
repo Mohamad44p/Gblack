@@ -1,19 +1,17 @@
 import { Suspense } from 'react'
 import { ProductShowcase } from "@/components/ProdcutsGrid/BentoGrid"
 import SecSection from "@/components/Sec/SecSection"
-import Carousel from "@/components/slider/Carousel"
 import ImagesShow from "@/components/ThirdSec/ImagesShow"
 import Loading from '@/components/Loading'
 import { Product } from '@/types/product'
 import dynamic from 'next/dynamic'
 import { unstable_noStore as noStore } from 'next/cache'
 import ImprovedAllHome from '@/components/AllProductsHome/AllHome'
-
-
+import CarouselSSR from '@/components/slider/CarouselSSR'
 
 async function getProducts(perPage: number): Promise<{ products: Product[] }> {
   noStore()
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?per_page=${perPage}`, { 
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?per_page=${perPage}`, {
     next: { revalidate: 3600 }
   })
   if (!res.ok) {
@@ -25,7 +23,7 @@ async function getProducts(perPage: number): Promise<{ products: Product[] }> {
 async function getProductRatings(productIds: number[]): Promise<{ [key: number]: { average_rating: string, rating_count: number } }> {
   noStore()
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product-ratings?ids=${productIds.join(',')}`, { 
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product-ratings?ids=${productIds.join(',')}`, {
       next: { revalidate: 3600 }
     })
     if (!res.ok) {
@@ -92,7 +90,7 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       <h1 className="sr-only">Welcome to GBLACK - Your Fashion Destination</h1>
-      <Carousel />
+      <CarouselSSR />
       <SecSection />
       <ImagesShow />
       <Suspense fallback={<Loading />}>

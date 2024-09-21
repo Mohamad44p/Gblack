@@ -5,7 +5,6 @@ import { Lenis } from "@/components/Lenis";
 import TopBar from "@/components/Header/TopBar";
 import Navbar from "@/components/Header/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
-import TransitionWrapper from "@/components/TransitionWrapper";
 import { CartProvider } from "@/contexts/CartContext";
 import { Toaster } from "@/components/ui/toaster";
 import { WishlistProvider } from "@/contexts/WishlistContext";
@@ -28,7 +27,7 @@ export const metadata: Metadata = {
   description:
     "Discover the latest fashion trends and shop your favorite styles at GBLACK.",
   icons: {
-    icon: "/Tapicon.jpg",
+    icon: "/Tabp-icon.png",
   },
 };
 
@@ -48,11 +47,9 @@ export default async function RootLayout({
                   <TopBar />
                   <Navbar />
                 </header>
-                <TransitionWrapper>
-                  {children}
-                  <CircularMenu />
-                  <Toaster />
-                </TransitionWrapper>
+                {children}
+                <CircularMenu />
+                <Toaster />
                 <AnimatedFooter />
               </Lenis>
             </WishlistProvider>

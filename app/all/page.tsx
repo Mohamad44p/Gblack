@@ -1,10 +1,14 @@
-import ProductList from '@/components/AllPage/ProductList'
 import { Suspense } from 'react'
 import { unstable_noStore as noStore } from 'next/cache'
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL
+import ProductList, { SkeletonProduct } from '@/components/AllPage/ProductList'
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 async function getProducts(perPage: number) {
-  const res = await fetch(`${API_BASE_URL}/api/products?per_page=${perPage}`, { cache: 'no-store' })
+  noStore()
+  const res = await fetch(`${API_BASE_URL}/api/products?per_page=${perPage}`, { 
+    next: { revalidate: 60 }
+  })
   if (!res.ok) {
     throw new Error('Failed to fetch products')
   }
@@ -13,17 +17,18 @@ async function getProducts(perPage: number) {
 
 async function getCategories() {
   noStore()
-  const res = await fetch(`${API_BASE_URL}/api/categories`, { cache: 'no-store' })
+  const res = await fetch(`${API_BASE_URL}/api/categories`, { 
+    next: { revalidate: 3600 }
+  })
   if (!res.ok) throw new Error('Failed to fetch categories')
   return res.json()
 }
 
 export default async function ProductsPage() {
-  noStore()
   const [productsData, categoriesData] = await Promise.all([getProducts(100), getCategories()])
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<SkeletonProduct />}>
       <ProductList initialProducts={productsData.products} initialCategories={categoriesData.categories} />
     </Suspense>
   )

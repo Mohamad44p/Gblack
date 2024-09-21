@@ -1,67 +1,53 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ShoppingCart, Compass } from "lucide-react";
+import { ShoppingCart, Compass } from "lucide-react";
+import { useInView } from 'react-intersection-observer';
 
 interface CarouselItem {
-  imgSrc: string;
-  videoSrc: string;
-  author: string;
+  id: number;
+  productName: string;
   title: string;
   topic: string;
   description: string;
+  videoSrc: string;
+  imgSrc: string;
 }
 
-const carouselItems: CarouselItem[] = [
-  {
-    imgSrc: "/slider/headphones.jpg",
-    videoSrc: "/videos/Video1.mp4",
-    author: "Pimax Vision VR Headset",
-    title: "Stylish Headsets That Match Your Vibe",
-    topic: "HEADPHONES",
-    description:
-      "Black is more than a color—it's a statement. Embrace elegance, power, and bold simplicity with every purchase. Elevate your style and let black reflect your true self. Experience GBlack today!",
-  },
-  {
-    imgSrc: "/slider/glasses1.jpg",
-    videoSrc: "/videos/Video2.mp4",
-    author: "LUNDEV",
-    title: "NATURE BEAUTY",
-    topic: "LANDSCAPE",
-    description:
-      "Discover the breathtaking beauty of nature through our lens. From majestic mountains to serene lakes, our collection showcases the diverse landscapes that make our planet truly remarkable. Join us on a visual journey that will inspire your wanderlust and deepen your appreciation for the natural world.",
-  },
-  {
-    imgSrc: "/slider/blakteshirt.jfif",
-    videoSrc: "/videos/Video3.mp4",
-    author: "LUNDEV",
-    title: "URBAN EXPLORER",
-    topic: "CITY",
-    description:
-      "Embark on an urban adventure with our city-focused photography. Capture the essence of bustling metropolises, from iconic skylines to hidden street corners. Our images reveal the energy, diversity, and architectural marvels that define modern urban landscapes. Let the city's pulse inspire your next journey.",
-  },
-  {
-    imgSrc: "/slider/Watch.jpg",
-    videoSrc: "/videos/Watch.mp4",
-    author: "LUNDEV",
-    title: "WILDLIFE WONDERS",
-    topic: "FAUNA",
-    description:
-      "Immerse yourself in the fascinating world of wildlife. Our stunning photographs bring you face-to-face with exotic creatures in their natural habitats. From elusive big cats to colorful tropical birds, experience the diversity and beauty of Earth's fauna. Let these images spark your passion for wildlife conservation.",
-  },
-];
+const shimmer = (w: number, h: number) => `
+<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="g">
+      <stop stop-color="#333" offset="20%" />
+      <stop stop-color="#222" offset="50%" />
+      <stop stop-color="#333" offset="70%" />
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="#333" />
+  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+</svg>`
 
-export default function ImprovedCarousel() {
+const toBase64 = (str: string) =>
+  typeof window === 'undefined'
+    ? Buffer.from(str).toString('base64')
+    : window.btoa(str)
+
+export default function ImprovedCarousel({ initialItems }: { initialItems: CarouselItem[] }) {
+  const [carouselItems] = useState<CarouselItem[]>(initialItems);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const timeRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    rootMargin: '200px 0px',
+  });
 
-  const showSlider = (index: number) => {
+  const showSlider = useCallback((index: number) => {
     const type = index > currentIndex ? "next" : "prev";
     setDirection(type);
     setCurrentIndex(index);
@@ -84,9 +70,11 @@ export default function ImprovedCarousel() {
     timeoutRef.current = setTimeout(() => {
       setDirection(null);
     }, 500);
-  };
+  }, [currentIndex]);
 
   useEffect(() => {
+    if (carouselItems.length === 0) return;
+
     const autoNext = setInterval(() => {
       showSlider((currentIndex + 1) % carouselItems.length);
     }, 7000);
@@ -97,16 +85,19 @@ export default function ImprovedCarousel() {
         clearTimeout(timeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex]);
+  }, [currentIndex, carouselItems.length, showSlider]);
 
   useEffect(() => {
-    if (videoRefs.current[currentIndex]) {
+    if (inView && videoRefs.current[currentIndex]) {
       videoRefs.current[currentIndex]!.play().catch((error) =>
         console.error("Video playback failed:", error)
       );
     }
-  }, [currentIndex]);
+  }, [currentIndex, inView]);
+
+  if (carouselItems.length === 0) {
+    return <div>No items to display</div>;
+  }
 
   return (
     <div
@@ -152,6 +143,7 @@ export default function ImprovedCarousel() {
             playsInline
             className="h-full w-full object-cover"
             aria-hidden="true"
+            preload="metadata"
           />
           <div
             className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-transparent opacity-70"
@@ -196,15 +188,15 @@ export default function ImprovedCarousel() {
       <div
         className="absolute bottom-4 right-4 z-10 flex gap-2 md:bottom-8 md:right-8 lg:bottom-12 lg:right-12"
         role="tablist"
+        ref={ref}
       >
         {carouselItems.map((item, index) => (
           <motion.div
             key={index}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className={`group relative h-24 w-16 cursor-pointer overflow-hidden rounded-lg transition-transform md:h-32 md:w-24 lg:h-40 lg:w-28 ${
-              index === currentIndex ? "ring-2 ring-yellow-400" : ""
-            }`}
+            className={`group relative h-24 w-16 cursor-pointer overflow-hidden rounded-lg transition-transform md:h-32 md:w-24 lg:h-40 lg:w-28 ${index === currentIndex ? "ring-2 ring-yellow-400" : ""
+              }`}
             onClick={() => showSlider(index)}
             role="tab"
             aria-selected={index === currentIndex}
@@ -214,13 +206,15 @@ export default function ImprovedCarousel() {
               src={item.imgSrc}
               alt={item.title}
               fill
-              blurDataURL="/BlurImage.jpg"
-              placeholder="blur"
+              sizes="(max-width: 768px) 64px, (max-width: 1024px) 96px, 112px"
               className="transition-transform object-cover w-full h-full group-hover:scale-110"
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(112, 160))}`}
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 p-2">
               <p className="text-xs font-medium absolute bottom-4 text-white md:text-sm">
-                {item.author}
+                {item.productName}
               </p>
             </div>
           </motion.div>

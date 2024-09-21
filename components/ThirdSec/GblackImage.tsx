@@ -1,13 +1,59 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { gsap } from 'gsap'
+
+interface UploadedImage {
+  filename: string
+  url: string
+}
+
+// Custom placeholder image as a base64 encoded SVG
+const placeholderImage = `data:image/svg+xml;base64,${btoa(`
+  <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="400" fill="#E5E7EB"/>
+    <path d="M160 140H240V260H160V140Z" fill="#9CA3AF"/>
+    <path d="M200 180L240 260H160L200 180Z" fill="#6B7280"/>
+  </svg>
+`)}`
 
 export default function Component() {
   const sectionRef = useRef<HTMLElement>(null)
   const headerRef = useRef<HTMLHeadingElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
+  const [images, setImages] = useState<UploadedImage[]>([])
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const cacheKey = 'cachedImages'
+      const cachedData = localStorage.getItem(cacheKey)
+      const currentTime = new Date().getTime()
+
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData)
+        const oneWeek = 7 * 24 * 60 * 60 * 1000
+
+        if (currentTime - timestamp < oneWeek) {
+          setImages(data)
+          return
+        }
+      }
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/miucm/v1/images`)
+        const data = await response.json()
+        setImages(data)
+
+        localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: currentTime }))
+      } catch (error) {
+        console.error('Error fetching images:', error)
+      }
+    }
+
+    fetchImages()
+  }, [])
 
   useEffect(() => {
     if (headerRef.current) {
@@ -34,7 +80,7 @@ export default function Component() {
             duration: 1,
             stagger: {
               each: 0.1,
-              grid: [3, 3],
+              grid: "auto",
               from: "edges",
               axis: "x"
             },
@@ -99,7 +145,6 @@ export default function Component() {
 
     return () => {
       if (sectionRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(sectionRef.current)
       }
     }
@@ -111,13 +156,13 @@ export default function Component() {
         ref={gridRef}
         className="grid-container grid grid-cols-3 gap-4 w-[120vmin] h-[80vmin] z-10"
       >
-        {[...Array(9)].map((_, i) => (
+        {images.map((image, i) => (
           <div key={i} className="grid-img relative w-full h-full overflow-hidden rounded-lg">
             <Image
-              src={`/assets/img${(i % 6) + 1}.jpeg`}
+              src={image.url}
               alt={`Image ${i + 1}`}
               fill
-              blurDataURL="/assets/BlurImage.jpg"
+              blurDataURL={placeholderImage}
               placeholder="blur"
               className="object-cover w-full h-full"
             />

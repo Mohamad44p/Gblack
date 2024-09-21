@@ -40,6 +40,7 @@ import { useCart } from "@/contexts/CartContext";
 import { openCart } from "@/lib/hooks/events";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Product {
   id: number;
@@ -65,6 +66,28 @@ interface Category {
 }
 
 const ITEMS_PER_PAGE = 12;
+
+
+const shimmer = (w: number, h: number) => `
+<svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="g">
+      <stop stop-color="#333" offset="20%" />
+      <stop stop-color="#222" offset="50%" />
+      <stop stop-color="#333" offset="70%" />
+    </linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" fill="#333" />
+  <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
+  <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
+</svg>`
+
+const toBase64 = (str: string) =>
+  typeof window === 'undefined'
+    ? Buffer.from(str).toString('base64')
+    : window.btoa(str)
+
+
 
 const QuickViewModal = ({
   product,
@@ -124,10 +147,14 @@ const QuickViewModal = ({
         </button>
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
-            <img
-              src={product.images[0]?.src || "/BlurImage.jpg"}
+            <Image
+              src={product.images[0]?.src || "/placeholder.svg?height=400&width=600"}
               alt={product.name}
-              className="w-full h-auto rounded-lg"
+              width={600}
+              height={400}
+              className="w-full h-80 object-cover"
+              placeholder="blur"
+              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(600, 400))}`}
             />
           </div>
           <div className="md:w-1/2">
@@ -151,11 +178,10 @@ const QuickViewModal = ({
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-5 h-5 ${
-                    i < Math.floor(parseFloat(product.average_rating))
-                      ? "text-yellow-400"
-                      : "text-gray-300"
-                  } fill-current`}
+                  className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating))
+                    ? "text-yellow-400"
+                    : "text-gray-300"
+                    } fill-current`}
                 />
               ))}
               <span className="ml-2 text-gray-400">
@@ -227,7 +253,7 @@ const QuickViewModal = ({
   );
 };
 
-const SkeletonProduct = () => {
+export const SkeletonProduct = () => {
   return (
     <div className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm animate-pulse">
       <div className="relative overflow-hidden">
@@ -298,7 +324,7 @@ export default function ProductList({
           id: product.id,
           name: product.name,
           price: product.sale_price || product.price,
-          image: product.images[0]?.src || "/placeholder.svg",
+          image: product.images[0]?.src,
           quantity: 1,
         });
         openCart();
@@ -419,11 +445,10 @@ export default function ProductList({
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  selectedCategory === category.name
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${selectedCategory === category.name
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`}
               >
                 {category.name}
               </button>
@@ -484,11 +509,10 @@ export default function ProductList({
               <button
                 key={gender}
                 onClick={() => setSelectedGender(gender)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  selectedGender === gender
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${selectedGender === gender
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`}
               >
                 {gender}
               </button>
@@ -506,11 +530,10 @@ export default function ProductList({
               <button
                 key={status}
                 onClick={() => setStockFilter(status)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  stockFilter === status
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${stockFilter === status
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`}
               >
                 {status}
               </button>
@@ -528,11 +551,10 @@ export default function ProductList({
               <button
                 key={status}
                 onClick={() => setSaleFilter(status)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  saleFilter === status
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${saleFilter === status
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`}
               >
                 {status}
               </button>
@@ -614,130 +636,131 @@ export default function ProductList({
                 <AnimatePresence>
                   {loading
                     ? [...Array(9)].map((_, index) => (
-                        <motion.div
-                          key={`skeleton-${index}`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          <SkeletonProduct />
-                        </motion.div>
-                      ))
+                      <motion.div
+                        key={`skeleton-${index}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <SkeletonProduct />
+                      </motion.div>
+                    ))
                     : paginatedProducts.map((product) => (
+                      <motion.div
+                        key={product.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative group"
+                        onHoverStart={() => setHoveredProduct(product.id)}
+                        onHoverEnd={() => setHoveredProduct(null)}
+                      >
                         <motion.div
-                          key={product.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.5 }}
-                          className="relative group"
-                          onHoverStart={() => setHoveredProduct(product.id)}
-                          onHoverEnd={() => setHoveredProduct(null)}
+                          className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+                          whileHover={{ scale: 1.05, rotateY: 5 }}
+                          transition={{ duration: 0.3 }}
                         >
-                          <motion.div
-                            className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
-                            whileHover={{ scale: 1.05, rotateY: 5 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <div className="relative overflow-hidden">
-                              <img
-                                src={
-                                  product.images[0]?.src || "/BlurImage.jpg"
-                                }
-                                alt={product.name}
-                                className="w-full h-80 object-cover"
-                              />
-                              {product.on_sale && (
-                                <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md">
-                                  Sale
-                                </div>
-                              )}
-                              <motion.div
-                                className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                initial={{ opacity: 0 }}
-                                animate={{
-                                  opacity:
-                                    hoveredProduct === product.id ? 1 : 0,
-                                }}
+                          <div className="relative overflow-hidden">
+                            <Image
+                              src={product.images[0]?.src || "/placeholder.svg?height=400&width=600"}
+                              alt={product.name}
+                              width={600}
+                              height={400}
+                              className="w-full h-80 object-cover"
+                              placeholder="blur"
+                              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(600, 400))}`}
+                            />
+                            {product.on_sale && (
+                              <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md">
+                                Sale
+                              </div>
+                            )}
+                            <motion.div
+                              className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              initial={{ opacity: 0 }}
+                              animate={{
+                                opacity:
+                                  hoveredProduct === product.id ? 1 : 0,
+                              }}
+                            >
+                              <Button
+                                className="bg-white text-black hover:bg-gray-200"
+                                onClick={() => setSelectedProduct(product)}
                               >
-                                <Button
-                                  className="bg-white text-black hover:bg-gray-200"
-                                  onClick={() => setSelectedProduct(product)}
-                                >
-                                  Quick View
-                                </Button>
-                              </motion.div>
-                            </div>
-                            <div className="p-6">
-                              <Link
-                                href={`/product/${product.id}`}
-                                className="block"
-                              >
-                                <h3 className="text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
-                                  {product.name}
-                                </h3>
-                              </Link>
-                              <div className="flex justify-between items-center mb-4">
-                                {product.on_sale ? (
-                                  <div>
-                                    <span className="text-3xl font-bold text-red-500">
-                                      ${product.sale_price}
-                                    </span>
-                                    <span className="ml-2 text-lg text-gray-400 line-through">
-                                      ${product.regular_price}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-3xl font-bold">
-                                    ${product.price}
+                                Quick View
+                              </Button>
+                            </motion.div>
+                          </div>
+                          <div className="p-6">
+                            <Link
+                              href={`/product/${product.id}`}
+                              className="block"
+                            >
+                              <h3 className="text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
+                                {product.name}
+                              </h3>
+                            </Link>
+                            <div className="flex justify-between items-center mb-4">
+                              {product.on_sale ? (
+                                <div>
+                                  <span className="text-3xl font-bold text-red-500">
+                                    ${product.sale_price}
                                   </span>
-                                )}
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-white text-black px-3 py-1 rounded-full"
-                                >
-                                  {product.categories[0]?.name ||
-                                    "Uncategorized"}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center mb-4">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-5 h-5 ${
-                                      i <
-                                      Math.floor(
-                                        parseFloat(product.average_rating)
-                                      )
-                                        ? "text-yellow-400"
-                                        : "text-gray-600"
-                                    } fill-current`}
-                                  />
-                                ))}
-                                <span className="ml-2 text-gray-400">
-                                  {product.average_rating}
+                                  <span className="ml-2 text-lg text-gray-400 line-through">
+                                    ${product.regular_price}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-3xl font-bold">
+                                  ${product.price}
                                 </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <Button
-                                  onClick={() => handleAddToCart(product)}
-                                  className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                                >
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  Add to Cart
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  className="px-3 border-white text-white hover:bg-white hover:text-black"
-                                >
-                                  <Heart className="w-4 h-4" />
-                                </Button>
-                              </div>
+                              )}
+                              <Badge
+                                variant="secondary"
+                                className="bg-white text-black px-3 py-1 rounded-full"
+                              >
+                                {product.categories[0]?.name ||
+                                  "Uncategorized"}
+                              </Badge>
                             </div>
-                          </motion.div>
+                            <div className="flex items-center mb-4">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-5 h-5 ${i <
+                                    Math.floor(
+                                      parseFloat(product.average_rating)
+                                    )
+                                    ? "text-yellow-400"
+                                    : "text-gray-600"
+                                    } fill-current`}
+                                />
+                              ))}
+                              <span className="ml-2 text-gray-400">
+                                {product.average_rating}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <Button
+                                onClick={() => handleAddToCart(product)}
+                                className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Add to Cart
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="px-3 border-white text-white hover:bg-white hover:text-black"
+                              >
+                                <Heart className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
                         </motion.div>
-                      ))}
+                      </motion.div>
+                    ))}
                 </AnimatePresence>
               </motion.div>
 

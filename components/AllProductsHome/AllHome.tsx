@@ -20,7 +20,6 @@ import {
 } from "../ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Product } from "@/types/product";
-import ErrorBoundary from "@/components/ErrorBoundary";
 
 const QuickViewModal = ({
   product,
