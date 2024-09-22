@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, createElement } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
 import { useWishlist } from "@/contexts/WishlistContext";
 import * as LucideIcons from "lucide-react";
 import Link from "next/link";
@@ -35,10 +34,10 @@ interface MenuItem {
 
 const menuSlide = {
   initial: { x: "calc(100% + 100px)" },
-  enter: { x: "0", transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } },
+  enter: { x: "0", transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1] } },
   exit: {
     x: "calc(100% + 100px)",
-    transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] },
+    transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1] },
   },
 };
 
@@ -47,12 +46,12 @@ const slideIn = {
   enter: (i: number) => ({
     x: 0,
     opacity: 1,
-    transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: 0.05 * i },
+    transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1], delay: 0.05 * i },
   }),
   exit: (i: number) => ({
     x: 80,
     opacity: 0,
-    transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1], delay: 0.05 * i },
+    transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1], delay: 0.05 * i },
   }),
 };
 
@@ -61,7 +60,6 @@ export default function AnimatedMenu() {
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const [selectedIndicator, setSelectedIndicator] = useState(pathname);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const { isLoggedIn, logout } = useAuth();
@@ -95,13 +93,14 @@ export default function AnimatedMenu() {
       setIsScrolled(window.scrollY > 0);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = async () => {
     await logout();
     router.refresh();
+    setIsOpen(false);
   };
 
   const menuItems: MenuItem[] = [
@@ -120,13 +119,13 @@ export default function AnimatedMenu() {
     },
     ...(isLoggedIn
       ? [
-        { name: "Profile", href: "/profile", icon: LucideIcons.User },
-        { name: "Logout", onClick: handleLogout, icon: LucideIcons.LogOut },
-      ]
+          { name: "Profile", href: "/profile", icon: LucideIcons.User },
+          { name: "Logout", onClick: handleLogout, icon: LucideIcons.LogOut },
+        ]
       : [
-        { name: "Register", href: "/sign-up", icon: LucideIcons.UserPlus },
-        { name: "Login", href: "/login", icon: LucideIcons.LogIn },
-      ]),
+          { name: "Register", href: "/sign-up", icon: LucideIcons.UserPlus },
+          { name: "Login", href: "/login", icon: LucideIcons.LogIn },
+        ]),
     { name: "Wishlist", href: "/wishlist", icon: LucideIcons.Heart },
   ];
 
@@ -134,28 +133,43 @@ export default function AnimatedMenu() {
     setOpenCategory(openCategory === name ? null : name);
   };
 
+  const handleLinkClick = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
-      <div className={`fixed top-0 md:hidden left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black' : 'bg-transparent'}`}>
+      <motion.div
+        className={`fixed top-0 md:hidden left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled ? "bg-black" : "bg-transparent"
+        }`}
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+      >
         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
-          <Link href="/" className="text-white text-xl font-bold">GBLACK</Link>
+          <Link href="/" className="text-white text-xl font-bold">
+            GBLACK
+          </Link>
           <div className="flex items-center space-x-4">
-
             <SearchModal />
-            <Link href="/wishlist" aria-label="Wishlist" className="text-white">
-              <LucideIcons.Heart size={24} />
-            </Link>
             <CartSheet />
-            <button
+            <motion.button
               onClick={() => setIsOpen(!isOpen)}
               className="text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
               aria-label={isOpen ? "Close menu" : "Open menu"}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              {isOpen ? <LucideIcons.X size={24} /> : <LucideIcons.Menu size={24} />}
-            </button>
+              {isOpen ? (
+                <LucideIcons.X size={24} />
+              ) : (
+                <LucideIcons.Menu size={24} />
+              )}
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -166,12 +180,7 @@ export default function AnimatedMenu() {
             className="fixed inset-y-0 right-0 w-full sm:w-[390px] bg-black text-white z-40 overflow-y-auto"
           >
             <div className="h-full flex flex-col justify-between p-6 sm:p-10 pt-20">
-              <div
-                onMouseLeave={() => {
-                  setSelectedIndicator(pathname);
-                }}
-                className="nav space-y-6"
-              >
+              <div className="nav space-y-6">
                 {menuItems.map((item, index) => (
                   <motion.div
                     key={item.name}
@@ -183,34 +192,46 @@ export default function AnimatedMenu() {
                     className="relative"
                   >
                     {item.subItems ? (
-                      <button
+                      <motion.button
                         onClick={() => toggleCategory(item.name)}
                         className="flex items-center justify-between w-full text-2xl sm:text-3xl font-light hover:text-neutral-300 transition-colors focus:outline-none"
+                        whileHover={{ x: 10 }}
                       >
                         <span className="flex items-center">
                           <item.icon className="w-6 h-6 mr-4" />
                           {item.name}
                         </span>
-                        <LucideIcons.ChevronDown
-                          className={`w-5 h-5 transition-transform ${openCategory === item.name ? "rotate-180" : ""
-                            }`}
-                        />
-                      </button>
+                        <motion.div
+                          animate={{
+                            rotate: openCategory === item.name ? 180 : 0,
+                          }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <LucideIcons.ChevronDown className="w-5 h-5" />
+                        </motion.div>
+                      </motion.button>
                     ) : item.onClick ? (
-                      <button
+                      <motion.button
                         onClick={item.onClick}
                         className="flex items-center text-2xl sm:text-3xl font-light hover:text-neutral-300 transition-colors focus:outline-none"
+                        whileHover={{ x: 10 }}
                       >
                         <item.icon className="w-6 h-6 mr-4" />
                         {item.name}
-                      </button>
+                      </motion.button>
                     ) : (
                       <Link
                         href={item.href || "/"}
                         className="flex items-center text-2xl sm:text-3xl font-light hover:text-neutral-300 transition-colors"
+                        onClick={handleLinkClick}
                       >
-                        <item.icon className="w-6 h-6 mr-4" />
-                        {item.name}
+                        <motion.div
+                          className="flex items-center"
+                          whileHover={{ x: 10 }}
+                        >
+                          <item.icon className="w-6 h-6 mr-4" />
+                          {item.name}
+                        </motion.div>
                       </Link>
                     )}
                     {item.subItems && openCategory === item.name && (
@@ -225,9 +246,15 @@ export default function AnimatedMenu() {
                             key={subItem.name}
                             href={subItem.href || "/"}
                             className="flex items-center text-lg sm:text-xl font-light hover:text-neutral-300 transition-colors"
+                            onClick={handleLinkClick}
                           >
-                            <subItem.icon className="w-5 h-5 mr-3" />
-                            {subItem.name}
+                            <motion.div
+                              className="flex items-center"
+                              whileHover={{ x: 10 }}
+                            >
+                              <subItem.icon className="w-5 h-5 mr-3" />
+                              {subItem.name}
+                            </motion.div>
                           </Link>
                         ))}
                       </motion.div>
@@ -235,30 +262,37 @@ export default function AnimatedMenu() {
                   </motion.div>
                 ))}
               </div>
-              <div className="mt-auto pt-6 border-t border-neutral-800">
+              <motion.div
+                className="mt-auto pt-6 border-t border-neutral-800"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+              >
                 <div className="flex justify-between text-sm">
                   {socialLinks.map((link) => {
                     const IconComponent =
                       LucideIcons[link.platform as keyof typeof LucideIcons] ||
                       LucideIcons.Link;
                     return (
-                      <a
+                      <motion.a
                         key={link.id}
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:text-neutral-300 transition-colors"
                         aria-label={link.name}
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         {createElement(
                           IconComponent as React.ComponentType<LucideIcons.LucideProps>,
                           { size: 20, className: "hover:text-primary" }
                         )}
-                      </a>
+                      </motion.a>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             </div>
             <Curve />
           </motion.div>

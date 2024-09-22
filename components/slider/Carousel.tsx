@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Compass } from "lucide-react";
-import { useInView } from 'react-intersection-observer';
+import { useInView } from "react-intersection-observer";
 
 interface CarouselItem {
   id: number;
@@ -28,14 +28,18 @@ const shimmer = (w: number, h: number) => `
   <rect width="${w}" height="${h}" fill="#333" />
   <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
   <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
-</svg>`
+</svg>`;
 
 const toBase64 = (str: string) =>
-  typeof window === 'undefined'
-    ? Buffer.from(str).toString('base64')
-    : window.btoa(str)
+  typeof window === "undefined"
+    ? Buffer.from(str).toString("base64")
+    : window.btoa(str);
 
-export default function ImprovedCarousel({ initialItems }: { initialItems: CarouselItem[] }) {
+export default function ImprovedCarousel({
+  initialItems,
+}: {
+  initialItems: CarouselItem[];
+}) {
   const [carouselItems] = useState<CarouselItem[]>(initialItems);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev" | null>(null);
@@ -44,33 +48,36 @@ export default function ImprovedCarousel({ initialItems }: { initialItems: Carou
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const [ref, inView] = useInView({
     triggerOnce: true,
-    rootMargin: '200px 0px',
+    rootMargin: "200px 0px",
   });
 
-  const showSlider = useCallback((index: number) => {
-    const type = index > currentIndex ? "next" : "prev";
-    setDirection(type);
-    setCurrentIndex(index);
+  const showSlider = useCallback(
+    (index: number) => {
+      const type = index > currentIndex ? "next" : "prev";
+      setDirection(type);
+      setCurrentIndex(index);
 
-    if (videoRefs.current[currentIndex]) {
-      videoRefs.current[currentIndex]!.pause();
-    }
+      if (videoRefs.current[currentIndex]) {
+        videoRefs.current[currentIndex]!.pause();
+      }
 
-    if (videoRefs.current[index]) {
-      videoRefs.current[index]!.currentTime = 0;
-      videoRefs.current[index]!.play().catch((error) =>
-        console.error("Video playback failed:", error)
-      );
-    }
+      if (videoRefs.current[index]) {
+        videoRefs.current[index]!.currentTime = 0;
+        videoRefs.current[index]!.play().catch((error) =>
+          console.error("Video playback failed:", error)
+        );
+      }
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-    timeoutRef.current = setTimeout(() => {
-      setDirection(null);
-    }, 500);
-  }, [currentIndex]);
+      timeoutRef.current = setTimeout(() => {
+        setDirection(null);
+      }, 500);
+    },
+    [currentIndex]
+  );
 
   useEffect(() => {
     if (carouselItems.length === 0) return;
@@ -195,8 +202,9 @@ export default function ImprovedCarousel({ initialItems }: { initialItems: Carou
             key={index}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className={`group relative h-24 w-16 cursor-pointer overflow-hidden rounded-lg transition-transform md:h-32 md:w-24 lg:h-40 lg:w-28 ${index === currentIndex ? "ring-2 ring-yellow-400" : ""
-              }`}
+            className={`group relative h-24 w-16 cursor-pointer overflow-hidden rounded-lg transition-transform md:h-32 md:w-24 lg:h-40 lg:w-28 ${
+              index === currentIndex ? "ring-2 ring-yellow-400" : ""
+            }`}
             onClick={() => showSlider(index)}
             role="tab"
             aria-selected={index === currentIndex}
@@ -210,7 +218,9 @@ export default function ImprovedCarousel({ initialItems }: { initialItems: Carou
               className="transition-transform object-cover w-full h-full group-hover:scale-110"
               loading="lazy"
               placeholder="blur"
-              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(112, 160))}`}
+              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                shimmer(112, 160)
+              )}`}
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 p-2">
               <p className="text-xs font-medium absolute bottom-4 text-white md:text-sm">

@@ -47,8 +47,10 @@ export default async function RootLayout({
                   <TopBar />
                   <Navbar />
                 </header>
-                {children}
                 <CircularMenu />
+                <section className="pt-16 md:pt-0">
+                {children}
+                </section>
                 <Toaster />
                 <AnimatedFooter />
               </Lenis>
