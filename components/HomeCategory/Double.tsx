@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -35,16 +35,24 @@ const categories: [Category, Category] = [
 function Double({ categories }: DoubleCategoryProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
+  const handleHoverStart = useCallback((index: number) => {
+    setHoverIndex(index)
+  }, [])
+
+  const handleHoverEnd = useCallback(() => {
+    setHoverIndex(null)
+  }, [])
+
   return (
-    <div className="flex h-[calc(100vh)] w-full">
+    <div className="flex h-screen w-full">
       {categories.map((category, index) => (
         <motion.div
           key={category.name}
           className="relative overflow-hidden"
           initial={{ width: "50%" }}
           animate={{ width: hoverIndex === index ? "60%" : hoverIndex === null ? "50%" : "40%" }}
-          onHoverStart={() => setHoverIndex(index)}
-          onHoverEnd={() => setHoverIndex(null)}
+          onHoverStart={() => handleHoverStart(index)}
+          onHoverEnd={handleHoverEnd}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
           <Link href={category.link} className="block h-full">
@@ -52,8 +60,8 @@ function Double({ categories }: DoubleCategoryProps) {
               src={category.src}
               alt={category.name}
               fill
-              blurDataURL="/BlurImage.jpg"
-              placeholder="blur"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority={index === 0}
               className="transition-transform object-cover duration-500 ease-in-out hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -67,6 +68,7 @@ function EcommerceProfileRedesignContent() {
         };
 
         checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [checkAuthStatus, router]);
 
     useEffect(() => {

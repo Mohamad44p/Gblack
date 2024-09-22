@@ -14,7 +14,7 @@ export default function AnimatedFooter() {
             const footer = document.getElementById('animated-footer')
             if (footer) {
                 const footerPosition = footer.getBoundingClientRect().top
-                const windowHeight = window.innerHeight
+                const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 0
                 if (footerPosition < windowHeight) {
                     setIsInView(true)
                 } else {
@@ -23,8 +23,10 @@ export default function AnimatedFooter() {
             }
         }
 
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
+        if (typeof window !== 'undefined') {
+            window.addEventListener('scroll', handleScroll)
+            return () => window.removeEventListener('scroll', handleScroll)
+        }
     }, [])
 
     useEffect(() => {

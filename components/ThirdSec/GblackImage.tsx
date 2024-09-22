@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-'use client'
+"use client"
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
@@ -39,14 +39,14 @@ export default function GblackImages() {
   }, [])
 
   useEffect(() => {
-    if (headerRef.current) {
-      const text = headerRef.current.innerText
-      const splitText = text
-        .split("")
-        .map((char) => `<span class="inline-block">${char}</span>`)
-        .join("")
-      headerRef.current.innerHTML = splitText
-    }
+    if (!sectionRef.current || !headerRef.current || !gridRef.current) return
+
+    const text = headerRef.current.innerText
+    const splitText = text
+      .split("")
+      .map((char) => `<span class="inline-block">${char}</span>`)
+      .join("")
+    headerRef.current.innerHTML = splitText
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -122,9 +122,7 @@ export default function GblackImages() {
       })
     }, { threshold: 0.1 })
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
-    }
+    observer.observe(sectionRef.current)
 
     return () => {
       if (sectionRef.current) {
@@ -145,8 +143,9 @@ export default function GblackImages() {
               src={image.url}
               alt={`Image ${i + 1}`}
               fill
-              blurDataURL={placeholderImage}
+              sizes="(max-width: 768px) 33vw, 25vw"
               placeholder="blur"
+              blurDataURL={placeholderImage}
               className="object-cover w-full h-full"
             />
           </div>

@@ -3,25 +3,33 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
-const Particle = ({ index }: { index: number }) => (
-    <motion.div
+const Particle = ({ index }: { index: number }) => {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+  
+    useEffect(() => {
+      setPosition({
+        x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+        y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+      });
+    }, []);
+  
+    return (
+      <motion.div
         className="absolute h-1 w-1 rounded-full bg-white opacity-50"
-        initial={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-        }}
+        initial={position}
         animate={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            transition: {
-                duration: 10 + Math.random() * 20,
-                repeat: Infinity,
-                repeatType: 'reverse',
-            },
+          x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+          y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+          transition: {
+            duration: 10 + Math.random() * 20,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          },
         }}
-    />
-)
-
+      />
+    )
+  }
+  
 export default function Loading() {
     const [progress, setProgress] = useState(0)
 
