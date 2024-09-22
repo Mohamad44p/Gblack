@@ -10,7 +10,6 @@ interface UploadedImage {
   url: string
 }
 
-// Custom placeholder image as a base64 encoded SVG
 const placeholderImage = `data:image/svg+xml;base64,${btoa(`
   <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="400" height="400" fill="#E5E7EB"/>
@@ -19,7 +18,7 @@ const placeholderImage = `data:image/svg+xml;base64,${btoa(`
   </svg>
 `)}`
 
-export default function Component() {
+export default function GblackImages() {
   const sectionRef = useRef<HTMLElement>(null)
   const headerRef = useRef<HTMLHeadingElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
@@ -27,26 +26,10 @@ export default function Component() {
 
   useEffect(() => {
     const fetchImages = async () => {
-      const cacheKey = 'cachedImages'
-      const cachedData = localStorage.getItem(cacheKey)
-      const currentTime = new Date().getTime()
-
-      if (cachedData) {
-        const { data, timestamp } = JSON.parse(cachedData)
-        const oneWeek = 7 * 24 * 60 * 60 * 1000
-
-        if (currentTime - timestamp < oneWeek) {
-          setImages(data)
-          return
-        }
-      }
-
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/miucm/v1/images`)
+        const response = await fetch('/api/images')
         const data = await response.json()
         setImages(data)
-
-        localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: currentTime }))
       } catch (error) {
         console.error('Error fetching images:', error)
       }
