@@ -41,25 +41,17 @@ export default function CartSheet() {
     return () => window.removeEventListener(OPEN_CART_EVENT, handleOpenCart)
   }, [])
 
-  const handleClose = useCallback((event: React.MouseEvent) => {
-    event.preventDefault()
+  const handleClose = useCallback(() => {
     scrollPositionRef.current = window.scrollY
     setIsOpen(false)
   }, [])
-
-  useEffect(() => {
-    if (!isOpen) {
-      setTimeout(() => {
-        window.scrollTo(0, scrollPositionRef.current)
-      }, 0)
-    }
-  }, [isOpen])
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
+      window.scrollTo(0, scrollPositionRef.current)
     }
     return () => {
       document.body.style.overflow = ''
@@ -67,22 +59,13 @@ export default function CartSheet() {
   }, [isOpen])
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          scrollPositionRef.current = window.scrollY
-          setTimeout(() => setIsOpen(false), 0)
-        } else {
-          setIsOpen(true)
-        }
-      }}
-    >
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className="relative p-2 rounded-full bg-primary text-primary-foreground focus:outline-none"
+          onClick={() => setIsOpen(true)}
         >
           <ShoppingBag size={24} />
           {mounted && (

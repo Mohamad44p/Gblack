@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client'
 
 import { useState } from 'react'
@@ -5,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useAuth } from '@/contexts/AuthContext'
+import Link from 'next/link'
 
 export default function LoginPage() {
     const [usernameOrEmail, setUsernameOrEmail] = useState('')
@@ -20,10 +22,10 @@ export default function LoginPage() {
         setIsLoading(true)
         try {
             const user = await login(usernameOrEmail, password)
-            console.log('Login successful:', user);
+            console.log('Login successful:', user)
             router.push('/')
         } catch (err: any) {
-            console.error('Login error:', err);
+            console.error('Login error:', err)
             setError(err.message || 'An error occurred during login')
         } finally {
             setIsLoading(false)
@@ -31,24 +33,24 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen bg-image Font-GTWalsheim">
-            <div className="flex-[2] p-12 flex flex-col justify-center">
-                <h1 className="text-[#f9dcc5] text-[7rem] font-bold leading-tight mb-4">
-                    <span className="font-saolice text-4xl mx-4">Login</span><br />
-                    WELCOME
+        <div className="flex flex-col lg:flex-row min-h-screen bg-image Font-GTWalsheim">
+            <div className="lg:flex-[2] p-6 md:p-8 lg:p-12 flex flex-col justify-center">
+                <h1 className="text-[#f9dcc5] text-4xl md:text-5xl lg:text-7xl font-bold leading-tight mb-4">
+                    <span className="font-saolice text-2xl md:text-3xl lg:text-4xl mx-2 md:mx-4">Login</span><br />
+                    WELCOME<br />
                     BACK
                 </h1>
-                <p className="text-[#f3e9d9] text-lg max-w-md">
+                <p className="text-[#f3e9d9] text-base md:text-lg max-w-md">
                     Sign back in to your account to access your courses and embody the art of being human.
                 </p>
             </div>
-            <div className="flex-1 bg-[#f3e9d9] mx-5 my-3 p-12 flex flex-col justify-center">
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                    <h1 className="text-[#404628] text-[2rem] font-bold leading-tight mb-4">
+            <div className="lg:flex-1 bg-[#f3e9d9] mx-3 my-3 lg:mx-5 lg:my-3 p-6 md:p-8 lg:p-12 flex flex-col justify-center">
+                <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+                    <h2 className="text-[#404628] text-2xl md:text-3xl font-bold leading-tight mb-4">
                         Your Account
-                    </h1>
+                    </h2>
                     <div>
-                        <label htmlFor="usernameOrEmail" className="block text-[#404628] text-xl font-extrabold mb-2">
+                        <label htmlFor="usernameOrEmail" className="block text-[#404628] text-lg md:text-xl font-extrabold mb-2">
                             USERNAME OR EMAIL
                         </label>
                         <Input
@@ -61,7 +63,7 @@ export default function LoginPage() {
                         />
                     </div>
                     <div>
-                        <label htmlFor="password" className="block text-[#404628] text-xl font-extrabold mb-2">
+                        <label htmlFor="password" className="block text-[#404628] text-lg md:text-xl font-extrabold mb-2">
                             PASSWORD
                         </label>
                         <Input
@@ -75,12 +77,20 @@ export default function LoginPage() {
                     </div>
                     <Button
                         type="submit"
-                        className="max-w-6xl bg-[#c2b280] hover:bg-[#a89a6b] text-[#404628] text-2xl font-medium py-2 px-4"
+                        className="w-full bg-[#c2b280] hover:bg-[#a89a6b] text-[#404628] text-xl md:text-2xl font-medium py-2 px-4"
                         disabled={isLoading}
                     >
                         {isLoading ? 'Logging in...' : 'LOG IN'}
                     </Button>
-                    {error && <p className="text-red-500">{error}</p>}
+                    {error && <p className="text-red-500 text-sm md:text-base">{error}</p>}
+                    <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0 mt-4">
+                        <Link href="/forgot-password" className="text-[#404628] text-sm md:text-base hover:underline">
+                            Forgot password?
+                        </Link>
+                        <Link href="/sign-up" className="text-[#404628] text-sm md:text-base hover:underline">
+                            Don't have an account? Sign up
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>

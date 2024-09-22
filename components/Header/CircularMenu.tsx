@@ -9,6 +9,8 @@ import { useWishlist } from "@/contexts/WishlistContext";
 import * as LucideIcons from "lucide-react";
 import Link from "next/link";
 import Curve from "./mobielnav/Curve";
+import SearchModal from "./SearchModal";
+import CartSheet from "../Cart/CartSheet";
 
 interface SocialLink {
   id: number;
@@ -57,6 +59,7 @@ const slideIn = {
 export default function AnimatedMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const [selectedIndicator, setSelectedIndicator] = useState(pathname);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
@@ -87,6 +90,13 @@ export default function AnimatedMenu() {
     };
 
     fetchData();
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLogout = async () => {
@@ -110,16 +120,14 @@ export default function AnimatedMenu() {
     },
     ...(isLoggedIn
       ? [
-          { name: "Profile", href: "/profile", icon: LucideIcons.User },
-          { name: "Logout", onClick: handleLogout, icon: LucideIcons.LogOut },
-        ]
+        { name: "Profile", href: "/profile", icon: LucideIcons.User },
+        { name: "Logout", onClick: handleLogout, icon: LucideIcons.LogOut },
+      ]
       : [
-          { name: "Register", href: "/sign-up", icon: LucideIcons.UserPlus },
-          { name: "Login", href: "/login", icon: LucideIcons.LogIn },
-        ]),
+        { name: "Register", href: "/sign-up", icon: LucideIcons.UserPlus },
+        { name: "Login", href: "/login", icon: LucideIcons.LogIn },
+      ]),
     { name: "Wishlist", href: "/wishlist", icon: LucideIcons.Heart },
-    { name: "Search", onClick: () => {}, icon: LucideIcons.Search },
-    { name: "Cart", onClick: () => {}, icon: LucideIcons.ShoppingCart },
   ];
 
   const toggleCategory = (name: string) => {
@@ -128,13 +136,26 @@ export default function AnimatedMenu() {
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 md:hidden right-4 z-50 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-        aria-label={isOpen ? "Close menu" : "Open menu"}
-      >
-        {isOpen ? <LucideIcons.X size={24} /> : <LucideIcons.Menu size={24} />}
-      </button>
+      <div className={`fixed top-0 md:hidden left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black' : 'bg-transparent'}`}>
+        <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+          <Link href="/" className="text-white text-xl font-bold">GBLACK</Link>
+          <div className="flex items-center space-x-4">
+
+            <SearchModal />
+            <Link href="/wishlist" aria-label="Wishlist" className="text-white">
+              <LucideIcons.Heart size={24} />
+            </Link>
+            <CartSheet />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+            >
+              {isOpen ? <LucideIcons.X size={24} /> : <LucideIcons.Menu size={24} />}
+            </button>
+          </div>
+        </div>
+      </div>
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -144,16 +165,13 @@ export default function AnimatedMenu() {
             exit="exit"
             className="fixed inset-y-0 right-0 w-full sm:w-[390px] bg-black text-white z-40 overflow-y-auto"
           >
-            <div className="h-full flex flex-col justify-between p-6 sm:p-10">
+            <div className="h-full flex flex-col justify-between p-6 sm:p-10 pt-20">
               <div
                 onMouseLeave={() => {
                   setSelectedIndicator(pathname);
                 }}
                 className="nav space-y-6"
               >
-                <div className="text-neutral-500 uppercase text-xs border-b border-neutral-800 pb-4 mb-6">
-                  <p>GBLACK</p>
-                </div>
                 {menuItems.map((item, index) => (
                   <motion.div
                     key={item.name}
@@ -174,9 +192,8 @@ export default function AnimatedMenu() {
                           {item.name}
                         </span>
                         <LucideIcons.ChevronDown
-                          className={`w-5 h-5 transition-transform ${
-                            openCategory === item.name ? "rotate-180" : ""
-                          }`}
+                          className={`w-5 h-5 transition-transform ${openCategory === item.name ? "rotate-180" : ""
+                            }`}
                         />
                       </button>
                     ) : item.onClick ? (
@@ -203,7 +220,7 @@ export default function AnimatedMenu() {
                         exit={{ opacity: 0, y: -10 }}
                         className="mt-2 ml-10 space-y-2"
                       >
-                        {item.subItems.map((subItem, subIndex) => (
+                        {item.subItems.map((subItem) => (
                           <Link
                             key={subItem.name}
                             href={subItem.href || "/"}

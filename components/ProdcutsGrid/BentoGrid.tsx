@@ -175,10 +175,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${i < Math.round(product.rating ?? 0)
+                  className={`w-4 h-4 ${
+                    i < Math.round(product.rating ?? 0)
                       ? "text-yellow-400 fill-current"
                       : "text-white/20"
-                    }`}
+                  }`}
                 />
               ))}
               <span className="ml-2 text-sm text-white/60">
@@ -283,10 +284,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${i < Math.round(product.rating ?? 0)
+                      className={`w-5 h-5 ${
+                        i < Math.round(product.rating ?? 0)
                           ? "text-yellow-400 fill-current"
                           : "text-white/20"
-                        }`}
+                      }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-white/60">
@@ -405,9 +407,18 @@ export function ProductShowcase({
   );
 
   const memoizedProducts = useMemo(
-    () => products.map((product) => (
-      <ProductCard key={product.id} product={product} handleAddToCart={handleAddToCart} />
-    )),
+    () =>
+      products.map((product, index) => (
+        <motion.div
+          key={product.id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+          className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] xl:flex-[0_0_25%] px-2"
+        >
+          <ProductCard product={product} handleAddToCart={handleAddToCart} />
+        </motion.div>
+      )),
     [products, handleAddToCart]
   );
 

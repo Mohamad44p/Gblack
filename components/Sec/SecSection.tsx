@@ -52,7 +52,7 @@ export default function SecSection() {
 
   return (
     <main className="min-h-screen px-4 py-32 text-white md:px-8 lg:px-16">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto md:max-w-7xl">
         <motion.h1
           ref={ref}
           className="mb-16 text-center text-4xl font-bold leading-tight tracking-tight md:text-5xl lg:text-5xl"

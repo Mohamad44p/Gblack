@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -35,24 +35,18 @@ const categories: [Category, Category] = [
 function Double({ categories }: DoubleCategoryProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
-  const handleHoverStart = useCallback((index: number) => {
-    setHoverIndex(index)
-  }, [])
-
-  const handleHoverEnd = useCallback(() => {
-    setHoverIndex(null)
-  }, [])
-
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh)] w-full">
       {categories.map((category, index) => (
         <motion.div
           key={category.name}
-          className="relative overflow-hidden"
-          initial={{ width: "50%" }}
-          animate={{ width: hoverIndex === index ? "60%" : hoverIndex === null ? "50%" : "40%" }}
-          onHoverStart={() => handleHoverStart(index)}
-          onHoverEnd={handleHoverEnd}
+          className="relative overflow-hidden h-[50vh] lg:h-full"
+          initial={{ width: "100%" }}
+          animate={{ 
+            width: hoverIndex === index ? "60%" : hoverIndex === null ? "50%" : "40%"
+          }}
+          onHoverStart={() => setHoverIndex(index)}
+          onHoverEnd={() => setHoverIndex(null)}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
           <Link href={category.link} className="block h-full">
@@ -60,21 +54,21 @@ function Double({ categories }: DoubleCategoryProps) {
               src={category.src}
               alt={category.name}
               fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority={index === 0}
+              blurDataURL="/BlurImage.jpg"
+              placeholder="blur"
               className="transition-transform object-cover duration-500 ease-in-out hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
-              <h2 className="mb-4 text-5xl font-bold">{category.name}</h2>
-              <p className="mb-6 text-xl text-gray-300">{category.description}</p>
+              <h2 className="mb-2 lg:mb-4 text-3xl lg:text-5xl font-bold">{category.name}</h2>
+              <p className="mb-3 lg:mb-6 text-lg lg:text-xl text-gray-300">{category.description}</p>
               <motion.div
-                className="flex items-center text-lg font-semibold text-white"
+                className="flex items-center text-base lg:text-lg font-semibold text-white"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                Shop Now <ArrowRight className="ml-2 h-5 w-5" />
+                Shop Now <ArrowRight className="ml-2 h-4 w-4 lg:h-5 lg:w-5" />
               </motion.div>
             </div>
           </Link>
