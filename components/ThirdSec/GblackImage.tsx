@@ -135,7 +135,7 @@ export default function GblackImages() {
     <section ref={sectionRef} className="hero w-screen h-screen overflow-hidden relative flex items-center justify-center">
       <div
         ref={gridRef}
-        className="grid-container grid grid-cols-3 gap-4 w-[120vmin] h-[80vmin] z-10"
+        className="grid-container grid grid-cols-3 gap-4 w-[120vmin] md:h-[80vmin] md:my-0 h-full z-10"
       >
         {images.map((image, i) => (
           <div key={i} className="grid-img relative w-full h-full overflow-hidden rounded-lg">

@@ -9,7 +9,8 @@ import * as LucideIcons from "lucide-react";
 import Link from "next/link";
 import Curve from "./mobielnav/Curve";
 import SearchModal from "./SearchModal";
-import CartSheet from "../Cart/CartSheet";
+import { useCart } from "@/contexts/CartContext";
+import { useCartSheet } from "../Cart/cart-sheet-context";
 
 interface SocialLink {
   id: number;
@@ -65,6 +66,8 @@ export default function AnimatedMenu() {
   const { isLoggedIn, logout } = useAuth();
   const router = useRouter();
   const { wishlist } = useWishlist();
+  const { openCart } = useCartSheet();
+  const { getCartCount } = useCart();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,7 +156,17 @@ export default function AnimatedMenu() {
           </Link>
           <div className="flex items-center space-x-4">
             <SearchModal />
-            <CartSheet />
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="relative p-2 rounded-full bg-primary text-primary-foreground focus:outline-none"
+              onClick={openCart}
+            >
+              <LucideIcons.ShoppingBag size={24} />
+              <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {getCartCount()}
+              </span>
+            </motion.button>
             <motion.button
               onClick={() => setIsOpen(!isOpen)}
               className="text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"

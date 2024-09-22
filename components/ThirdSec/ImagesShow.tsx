@@ -123,43 +123,45 @@ export default function ImprovedComponent() {
 
   return (
     <ReactLenis root>
-      <section className="hero section my-44">
+      <section className="hero section md:my-44">
         <ImageAnimation />
       </section>
 
-      <section
-        ref={mainRef}
-        className="main section overflow-y-hidden"
-        aria-label="Product Showcase"
-      >
-        <div className="main-content">
-          <div className="logo">
-            <Image
-              src="/images/Rotated/logo.jpg"
-              alt="Company Logo"
-              width={100}
-              height={100}
-              className="img"
-            />
-          </div>
-          <div className="copy" aria-label="Product Description">
-            <div className="line">
-              <p>Explore Our Wide Range of Products</p>
+      <div className="hidden md:block">
+        <section
+          ref={mainRef}
+          className="main section overflow-y-hidden"
+          aria-label="Product Showcase"
+        >
+          <div className="main-content">
+            <div className="logo">
+              <Image
+                src="/images/Rotated/logo.jpg"
+                alt="Company Logo"
+                width={100}
+                height={100}
+                className="img"
+              />
             </div>
-            <div className="line">
-              <p>From Electronics to Fashion, We&apos;ve Got You Covered</p>
+            <div className="copy" aria-label="Product Description">
+              <div className="line">
+                <p>Explore Our Wide Range of Products</p>
+              </div>
+              <div className="line">
+                <p>From Electronics to Fashion, We&apos;ve Got You Covered</p>
+              </div>
+              <div className="line">
+                <p>Find the Perfect Items for Every Need.</p>
+              </div>
             </div>
-            <div className="line">
-              <p>Find the Perfect Items for Every Need.</p>
+            <div className="btn">
+              <Button>Explore Now</Button>
             </div>
           </div>
-          <div className="btn">
-            <Button>Explore Now</Button>
-          </div>
-        </div>
 
-        {generateRows()}
-      </section>
+          {generateRows()}
+        </section>
+      </div>
     </ReactLenis>
   );
 }

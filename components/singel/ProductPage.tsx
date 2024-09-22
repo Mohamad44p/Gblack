@@ -277,7 +277,7 @@ export default function SingleProductPage({
 
             <motion.div variants={fadeInUp} className="flex gap-2.5 mb-6">
               <Button
-                className="flex-1 mr-2 bg-gradient-to-r from-gray-500 to-gray-50 hover:from-gray-100 hover:to-slate-600 text-white transition-all duration-300"
+                className="flex-1 mr-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white transition-all duration-300"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
@@ -308,15 +308,6 @@ export default function SingleProductPage({
                 className="hover:bg-gray-800 transition-all duration-300"
               >
                 <Share2 className="h-5 w-5" />
-              </Button>
-            </motion.div>
-            <motion.div variants={fadeInUp}>
-              <Button
-                size="lg"
-                variant="ghost"
-                className="transition-all duration-300"
-              >
-                Contact Our Experts
               </Button>
             </motion.div>
           </motion.div>

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import SingleProductPage from "@/components/singel/ProductPage";
-import AlsoLikePr from "@/components/singel/AlsoLike/AlsoLikePr";
-import { unstable_noStore as noStore } from 'next/cache'
+import { unstable_noStore as noStore } from "next/cache";
+import ProductImageSlider from "@/components/singel/image-slider";
 
 interface WooCommerceProduct {
   id: number;
@@ -37,7 +37,7 @@ const api = new WooCommerceRestApi({
 });
 
 async function getProduct(id: string) {
-  noStore()
+  noStore();
   try {
     const { data } = await api.get(`products/${id}`);
     return data;
@@ -48,7 +48,7 @@ async function getProduct(id: string) {
 }
 
 async function getReviews(productId: number) {
-  noStore()
+  noStore();
   try {
     const { data } = await api.get(`products/reviews`, {
       product: productId,
@@ -60,8 +60,11 @@ async function getReviews(productId: number) {
   }
 }
 
-async function getRelatedProducts(categoryId: number, currentProductId: number) {
-  noStore()
+async function getRelatedProducts(
+  categoryId: number,
+  currentProductId: number
+) {
+  noStore();
   try {
     const { data } = await api.get("products", {
       category: categoryId,
@@ -80,7 +83,7 @@ export default async function ProductPage({
 }: {
   params: { id: string };
 }) {
-  noStore()
+  noStore();
   const product = await getProduct(params.id);
 
   if (!product) {
@@ -89,8 +92,12 @@ export default async function ProductPage({
 
   const reviews = await getReviews(product.id);
 
-  const totalRating = reviews.reduce((sum: number, review: Review) => sum + review.rating, 0);
-  const averageRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(2) : "0.00";
+  const totalRating = reviews.reduce(
+    (sum: number, review: Review) => sum + review.rating,
+    0
+  );
+  const averageRating =
+    reviews.length > 0 ? (totalRating / reviews.length).toFixed(2) : "0.00";
   const ratingCount = reviews.length;
 
   const updatedProduct = {
@@ -99,34 +106,34 @@ export default async function ProductPage({
     rating_count: ratingCount,
   };
 
-  const relatedProducts = await getRelatedProducts(product.categories[0]?.id, product.id);
+  const relatedProducts = await getRelatedProducts(
+    product.categories[0]?.id,
+    product.id
+  );
 
-  const formattedProducts = relatedProducts.map((product: WooCommerceProduct) => ({
-    id: product.id,
-    name: product.name,
-    brand: product.categories[0]?.name || '',
-    description: product.short_description,
-    price: product.price,
-    regular_price: product.regular_price,
-    sale_price: product.sale_price,
-    images: product.images,
-    average_rating: product.average_rating,
-    rating_count: product.rating_count,
-    attributes: product.attributes,
-  }));
+  const formattedProducts = relatedProducts.map(
+    (product: WooCommerceProduct) => ({
+      id: product.id,
+      name: product.name,
+      brand: product.categories[0]?.name || "",
+      description: product.short_description,
+      price: product.price,
+      regular_price: product.regular_price,
+      sale_price: product.sale_price,
+      images: product.images,
+      average_rating: product.average_rating,
+      rating_count: product.rating_count,
+      attributes: product.attributes,
+    })
+  );
 
   return (
     <section className="min-h-screen w-full">
       <section>
         <SingleProductPage product={updatedProduct} />
       </section>
-      <section>
-        <AlsoLikePr
-          featuredDescription="You may also like"
-          featuredImage="/assets/img9.jpeg"
-          featuredTitle="Featured Products"
-          products={formattedProducts}
-        />
+      <section className="min-h-screen w-full">
+        <ProductImageSlider  products={formattedProducts}/>
       </section>
     </section>
   );

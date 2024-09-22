@@ -1,23 +1,24 @@
-'use client'
+"use client";
 
-import { useState, useEffect, createElement } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { User, Heart, LogOut } from "lucide-react"
-import * as LucideIcons from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect, createElement } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { User, Heart, LogOut, ShoppingBag } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import SearchModal from "./SearchModal"
-import { useAuth } from "@/contexts/AuthContext"
-import { useRouter } from "next/navigation"
-import CartSheet from "../Cart/CartSheet"
-import { useWishlist } from "@/contexts/WishlistContext"
+} from "@/components/ui/dropdown-menu";
+import SearchModal from "./SearchModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useCart } from "@/contexts/CartContext";
+import { useCartSheet } from "../Cart/cart-sheet-context";
 
 interface SocialLink {
   id: number;
@@ -27,24 +28,26 @@ interface SocialLink {
 }
 
 export default function TopBar() {
-  const [lang, setLang] = useState<"en" | "ar">("en")
-  const { isLoggedIn, user, logout } = useAuth()
-  const router = useRouter()
-  const { wishlist } = useWishlist()
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
-  
+  const [lang, setLang] = useState<"en" | "ar">("en");
+  const { isLoggedIn, user, logout } = useAuth();
+  const router = useRouter();
+  const { wishlist } = useWishlist();
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const { openCart } = useCartSheet();
+  const { getCartCount } = useCart();
+
   useEffect(() => {
     const fetchSocialLinks = async () => {
       try {
-        const response = await fetch('/api/get-social-links');
+        const response = await fetch("/api/get-social-links");
         if (response.ok) {
           const data = await response.json();
           setSocialLinks(data);
         } else {
-          console.error('Failed to fetch social links');
+          console.error("Failed to fetch social links");
         }
       } catch (error) {
-        console.error('Error fetching social links:', error);
+        console.error("Error fetching social links:", error);
       }
     };
 
@@ -52,9 +55,9 @@ export default function TopBar() {
   }, []);
 
   const handleLogout = async () => {
-    await logout()
-    router.refresh()
-  }
+    await logout();
+    router.refresh();
+  };
 
   return (
     <motion.header
@@ -67,18 +70,28 @@ export default function TopBar() {
         <div className="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:text-gray-300"
+              >
                 {lang === "en" ? "EN" : "AR"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setLang("en")}>English</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLang("ar")}>العربية</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLang("en")}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLang("ar")}>
+                العربية
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="hidden md:flex space-x-4">
             {socialLinks.map((link) => {
-              const IconComponent = LucideIcons[link.platform as keyof typeof LucideIcons] || LucideIcons.Link;
+              const IconComponent =
+                LucideIcons[link.platform as keyof typeof LucideIcons] ||
+                LucideIcons.Link;
               return (
                 <motion.a
                   key={link.id}
@@ -89,7 +102,10 @@ export default function TopBar() {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  {createElement(IconComponent as React.ComponentType<LucideIcons.LucideProps>, { size: 20, className: "hover:text-primary" })}
+                  {createElement(
+                    IconComponent as React.ComponentType<LucideIcons.LucideProps>,
+                    { size: 20, className: "hover:text-primary" }
+                  )}
                   <span className="sr-only">{link.name}</span>
                 </motion.a>
               );
@@ -137,10 +153,18 @@ export default function TopBar() {
               </DropdownMenu>
             ) : (
               <div>
-                <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:text-gray-300"
+                >
                   <Link href="/sign-up">Register</Link>
                 </Button>
-                <Button variant="ghost" size="sm" className="text-white hover:text-gray-300">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:text-gray-300"
+                >
                   <Link href="/login">Login</Link>
                 </Button>
               </div>
@@ -161,9 +185,19 @@ export default function TopBar() {
               )}
             </motion.button>
           </Link>
-          <CartSheet />
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="focus:outline-none relative"
+            onClick={openCart}
+          >
+            <ShoppingBag size={20} />
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              {getCartCount()}
+            </span>
+          </motion.button>
         </div>
       </div>
     </motion.header>
-  )
+  );
 }
