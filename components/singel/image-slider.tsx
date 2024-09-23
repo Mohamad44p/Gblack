@@ -1,92 +1,100 @@
-'use client'
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { gsap } from 'gsap'
-import { ArrowLeft } from 'lucide-react'
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { gsap } from "gsap";
+import { ArrowLeft } from "lucide-react";
 
 interface Product {
-  id: number
-  name: string
-  brand: string
-  description: string
-  price: string
-  regular_price: string
-  sale_price: string
-  images: Array<{ id: number; src: string; alt: string }>
-  average_rating: string
-  rating_count: number
-  attributes: Array<{ id: number; name: string; options: string[] }>
+  id: number;
+  name: string;
+  brand: string;
+  description: string;
+  price: string;
+  regular_price: string;
+  sale_price: string;
+  images: Array<{ id: number; src: string; alt: string }>;
+  average_rating: string;
+  rating_count: number;
+  attributes: Array<{ id: number; name: string; options: string[] }>;
 }
 
 interface WorkCarouselProps {
-  products: Product[]
+  products: Product[];
 }
 
 export default function WorkCarousel({ products }: WorkCarouselProps) {
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const slideCount = useRef(1)
-  const [slideIndex, setSlideIndex] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const router = useRouter()
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const slideCount = useRef(1);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const router = useRouter();
 
-  const handleHeaderClick = (event: React.MouseEvent<HTMLDivElement>, productId: number) => {
-    event.stopPropagation()
-    router.push(`/product/${productId}`)
-  }
+  const handleHeaderClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+    productId: number
+  ) => {
+    event.stopPropagation();
+    router.push(`/product/${productId}`);
+  };
 
   const splitHeader = (element: HTMLElement) => {
-    let text = element.innerText
+    let text = element.innerText;
     let splitText = text
-      .split('')
-      .map((char) => `<span>${char === ' ' ? '&nbsp;&nbsp;' : char}</span>`)
-      .join('')
-    element.innerHTML = splitText
-  }
+      .split("")
+      .map((char) => `<span>${char === " " ? "&nbsp;&nbsp;" : char}</span>`)
+      .join("");
+    element.innerHTML = splitText;
+  };
 
   const addNewSlide = () => {
-    if (isAnimating || !carouselRef.current) return
-    setIsAnimating(true)
+    if (isAnimating || !carouselRef.current) return;
+    setIsAnimating(true);
 
-    const nextSlideIndex = slideCount.current % products.length
-    setSlideIndex(nextSlideIndex)
-    const newSlide = products[nextSlideIndex]
+    const nextSlideIndex = slideCount.current % products.length;
+    setSlideIndex(nextSlideIndex);
+    const newSlide = products[nextSlideIndex];
 
-    const slideDiv = document.createElement('div')
-    slideDiv.className = 'absolute top-0 left-0 w-full h-full flex'
+    const slideDiv = document.createElement("div");
+    slideDiv.className = "absolute top-0 left-0 w-full h-full flex";
 
-    const slideImgDiv = document.createElement('div')
-    slideImgDiv.className = 'relative w-1/2 h-full'
-    const image = document.createElement('img')
-    image.src = newSlide.images[0]?.src || '/placeholder.jpg'
-    image.alt = newSlide.name
-    image.className = 'object-cover w-full h-full'
-    slideImgDiv.appendChild(image)
+    const slideImgDiv = document.createElement("div");
+    slideImgDiv.className = "relative w-1/2 h-full";
+    const image = document.createElement("img");
+    image.src = newSlide.images[0]?.src || "/placeholder.jpg";
+    image.alt = newSlide.name;
+    image.className = "object-cover w-full h-full";
+    slideImgDiv.appendChild(image);
 
-    const slideContentDiv = document.createElement('div')
-    slideContentDiv.className = 'relative w-1/2 h-full'
-    slideContentDiv.style.backgroundColor = `#${Math.floor(Math.random()*16777215).toString(16)}`
-    const contentHeader = document.createElement('div')
+    const slideContentDiv = document.createElement("div");
+    slideContentDiv.className = "relative w-1/2 h-full";
+    slideContentDiv.style.backgroundColor = `#${Math.floor(
+      Math.random() * 16777215
+    ).toString(16)}`;
+    const contentHeader = document.createElement("div");
     contentHeader.className =
-      'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer'
-    const header = document.createElement('h1')
-    header.addEventListener('click', (event: MouseEvent) =>
-      handleHeaderClick(event as unknown as React.MouseEvent<HTMLDivElement>, newSlide.id)
-    )
-    header.textContent = newSlide.name
+      "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer";
+    const header = document.createElement("h1");
+    header.addEventListener("click", (event: MouseEvent) =>
+      handleHeaderClick(
+        event as unknown as React.MouseEvent<HTMLDivElement>,
+        newSlide.id
+      )
+    );
+    header.textContent = newSlide.name;
     header.className =
-      'font-romie text-4xl md:text-5xl lg:text-7xl font-normal uppercase'
-    splitHeader(header)
-    const letters = header.querySelectorAll('span')
+      "font-romie text-4xl md:text-5xl lg:text-7xl font-normal uppercase";
+    splitHeader(header);
+    const letters = header.querySelectorAll("span");
 
-    contentHeader.appendChild(header)
-    slideContentDiv.appendChild(contentHeader)
+    contentHeader.appendChild(header);
+    slideContentDiv.appendChild(contentHeader);
 
-    const workClient = document.querySelector('#work-client')
-    const workRole = document.querySelector('#work-role')
-    const workType = document.querySelector('#work-type')
+    const workClient = document.querySelector("#work-client");
+    const workRole = document.querySelector("#work-role");
+    const workType = document.querySelector("#work-type");
 
     if (workClient && workRole && workType) {
       gsap.to([workClient, workRole, workType], {
@@ -95,87 +103,91 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
         duration: 0.3,
         stagger: 0.1,
         onComplete: () => {
-          if (workClient) workClient.textContent = newSlide.brand
-          if (workRole) workRole.textContent = `$${newSlide.price}`
-          if (workType) workType.textContent = newSlide.attributes[0]?.options[0] || 'N/A'
+          if (workClient) workClient.textContent = newSlide.brand;
+          if (workRole) workRole.textContent = `$${newSlide.price}`;
+          if (workType)
+            workType.textContent = newSlide.attributes[0]?.options[0] || "N/A";
           gsap.to([workClient, workRole, workType], {
             opacity: 1,
             x: 0,
             duration: 0.3,
             stagger: 0.1,
             delay: 0.3,
-          })
+          });
         },
-      })
+      });
     }
 
-    slideDiv.appendChild(slideImgDiv)
-    slideDiv.appendChild(slideContentDiv)
+    slideDiv.appendChild(slideImgDiv);
+    slideDiv.appendChild(slideContentDiv);
 
-    gsap.set(letters, { top: '100px' })
+    gsap.set(letters, { top: "100px" });
 
     gsap.to(letters, {
-      top: '0px',
+      top: "0px",
       duration: 0.5,
-      ease: 'power2.out',
+      ease: "power2.out",
       delay: 0.35,
       stagger: 0.075,
-    })
+    });
 
     gsap.set([slideImgDiv, slideContentDiv], {
-      clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
-    })
+      clipPath: "polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)",
+    });
 
     gsap.to([slideImgDiv, slideContentDiv], {
-      clipPath: 'polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)',
+      clipPath: "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
       duration: 1.5,
-      ease: 'power4.out',
+      ease: "power4.out",
       stagger: 0.125,
       onComplete: () => {
-        setIsAnimating(false)
+        setIsAnimating(false);
       },
-    })
+    });
 
-    carouselRef.current.appendChild(slideDiv)
-    slideCount.current++
+    carouselRef.current.appendChild(slideDiv);
+    slideCount.current++;
 
     if (carouselRef.current.children.length > 5) {
-      const slidesToRemove = Array.from(carouselRef.current.children).slice(0, -5)
+      const slidesToRemove = Array.from(carouselRef.current.children).slice(
+        0,
+        -5
+      );
       slidesToRemove.forEach((slide) => {
         if (carouselRef.current?.contains(slide)) {
           setTimeout(() => {
             if (carouselRef.current?.contains(slide)) {
-              carouselRef.current.removeChild(slide)
+              carouselRef.current.removeChild(slide);
             }
-          }, 2000)
+          }, 2000);
         }
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
+      const target = event.target as HTMLElement;
       if (
-        !document.querySelector('.menu')?.contains(target) &&
-        !document.querySelector('.slide-content-header')?.contains(target) &&
-        !document.querySelector('.slide-content-header h1')?.contains(target) &&
-        !document.querySelector('.back-btn')?.contains(target) &&
+        !document.querySelector(".menu")?.contains(target) &&
+        !document.querySelector(".slide-content-header")?.contains(target) &&
+        !document.querySelector(".slide-content-header h1")?.contains(target) &&
+        !document.querySelector(".back-btn")?.contains(target) &&
         !isAnimating
       ) {
-        addNewSlide()
+        addNewSlide();
       }
-    }
+    };
 
-    document.addEventListener('click', handleClick)
+    document.addEventListener("click", handleClick);
     return () => {
-      document.removeEventListener('click', handleClick)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAnimating])
+      document.removeEventListener("click", handleClick);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAnimating]);
 
   if (products.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -184,7 +196,7 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
         <div className="absolute top-0 left-0 w-full h-full flex">
           <div className="relative w-1/2 h-full">
             <Image
-              src={products[0].images[0]?.src || '/placeholder.jpg'}
+              src={products[0].images[0]?.src || "/placeholder.jpg"}
               alt={products[0].name}
               layout="fill"
               objectFit="cover"
@@ -192,7 +204,11 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
           </div>
           <div
             className="relative w-1/2 h-full"
-            style={{ backgroundColor: `#${Math.floor(Math.random()*16777215).toString(16)}` }}
+            style={{
+              backgroundColor: `#${Math.floor(
+                Math.random() * 16777215
+              ).toString(16)}`,
+            }}
           >
             <div
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer"
@@ -221,7 +237,7 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
         <div className="flex items-center gap-2.5">
           <p className="font-romie italic text-xs capitalize">Type</p>
           <p id="work-type" className="text-xs font-medium uppercase">
-            {products[0].attributes[0]?.options[0] || 'N/A'}
+            {products[0].attributes[0]?.options[0] || "N/A"}
           </p>
         </div>
       </div>
@@ -237,5 +253,5 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
         <p className="text-xs font-medium uppercase">Next</p>
       </div>
     </section>
-  )
+  );
 }
