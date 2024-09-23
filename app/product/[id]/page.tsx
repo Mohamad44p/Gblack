@@ -133,7 +133,8 @@ export default async function ProductPage({
         <SingleProductPage product={updatedProduct} />
       </section>
       <section className="min-h-screen w-full">
-        <ProductImageSlider  products={formattedProducts}/>
+        <h1 className="text-5xl text-center my-10">You might also like</h1>
+        <ProductImageSlider products={formattedProducts} />
       </section>
     </section>
   );
