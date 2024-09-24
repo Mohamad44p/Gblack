@@ -198,11 +198,11 @@ export default function SingleProductPage({
             <motion.div variants={fadeInUp} className="mb-6">
               <div className="flex items-end gap-2">
                 <span className="text-2xl font-bold md:text-3xl">
-                  ${isOnSale ? product.sale_price : product.regular_price}
+                  {isOnSale ? product.sale_price : product.regular_price} NIS
                 </span>
                 {isOnSale && (
                   <span className="mb-0.5 text-red-500 line-through">
-                    ${product.regular_price}
+                    {product.regular_price} NIS
                   </span>
                 )}
               </div>
@@ -373,12 +373,12 @@ export default function SingleProductPage({
                 >
                   <span className="text-gray-300">{zone.name}:</span>
                   <span className="text-gray-300">
-                    ${zone.price.toFixed(2)}
+                    {zone.price.toFixed(2)} NIS
                   </span>
                 </div>
               ))}
               <p className="mt-4 text-gray-300">
-                Free standard shipping on orders over $100. Expedited and
+                Free standard shipping on orders over 100 NIS. Expedited and
                 international shipping options available at checkout. Please
                 allow 1-3 business days for processing.
               </p>

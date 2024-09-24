@@ -67,7 +67,6 @@ interface Category {
 
 const ITEMS_PER_PAGE = 12;
 
-
 const shimmer = (w: number, h: number) => `
 <svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
@@ -80,14 +79,12 @@ const shimmer = (w: number, h: number) => `
   <rect width="${w}" height="${h}" fill="#333" />
   <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
   <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
-</svg>`
+</svg>`;
 
 const toBase64 = (str: string) =>
-  typeof window === 'undefined'
-    ? Buffer.from(str).toString('base64')
-    : window.btoa(str)
-
-
+  typeof window === "undefined"
+    ? Buffer.from(str).toString("base64")
+    : window.btoa(str);
 
 const QuickViewModal = ({
   product,
@@ -148,13 +145,18 @@ const QuickViewModal = ({
         <div className="flex flex-col md:flex-row gap-8">
           <div className="md:w-1/2">
             <Image
-              src={product.images[0]?.src || "/placeholder.svg?height=400&width=600"}
+              src={
+                product.images[0]?.src ||
+                "/placeholder.svg?height=400&width=600"
+              }
               alt={product.name}
               width={600}
               height={400}
               className="w-full h-80 object-cover"
               placeholder="blur"
-              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(600, 400))}`}
+              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                shimmer(600, 400)
+              )}`}
             />
           </div>
           <div className="md:w-1/2">
@@ -192,14 +194,14 @@ const QuickViewModal = ({
               {product.on_sale ? (
                 <div>
                   <span className="text-3xl font-bold text-red-500">
-                    ${product.sale_price}
+                    {product.sale_price} NIS
                   </span>
                   <span className="ml-2 text-lg text-gray-400 line-through">
-                    ${product.regular_price}
+                    {product.regular_price} NIS
                   </span>
                 </div>
               ) : (
-                <span className="text-3xl font-bold">${product.price}</span>
+                <span className="text-3xl font-bold">{product.price} NIS</span>
               )}
               <Badge
                 variant="secondary"
@@ -340,9 +342,9 @@ export default function ProductList({
           selectedCategory === "All" ||
           product.categories.some((cat) => cat.name === selectedCategory);
 
+        const productPrice = parseFloat(product.sale_price || product.price);
         const priceMatch =
-          parseFloat(product.sale_price || product.price) >= priceRange[0] &&
-          parseFloat(product.sale_price || product.price) <= priceRange[1];
+          productPrice >= priceRange[0] && productPrice <= priceRange[1];
 
         const genderMatch =
           selectedGender === "All" ||
@@ -467,13 +469,14 @@ export default function ProductList({
                 htmlFor="minPrice"
                 className="block text-sm font-medium text-gray-300"
               >
-                Min Price: ${priceRange[0]}
+                Min Price: {priceRange[0]} NIS
               </label>
               <input
                 type="range"
                 id="minPrice"
                 min="0"
                 max="10000"
+                step="100"
                 value={priceRange[0]}
                 onChange={handlePriceChange}
                 className="w-full"
@@ -484,13 +487,14 @@ export default function ProductList({
                 htmlFor="maxPrice"
                 className="block text-sm font-medium text-gray-300"
               >
-                Max Price: ${priceRange[1]}
+                Max Price: {priceRange[1]} NIS
               </label>
               <input
                 type="range"
                 id="maxPrice"
                 min="0"
-                max="1000"
+                max="10000"
+                step="100"
                 value={priceRange[1]}
                 onChange={handlePriceChange}
                 className="w-full"
@@ -664,13 +668,18 @@ export default function ProductList({
                         >
                           <div className="relative overflow-hidden">
                             <Image
-                              src={product.images[0]?.src || "/placeholder.svg?height=400&width=600"}
+                              src={
+                                product.images[0]?.src ||
+                                "/placeholder.svg?height=400&width=600"
+                              }
                               alt={product.name}
                               width={600}
                               height={400}
                               className="w-full h-80 object-cover"
                               placeholder="blur"
-                              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(600, 400))}`}
+                              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                                shimmer(600, 400)
+                              )}`}
                             />
                             {product.on_sale && (
                               <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md">
@@ -706,15 +715,15 @@ export default function ProductList({
                               {product.on_sale ? (
                                 <div>
                                   <span className="text-3xl font-bold text-red-500">
-                                    ${product.sale_price}
+                                    {product.sale_price} NIS
                                   </span>
                                   <span className="ml-2 text-lg text-gray-400 line-through">
-                                    ${product.regular_price}
+                                    {product.regular_price} NIS
                                   </span>
                                 </div>
                               ) : (
                                 <span className="text-3xl font-bold">
-                                  ${product.price}
+                                  {product.price} NIS
                                 </span>
                               )}
                               <Badge

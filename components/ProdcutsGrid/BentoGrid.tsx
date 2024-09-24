@@ -95,10 +95,10 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const isOnSale = product.on_sale;
-  const formattedPrice = `$${parseFloat(product.regular_price).toFixed(2)}`;
-  const formattedSalePrice = `$${parseFloat(
+  const formattedPrice = `${parseFloat(product.regular_price).toFixed(2)} NIS`;
+  const formattedSalePrice = `${parseFloat(
     product.sale_price || product.price
-  ).toFixed(2)}`;
+  ).toFixed(2)} NIS`;
   const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
 
   const handleAddToCartClick = useCallback(() => {
@@ -125,14 +125,14 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
 
   return (
     <Card
-      className="h-[400px] w-full bg-black border border-white/20 overflow-hidden relative rounded-lg"
+      className="h-[500px] w-full bg-black border border-white/20 overflow-hidden relative rounded-lg"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <CardContent className="p-0 flex flex-col h-full relative">
         <Link
           href={`/product/${product.id}`}
-          className="relative w-full h-[300px] overflow-hidden"
+          className="relative w-full h-full overflow-hidden"
         >
           <Image
             src={product.images[0].src}

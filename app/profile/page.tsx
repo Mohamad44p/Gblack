@@ -253,7 +253,7 @@ function EcommerceProfileRedesignContent() {
                                                         <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg mr-4" />
                                                         <div>
                                                             <h4 className="font-semibold">{item.name}</h4>
-                                                            <p className="text-sm text-gray-300">${item.price}</p>
+                                                            <p className="text-sm text-gray-300">{item.price} NIS</p>
                                                         </div>
                                                     </div>
                                                     <Button

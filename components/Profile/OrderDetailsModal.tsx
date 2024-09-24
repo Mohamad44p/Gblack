@@ -44,12 +44,12 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ isOpen, on
               {order.line_items.map((item) => (
                 <div key={item.id} className="flex justify-between items-center mb-2">
                   <span>{item.name} x{item.quantity}</span>
-                  <span>${item.price.toFixed(2)}</span>
+                  <span>{item.price.toFixed(2)} NIS</span>
                 </div>
               ))}
             </div>
             <div className="font-semibold text-lg">
-              Total: ${order.total}
+              Total: {order.total} NIS
             </div>
           </div>
         </ScrollArea>

@@ -3,13 +3,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { jsPDF } from "jspdf"
-import { Download, CheckCircle, ShoppingBag } from 'lucide-react'
+import { Download, CheckCircle, ShoppingBag, Truck, Calendar, CreditCard } from 'lucide-react'
 
 interface OrderDetails {
   id: string
@@ -69,58 +69,77 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
 
     const doc = new jsPDF()
 
+    // Set background color
     doc.setFillColor(41, 37, 36)
-    doc.rect(0, 0, 210, 30, 'F')
+    doc.rect(0, 0, 210, 297, 'F')
+
+    // Header
+    doc.setFillColor(82, 74, 72)
+    doc.roundedRect(10, 10, 190, 40, 3, 3, 'F')
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(24)
-    doc.text('Order Confirmation', 105, 20, { align: 'center' })
-
-    doc.setTextColor(0, 0, 0)
-
+    doc.setFont('helvetica', 'bold')
+    doc.text('Order Confirmation', 105, 30, { align: 'center' })
     doc.setFontSize(12)
-    doc.text(`Order ID: ${orderDetails.id}`, 20, 40)
-    doc.text(`Date: ${new Date(orderDetails.date_created).toLocaleDateString()}`, 20, 50)
-    doc.text(`Status: ${orderDetails.status}`, 20, 60)
-    doc.text(`Total: $${orderDetails.total}`, 20, 70)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Order ID: ${orderDetails.id}`, 105, 40, { align: 'center' })
 
-    doc.setFontSize(14)
-    doc.text('Shipping Address:', 20, 85)
+    // Order Details
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Order Details', 20, 70)
     doc.setFontSize(12)
-    doc.text(`${orderDetails.shipping.first_name} ${orderDetails.shipping.last_name}`, 25, 95)
-    doc.text(orderDetails.shipping.address_1, 25, 102)
-    doc.text(`${orderDetails.shipping.city}, ${orderDetails.shipping.state} ${orderDetails.shipping.postcode}`, 25, 109)
-    doc.text(orderDetails.shipping.country, 25, 116)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Date: ${new Date(orderDetails.date_created).toLocaleDateString()}`, 20, 80)
+    doc.text(`Status: ${orderDetails.status}`, 20, 90)
+    doc.text(`Total: ${totalWithExtras} NIS`, 20, 100)
 
-    doc.setFontSize(14)
-    doc.text('Order Items:', 20, 131)
-    let yPos = 141
+    // Shipping Address
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Shipping Address', 20, 120)
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`${orderDetails.shipping.first_name} ${orderDetails.shipping.last_name}`, 20, 130)
+    doc.text(orderDetails.shipping.address_1, 20, 140)
+    doc.text(`${orderDetails.shipping.city}, ${orderDetails.shipping.state} ${orderDetails.shipping.postcode}`, 20, 150)
+    doc.text(orderDetails.shipping.country, 20, 160)
+
+    // Order Items
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Order Items', 20, 180)
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    let yPos = 190
     orderDetails.line_items.forEach((item, index) => {
-      doc.setFontSize(12)
-      doc.text(`${index + 1}. ${item.name} (Qty: ${item.quantity}) - $${item.total}`, 25, yPos)
+      doc.text(`${index + 1}. ${item.name} (Qty: ${item.quantity}) - ${item.total} NIS`, 25, yPos)
       yPos += 10
     })
 
-    doc.setFillColor(41, 37, 36)
-    doc.rect(0, 280, 210, 17, 'F')
+    // Footer
+    doc.setFillColor(82, 74, 72)
+    doc.roundedRect(10, 267, 190, 20, 3, 3, 'F')
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(10)
-    doc.text('Thank you for your purchase!', 105, 290, { align: 'center' })
+    doc.text('Thank you for your purchase!', 105, 280, { align: 'center' })
 
     doc.save(`order-confirmation-${orderDetails.id}.pdf`)
   }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <Card>
+      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 bg-stone-900 min-h-screen">
+        <Card className="bg-stone-800 text-white border-stone-700">
           <CardHeader>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-8 w-64 mb-2 bg-stone-700" />
+            <Skeleton className="h-4 w-32 bg-stone-700" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full mb-2 bg-stone-700" />
+            <Skeleton className="h-4 w-full mb-2 bg-stone-700" />
+            <Skeleton className="h-4 w-full bg-stone-700" />
           </CardContent>
         </Card>
       </div>
@@ -129,14 +148,16 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
 
   if (!orderDetails) {
     return (
-      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <Card>
+      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 bg-stone-900 min-h-screen">
+        <Card className="bg-stone-800 text-white border-stone-700">
           <CardHeader>
             <CardTitle>Order Not Found</CardTitle>
-            <CardDescription>We couldn't find the order you're looking for.</CardDescription>
+            <CardDescription className="text-stone-400">We couldn't find the order you're looking for.</CardDescription>
           </CardHeader>
           <CardFooter>
-            <Button onClick={() => router.push('/')}>Return to Home</Button>
+            <Button onClick={() => router.push('/')} className="bg-stone-700 hover:bg-stone-600 text-white">
+              Return to Home
+            </Button>
           </CardFooter>
         </Card>
       </div>
@@ -145,96 +166,128 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 bg-stone-800 min-h-screen"
+      className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 bg-stone-900 min-h-screen"
     >
-      <Card className="bg-stone-900 text-white border-stone-700">
-        <CardHeader>
+      <Card className="bg-stone-800 text-white border-stone-700 overflow-hidden">
+        <CardHeader className="relative">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
+            className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-500 to-blue-500 opacity-20"
+          />
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <CardTitle className="text-3xl flex items-center justify-center mb-4">
-              <CheckCircle className="mr-2 text-green-500" size={32} />
-              Order Confirmation
+            <CardTitle className="text-4xl flex items-center justify-center mb-4">
+              <CheckCircle className="mr-2 text-green-500" size={40} />
+              Order Confirmed
             </CardTitle>
           </motion.div>
-          <CardDescription className="text-stone-400 text-center text-lg">
-            Thank you for your purchase! Your order has been received.
+          <CardDescription className="text-stone-300 text-center text-lg">
+            Thank you for your purchase! Your order has been received and is being processed.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className="bg-stone-800 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2 text-xl">Order Details</h3>
-              <p>Order ID: {orderDetails.id}</p>
-              <p>Date: {new Date(orderDetails.date_created).toLocaleDateString()}</p>
-              <p>Status: {orderDetails.status}</p>
-              <p className="text-xl font-bold mt-2">Total: ${orderDetails.total}</p>
-            </div>
-            <div className="bg-stone-800 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2 text-xl">Shipping Address</h3>
-              <p>{orderDetails.shipping.first_name} {orderDetails.shipping.last_name}</p>
-              <p>{orderDetails.shipping.address_1}</p>
-              <p>{orderDetails.shipping.city}, {orderDetails.shipping.state} {orderDetails.shipping.postcode}</p>
-              <p>{orderDetails.shipping.country}</p>
-            </div>
-          </motion.div>
+        <CardContent className="space-y-8">
+          <AnimatePresence>
+            <motion.div
+              key="order-details"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <div className="bg-stone-700 p-6 rounded-lg shadow-lg">
+                <h3 className="font-semibold mb-4 text-2xl flex items-center">
+                  <Calendar className="mr-2 text-blue-400" size={24} />
+                  Order Details
+                </h3>
+                <p className="mb-2"><strong>Order ID:</strong> {orderDetails.id}</p>
+                <p className="mb-2"><strong>Date:</strong> {new Date(orderDetails.date_created).toLocaleDateString()}</p>
+                <p className="mb-2"><strong>Status:</strong> {orderDetails.status}</p>
+                <p className="text-2xl font-bold mt-4 text-green-400">Total: {totalWithExtras} NIS</p>
+              </div>
+              <div className="bg-stone-700 p-6 rounded-lg shadow-lg">
+                <h3 className="font-semibold mb-4 text-2xl flex items-center">
+                  <Truck className="mr-2 text-blue-400" size={24} />
+                  Shipping Address
+                </h3>
+                <p className="mb-2">{orderDetails.shipping.first_name} {orderDetails.shipping.last_name}</p>
+                <p className="mb-2">{orderDetails.shipping.address_1}</p>
+                <p className="mb-2">{orderDetails.shipping.city}, {orderDetails.shipping.state} {orderDetails.shipping.postcode}</p>
+                <p>{orderDetails.shipping.country}</p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
           >
-            <h3 className="font-semibold mb-4 text-xl">Order Items</h3>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b border-stone-700">
-                  <TableHead className="text-white">Item</TableHead>
-                  <TableHead className="text-white">Quantity</TableHead>
-                  <TableHead className="text-white text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orderDetails.line_items.map((item, index) => (
-                  <TableRow key={index} className="border-b border-stone-700">
-                    <TableCell className="font-medium">
-                      {item.name}
-                      {item.meta_data.find((meta: any) => meta.key === 'Size') && (
-                        <span className="text-sm text-gray-400"> (Size: {item.meta_data.find((meta: any) => meta.key === 'Size')?.value})</span>
-                      )}
-                    </TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell className="text-right">${item.total}</TableCell>
+            <h3 className="font-semibold mb-4 text-2xl flex items-center">
+              <ShoppingBag className="mr-2 text-blue-400" size={24} />
+              Order Items
+            </h3>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-stone-600">
+                    <TableHead className="text-white">Item</TableHead>
+                    <TableHead className="text-white">Quantity</TableHead>
+                    <TableHead className="text-white text-right">Total</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {orderDetails.line_items.map((item, index) => (
+                    <TableRow key={index} className="border-b border-stone-600">
+                      <TableCell className="font-medium">
+                        {item.name}
+                        {item.meta_data.find((meta: any) => meta.key === 'Size') && (
+                          <span className="text-sm text-stone-400"> (Size: {item.meta_data.find((meta: any) => meta.key === 'Size')?.value})</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell className="text-right">{item.total} NIS</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </motion.div>
         </CardContent>
-        <CardFooter className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <Button
-            onClick={() => router.push('/')}
-            className="bg-stone-700 hover:bg-stone-600 text-white w-full sm:w-auto"
+        <CardFooter className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0 bg-stone-700 mt-8 p-6 rounded-b-lg">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ShoppingBag className="mr-2 h-4 w-4" />
-            Continue Shopping
-          </Button>
-          <Button
-            onClick={generatePDF}
-            variant="outline"
-            className="border-stone-700 text-white hover:bg-stone-700 w-full sm:w-auto"
+            <Button
+              onClick={() => router.push('/')}
+              className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
+            >
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Continue Shopping
+            </Button>
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
-          </Button>
+            <Button
+              onClick={generatePDF}
+              variant="outline"
+              className="border-green-500 text-green-500 hover:bg-green-500 hover:text-white w-full sm:w-auto"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+          </motion.div>
         </CardFooter>
       </Card>
     </motion.div>

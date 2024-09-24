@@ -58,8 +58,8 @@ const ProductCard = ({ product, handleAddToCart }: { product: Product; handleAdd
   const [isHovered, setIsHovered] = useState(false);
 
   const isOnSale = product.sale_price && parseFloat(product.sale_price) < parseFloat(product.regular_price!);
-  const formattedPrice = `$${parseFloat(product.regular_price!).toFixed(2)}`;
-  const formattedSalePrice = `$${parseFloat(product.sale_price || product.price).toFixed(2)}`;
+  const formattedPrice = `${parseFloat(product.regular_price!).toFixed(2)} NIS`;
+  const formattedSalePrice = `${parseFloat(product.sale_price || product.price).toFixed(2)} NIS`;
   const sizeAttribute = product.attributes?.find((attr) => attr.name === "Size");
 
   const handleAddToCartClick = useCallback(() => {

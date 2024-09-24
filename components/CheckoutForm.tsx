@@ -340,7 +340,7 @@ export default function EnhancedCheckout() {
                   <SelectContent>
                     {shippingZones.map((zone) => (
                       <SelectItem key={zone.id} value={zone.id.toString()}>
-                        {zone.name} - ${zone.price.toFixed(2)}
+                        {zone.name} - {zone.price.toFixed(2)} NIS
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -371,7 +371,7 @@ export default function EnhancedCheckout() {
                   checked={orderDetails.gift_wrap}
                   onCheckedChange={(checked) => handleCheckboxChange('gift_wrap', checked as boolean)}
                 />
-                <Label htmlFor="gift-wrap">Gift wrap ($5)</Label>
+                <Label htmlFor="gift-wrap">Gift wrap (5 NIS)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -448,28 +448,28 @@ export default function EnhancedCheckout() {
                     {item.size && <p className="text-sm text-gray-400">Size: {item.size}</p>}
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">{(parseFloat(item.price) * item.quantity).toFixed(2)} NIS</p>
                   </div>
                 </div>
               ))}
               <div className="border-t border-gray-700 pt-4">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>{getCartTotal().toFixed(2)} NIS</span>
                 </div>
                 <div className="flex justify-between mt-2">
                   <span>Shipping</span>
-                  <span>{selectedZone ? `$${selectedZone.price.toFixed(2)}` : 'TBD'}</span>
+                  <span>{selectedZone ? `${selectedZone.price.toFixed(2)} NIS` : 'TBD'}</span>
                 </div>
                 {orderDetails.gift_wrap && (
                   <div className="flex justify-between mt-2">
                     <span>Gift Wrap</span>
-                    <span>$5.00</span>
+                    <span>5.00 NIS</span>
                   </div>
                 )}
                 <div className="flex justify-between mt-4 text-lg font-bold">
                   <span>Total</span>
-                  <span>${(totalWithShipping + (orderDetails.gift_wrap ? 5 : 0)).toFixed(2)}</span>
+                  <span>{(totalWithShipping + (orderDetails.gift_wrap ? 5 : 0)).toFixed(2)} NIS</span>
                 </div>
               </div>
             </CardContent>

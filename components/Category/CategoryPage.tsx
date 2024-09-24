@@ -128,7 +128,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                ${product.price}
+                {product.price} NIS
               </span>
               <Badge
                 variant="secondary"
@@ -371,7 +371,7 @@ export default function CategoryPage({
                               WebkitTextFillColor: "transparent",
                             }}
                           >
-                            ${product.price}
+                            {product.price} NIS
                           </span>
                           <Badge
                             variant="secondary"

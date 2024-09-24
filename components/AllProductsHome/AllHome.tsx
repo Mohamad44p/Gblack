@@ -115,7 +115,7 @@ const QuickViewModal = ({ product, onClose }: {
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent'
                     }}
-                  >${product.sale_price}</span>
+                  >{product.sale_price} NIS</span>
                   <span className="text-xl text-gray-400 line-through">${product.regular_price}</span>
                 </div>
               ) : (
@@ -125,7 +125,7 @@ const QuickViewModal = ({ product, onClose }: {
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent'
                   }}
-                >${product.regular_price}</span>
+                >{product.regular_price} NIS</span>
               )}
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
                 {product.categories[0]?.name || 'Uncategorized'}
@@ -373,14 +373,14 @@ export default function AllHome() {
                                   WebkitBackgroundClip: 'text',
                                   WebkitTextFillColor: 'transparent'
                                 }}>${product.sale_price}</span>
-                                <span className="text-xl text-gray-400 line-through">${product.regular_price}</span>
+                                <span className="text-xl text-gray-400 line-through">{product.regular_price} NIS</span>
                               </div>
                             ) : (
                               <span className="text-3xl font-bold" style={{
                                 background: 'linear-gradient(to right, #fff, #888)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent'
-                              }}>${product.regular_price}</span>
+                              }}>{product.regular_price} NIS</span>
                             )}
                             <Badge variant="secondary" className="bg-white text-black px-3 py-1 rounded-full">
                               {product.categories[0]?.name || 'Uncategorized'}
