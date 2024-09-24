@@ -136,7 +136,7 @@ export default function ImprovedComponent() {
           <div className="main-content">
             <div className="logo">
               <Image
-                src="/images/Rotated/logo.jpg"
+                src="/LogoSection.png"
                 alt="Company Logo"
                 width={100}
                 height={100}
