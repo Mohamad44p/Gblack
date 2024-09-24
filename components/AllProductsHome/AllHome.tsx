@@ -35,6 +35,8 @@ interface Category {
   slug: string
 }
 
+
+
 const QuickViewModal = ({ product, onClose }: {
   product: Product,
   onClose: () => void
@@ -99,7 +101,7 @@ const QuickViewModal = ({ product, onClose }: {
                 WebkitTextFillColor: 'transparent'
               }}
             >{product.name}</h2>
-            <p className="text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: product.description }}></p>
+            <p className="text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: product.short_description }}></p>
             <div className="flex items-center mb-4">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating)) ? 'text-yellow-400' : 'text-gray-300'} fill-current`} />
@@ -148,9 +150,9 @@ const QuickViewModal = ({ product, onClose }: {
                 </Select>
               </div>
             )}
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-4">
               <Button
-                className="flex-1 bg-black hover:bg-white hover:text-black text-white"
+                className="flex-1 bg-white hover:bg-gray-200 text-black"
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
@@ -166,11 +168,22 @@ const QuickViewModal = ({ product, onClose }: {
                 short_description: product.short_description
               }} />
             </div>
+            <Link href={`/product/${product.id}`} passHref>
+              <Button
+                className="w-full bg-transparent hover:bg-white hover:text-black text-white border border-white"
+                onClick={onClose}
+              >
+                View All Details
+                <ChevronRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </motion.div>
     </motion.div>
   )
+
+
 }
 
 const ProductSkeleton = () => (
@@ -258,7 +271,6 @@ export default function AllHome() {
         <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
         <div className="absolute inset-0 bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
         <div className="absolute inset-0 bg-dot-white/[0.2] -z-10" />
-
         <div className="container mx-auto px-4 py-16 relative z-10">
           <motion.div
             className="text-7xl font-extrabold mb-12 text-center"

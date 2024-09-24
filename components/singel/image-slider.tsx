@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { ArrowLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface Product {
   id: number;
@@ -25,12 +24,26 @@ interface WorkCarouselProps {
   products: Product[];
 }
 
+const backgroundColors = [
+  "bg-gray-400",
+  "bg-gray-500",
+  "bg-gray-600",
+  "bg-slate-600",
+  "bg-zinc-600",
+  "bg-neutral-600",
+  "bg-stone-600",
+];
+
 export default function WorkCarousel({ products }: WorkCarouselProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const slideCount = useRef(1);
   const [slideIndex, setSlideIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
+
+  const getNextBackgroundColor = () => {
+    return backgroundColors[slideCount.current % backgroundColors.length];
+  };
 
   const handleHeaderClick = (
     event: React.MouseEvent<HTMLDivElement>,
@@ -58,10 +71,10 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     const newSlide = products[nextSlideIndex];
 
     const slideDiv = document.createElement("div");
-    slideDiv.className = "absolute top-0 left-0 w-full h-full flex";
+    slideDiv.className = "absolute top-0 left-0 w-full h-full flex flex-col md:flex-row";
 
     const slideImgDiv = document.createElement("div");
-    slideImgDiv.className = "relative w-1/2 h-full";
+    slideImgDiv.className = "relative w-full md:w-1/2 h-1/2 md:h-full";
     const image = document.createElement("img");
     image.src = newSlide.images[0]?.src || "/placeholder.jpg";
     image.alt = newSlide.name;
@@ -69,10 +82,7 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     slideImgDiv.appendChild(image);
 
     const slideContentDiv = document.createElement("div");
-    slideContentDiv.className = "relative w-1/2 h-full";
-    slideContentDiv.style.backgroundColor = `#${Math.floor(
-      Math.random() * 16777215
-    ).toString(16)}`;
+    slideContentDiv.className = `relative w-full md:w-1/2 h-1/2 md:h-full ${getNextBackgroundColor()}`;
     const contentHeader = document.createElement("div");
     contentHeader.className =
       "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer";
@@ -85,7 +95,7 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     );
     header.textContent = newSlide.name;
     header.className =
-      "font-romie text-4xl md:text-5xl lg:text-7xl font-normal uppercase";
+      "font-romie text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal uppercase text-black";
     splitHeader(header);
     const letters = header.querySelectorAll("span");
 
@@ -183,7 +193,6 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     return () => {
       document.removeEventListener("click", handleClick);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnimating]);
 
   if (products.length === 0) {
@@ -191,10 +200,10 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
   }
 
   return (
-    <section className="relative w-full h-[600px] md:h-[800px] overflow-hidden">
+    <section className="relative w-full h-[600px] md:h-[800px] overflow-hidden bg-black">
       <div ref={carouselRef} className="w-full h-full">
-        <div className="absolute top-0 left-0 w-full h-full flex">
-          <div className="relative w-1/2 h-full">
+        <div className="absolute top-0 left-0 w-full h-full flex flex-col md:flex-row">
+          <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
             <Image
               src={products[0].images[0]?.src || "/placeholder.jpg"}
               alt={products[0].name}
@@ -202,55 +211,48 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
               objectFit="cover"
             />
           </div>
-          <div
-            className="relative w-1/2 h-full"
-            style={{
-              backgroundColor: `#${Math.floor(
-                Math.random() * 16777215
-              ).toString(16)}`,
-            }}
-          >
+          <div className={`relative w-full md:w-1/2 h-1/2 md:h-full ${backgroundColors[0]}`}>
             <div
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer"
               onClick={(e) => handleHeaderClick(e, products[0].id)}
             >
-              <h1 className="font-romie text-2xl md:text-3xl lg:text-4xl font-normal uppercase">
+              <h1 className="font-romie text-2xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-normal uppercase text-black">
                 {products[0].name}
               </h1>
             </div>
           </div>
         </div>
       </div>
-      <div className="absolute top-0 left-1/2 p-4 z-10">
+      <div className="absolute top-0 left-0 md:left-1/2 p-4 z-10">
         <div className="flex items-center gap-2.5">
-          <p className="font-romie italic text-xs capitalize">Brand</p>
-          <p id="work-client" className="text-xs font-medium uppercase">
+          <p className="font-romie italic text-xs capitalize text-gray-300">Brand</p>
+          <p id="work-client" className="text-xs font-medium uppercase text-white">
             {products[0].brand}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
-          <p className="font-romie italic text-xs capitalize">Price</p>
-          <p id="work-role" className="text-xs font-medium uppercase">
+          <p className="font-romie italic text-xs capitalize text-gray-300">Price</p>
+          <p id="work-role" className="text-xs font-medium uppercase text-white">
             ${products[0].price}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
-          <p className="font-romie italic text-xs capitalize">Type</p>
-          <p id="work-type" className="text-xs font-medium uppercase">
+          <p className="font-romie italic text-xs capitalize text-gray-300">Type</p>
+          <p id="work-type" className="text-xs font-medium uppercase text-white">
             {products[0].attributes[0]?.options[0] || "N/A"}
           </p>
         </div>
       </div>
       <div className="absolute bottom-0 left-0 p-4 flex gap-2.5">
-        <p className="text-xs font-medium">{slideIndex + 1}</p>
-        <p className="text-xs font-medium">/</p>
-        <p className="text-xs font-medium">{products.length}</p>
+        <p className="text-xs font-medium text-gray-300">{slideIndex + 1}</p>
+        <p className="text-xs font-medium text-gray-300">/</p>
+        <p className="text-xs font-medium text-gray-300">{products.length}</p>
       </div>
       <div
-        className="absolute bottom-0 right-0 p-4 cursor-pointer"
+        className="absolute bottom-4 right-4 cursor-pointer bg-white p-2 rounded-full shadow-lg"
         onClick={addNewSlide}
       >
-        <p className="text-xs font-medium uppercase">Next</p>
+        <ArrowRight className="w-6 h-6 text-black" />
       </div>
     </section>
   );

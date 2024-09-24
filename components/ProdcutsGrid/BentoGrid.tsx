@@ -132,7 +132,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
       <CardContent className="p-0 flex flex-col h-full relative">
         <Link
           href={`/product/${product.id}`}
-          className="relative w-full h-full overflow-hidden"
+          className="relative w-full h-[250px] overflow-hidden"
         >
           <Image
             src={product.images[0].src}
@@ -148,17 +148,19 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
             </div>
           )}
           {isHovered && (
-            <Button
-              size="sm"
-              className="absolute top-2 right-2 bg-white text-black hover:bg-white/80 transition-all duration-300 rounded-full"
-              onClick={(e) => {
-                e.preventDefault();
-                setIsQuickViewOpen(true);
-              }}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Quick View
-            </Button>
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
+              <Button
+                size="sm"
+                className="bg-white text-black hover:bg-white/80 transition-all duration-300 rounded-full"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsQuickViewOpen(true);
+                }}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Quick View
+              </Button>
+            </div>
           )}
         </Link>
         <div className="p-4 flex-grow flex flex-col justify-between bg-black">
@@ -175,11 +177,10 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.round(product.rating ?? 0)
+                  className={`w-4 h-4 ${i < Math.round(product.rating ?? 0)
                       ? "text-yellow-400 fill-current"
                       : "text-white/20"
-                  }`}
+                    }`}
                 />
               ))}
               <span className="ml-2 text-sm text-white/60">
@@ -284,11 +285,10 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.round(product.rating ?? 0)
+                      className={`w-5 h-5 ${i < Math.round(product.rating ?? 0)
                           ? "text-yellow-400 fill-current"
                           : "text-white/20"
-                      }`}
+                        }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-white/60">
@@ -438,7 +438,7 @@ export function ProductShowcase({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="overflow-hidden h-[500px] border-0 shadow-2xl relative rounded-lg">
+          <Card className="overflow-hidden h-[300px] border-0 shadow-2xl relative rounded-lg">
             <Image
               src={featuredImage}
               alt="Featured product"

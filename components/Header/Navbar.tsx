@@ -22,6 +22,7 @@ interface Category {
 const staticNavItems = [
   { name: "Home", href: "/" },
   { name: "All Products", href: "/all" },
+  { name: "Contact Us", href: "/contact-us" },
 ]
 
 export default function Navbar() {
