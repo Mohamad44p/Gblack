@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, createElement } from "react";
+import { useState, createElement } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -27,32 +27,17 @@ interface SocialLink {
   platform: string;
 }
 
-export default function TopBar() {
+interface TopBarProps {
+  socialLinks: SocialLink[];
+}
+
+export default function TopBar({ socialLinks }: TopBarProps) {
   const [lang, setLang] = useState<"en" | "ar">("en");
   const { isLoggedIn, user, logout } = useAuth();
   const router = useRouter();
   const { wishlist } = useWishlist();
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const { openCart } = useCartSheet();
   const { getCartCount } = useCart();
-
-  useEffect(() => {
-    const fetchSocialLinks = async () => {
-      try {
-        const response = await fetch("/api/get-social-links");
-        if (response.ok) {
-          const data = await response.json();
-          setSocialLinks(data);
-        } else {
-          console.error("Failed to fetch social links");
-        }
-      } catch (error) {
-        console.error("Error fetching social links:", error);
-      }
-    };
-
-    fetchSocialLinks();
-  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -175,7 +160,7 @@ export default function TopBar() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="focus:outline-none relative"
+              className="focus:outline-none mt-1 relative"
             >
               <Heart size={20} />
               {wishlist.length > 0 && (

@@ -1,10 +1,9 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ZoomIn, X } from "lucide-react";
+import Image from "next/image";
 
 interface ImageGalleryProps {
   images: Array<{
@@ -29,50 +28,35 @@ export default function ImageGallery({ images, isOnSale }: ImageGalleryProps) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-5">
-      <div className="order-last flex gap-4 lg:order-none lg:flex-col">
-        <Suspense
-          fallback={
-            <>
-              {images.map((image) => (
-                <div className="flex flex-col space-y-3" key={image.id}>
-                  <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[250px]" />
-                    <Skeleton className="h-4 w-[200px]" />
-                  </div>
-                </div>
-              ))}
-            </>
-          }
-        >
-          {images.map((image) => (
-            <motion.div
-              key={image.id}
-              className="overflow-hidden rounded-lg bg-gray-100 shadow-lg transition-all duration-300 hover:shadow-xl"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                loading="lazy"
-                className="h-full w-full object-cover object-center cursor-pointer transition-transform duration-300 hover:scale-110"
-                width={200}
-                height={200}
-                onClick={() => handleSmallImageClick(image)}
-              />
-            </motion.div>
-          ))}
-        </Suspense>
+      <div className="order-last flex gap-2 overflow-x-auto lg:order-none lg:flex-col lg:overflow-x-visible">
+        {images.map((image) => (
+          <motion.div
+            key={image.id}
+            className={`flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 shadow-lg transition-all duration-300 hover:shadow-xl ${
+              bigImage.id === image.id ? "ring-2 ring-primary" : ""
+            }`}
+            whileHover={{ scale: 1.05 }}
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              width={100}
+              height={100}
+              className="cursor-pointer object-cover object-center transition-transform duration-300 hover:scale-110 h-full w-full"
+              onClick={() => handleSmallImageClick(image)}
+            />
+          </motion.div>
+        ))}
       </div>
 
-      <div className="relative overflow-hidden rounded-lg bg-gray-100 lg:col-span-4 shadow-2xl">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 lg:col-span-4 shadow-2xl">
         <Image
           src={bigImage.src}
           alt={bigImage.alt}
-          loading="lazy"
-          className="h-full w-full object-cover object-center"
-          width={500}
-          height={500}
+          fill
+          className="object-cover object-center"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority
         />
 
         {isOnSale && (
@@ -109,14 +93,14 @@ export default function ImageGallery({ images, isOnSale }: ImageGalleryProps) {
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.8 }}
-              className="relative max-h-[90vh] max-w-[90vw]"
+              className="relative h-full w-full"
             >
               <Image
                 src={bigImage.src}
                 alt={bigImage.alt}
-                className="h-full w-full object-contain"
-                width={1000}
-                height={1000}
+                fill
+                className="object-contain"
+                sizes="100vw"
               />
               <button
                 className="absolute top-4 right-4 rounded-full bg-white p-2 shadow-md transition-colors duration-300 hover:bg-gray-200"

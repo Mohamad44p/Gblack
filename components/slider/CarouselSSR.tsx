@@ -1,10 +1,13 @@
-// app/page.tsx
-import { Suspense } from "react";
-import CarouselSkeleton from "./CarouselSkeleton";
 import { cache } from "react";
-import ImprovedCarousel from "./Carousel";
+import dynamic from "next/dynamic";
+import Loading from "@/app/loading";
 
-export const revalidate = 604800; // Revalidate every week (7 days)
+const ImprovedCarousel = dynamic(() => import("./Carousel"), {
+  ssr: false,
+  loading: () => <Loading />,
+});
+
+export const revalidate = 604800;
 
 const getCarouselItems = cache(async () => {
   const wordpressSiteUrl = process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL;
@@ -26,16 +29,7 @@ const getCarouselItems = cache(async () => {
 });
 
 export default async function CarouselSSR() {
-  try {
-    const carouselItems = await getCarouselItems();
+  const carouselItems = await getCarouselItems();
 
-    return (
-      <Suspense fallback={<CarouselSkeleton />}>
-        <ImprovedCarousel initialItems={carouselItems} />
-      </Suspense>
-    );
-  } catch (error) {
-    console.error("Error fetching carousel items:", error);
-    return <div>Error loading carousel. Please try again later.</div>;
-  }
+  return <ImprovedCarousel initialItems={carouselItems} />;
 }

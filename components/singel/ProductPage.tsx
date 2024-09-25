@@ -1,9 +1,10 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import ImageGallery from "@/components/singel/ImageGallery";
 import { Button } from "@/components/ui/button";
-import { Star, Truck, Share2, ShoppingCart } from "lucide-react";
+import { Star, Truck, Share2, ShoppingCart, Bell } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -13,9 +14,11 @@ import { WishlistButton } from "@/components/WishlistButton";
 import { useCart } from "@/contexts/CartContext";
 import { openCart } from "@/lib/hooks/events";
 import ProductReviews from "./ProductReviews";
-import AlsoLikePr from "./AlsoLike/AlsoLikePr";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ProductAttribute {
   id: number;
@@ -65,6 +68,12 @@ interface ProductProps {
     width: string;
     height: string;
   };
+  manage_stock: boolean;
+  backorders: string;
+  backorders_allowed: boolean;
+  backordered: boolean;
+  low_stock_amount: number;
+  sold_individually: boolean;
 }
 
 const fadeInUp = {
@@ -78,35 +87,57 @@ const stagger = {
 
 export default function SingleProductPage({
   product,
+  shippingZones,
 }: {
   product: ProductProps;
+  shippingZones: ShippingZone[];
 }) {
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const { addToCart } = useCart();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
-
-  useEffect(() => {
-    fetch("/api/shipping-zones")
-      .then((response) => response.json())
-      .then((data) => setShippingZones(data))
-      .catch((error) => console.error("Error fetching shipping zones:", error));
-  }, []);
+  const router = useRouter();
+  const [isLowStock, setIsLowStock] = useState(false);
+  const [isOutOfStock, setIsOutOfStock] = useState(false);
 
   const sizes =
     product.attributes.find((attr) => attr.name === "Size")?.options || [];
   const isOnSale =
     product.sale_price !== "" && product.sale_price !== product.regular_price;
 
-  const handleAddToCart = () => {
+  useEffect(() => {
+    if (product.manage_stock) {
+      setIsLowStock(product.stock_quantity <= product.low_stock_amount);
+      setIsOutOfStock(product.stock_quantity === 0);
+    }
+  }, [product.manage_stock, product.stock_quantity, product.low_stock_amount]);
+
+  const handleAddToCart = useCallback(() => {
     if (sizes.length > 0 && !selectedSize) {
       toast({
         title: "Please select a size",
         description: "You must select a size before adding to cart.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isOutOfStock) {
+      toast({
+        title: "Out of Stock",
+        description: "This product is currently out of stock.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (product.sold_individually && quantity > 1) {
+      toast({
+        title: "Quantity Limit",
+        description: "This product can only be purchased one at a time.",
         variant: "destructive",
       });
       return;
@@ -127,25 +158,58 @@ export default function SingleProductPage({
       }) added to your cart.`,
     });
     openCart();
-  };
+  }, [
+    addToCart,
+    isOnSale,
+    product,
+    quantity,
+    selectedSize,
+    sizes.length,
+    isOutOfStock,
+  ]);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
+    const productUrl = `${window.location.origin}/product/${product.id}`;
     if (navigator.share) {
       navigator
         .share({
           title: product.name,
           text: product.short_description,
-          url: product.permalink,
+          url: productUrl,
         })
         .then(() => console.log("Successful share"))
         .catch((error) => console.log("Error sharing", error));
     } else {
       toast({
         title: "Share",
-        description: "Copy this link: " + product.permalink,
+        description: "Copy this link: " + productUrl,
       });
     }
-  };
+  }, [product.id, product.name, product.short_description]);
+
+  const handleQuantityChange = useCallback(
+    (newQuantity: number) => {
+      if (product.sold_individually) {
+        setQuantity(1);
+        return;
+      }
+      setQuantity((prevQuantity) => {
+        if (product.stock_quantity === null) {
+          return Math.max(1, newQuantity);
+        }
+        return Math.max(1, Math.min(product.stock_quantity, newQuantity));
+      });
+    },
+    [product.stock_quantity, product.sold_individually]
+  );
+
+  const handleNotifyMe = useCallback(() => {
+    // Implement notification logic here
+    toast({
+      title: "Notification Set",
+      description: "We'll notify you when this product is back in stock.",
+    });
+  }, []);
 
   return (
     <motion.div
@@ -193,6 +257,11 @@ export default function SingleProductPage({
               <span className="text-sm transition duration-100">
                 {product.rating_count} Ratings
               </span>
+              {product.sku && (
+                <span className="text-sm text-muted-foreground">
+                  SKU: {product.sku}
+                </span>
+              )}
             </motion.div>
 
             <motion.div variants={fadeInUp} className="mb-6">
@@ -210,6 +279,24 @@ export default function SingleProductPage({
                 Incl. VAT plus shipping
               </span>
             </motion.div>
+
+            {isLowStock && !isOutOfStock && (
+              <Alert variant="default" className="mb-4">
+                <AlertTitle>Low Stock</AlertTitle>
+                <AlertDescription>
+                  Only {product.stock_quantity} items left in stock!
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {isOutOfStock && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertTitle>Out of Stock</AlertTitle>
+                <AlertDescription>
+                  This product is currently unavailable.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {sizes.length > 0 && (
               <motion.div variants={fadeInUp} className="mb-6">
@@ -244,41 +331,48 @@ export default function SingleProductPage({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  onClick={() => handleQuantityChange(quantity - 1)}
+                  disabled={isOutOfStock || product.sold_individually}
                 >
                   -
                 </Button>
                 <Input
                   type="number"
                   min="1"
-                  max={product.stock_quantity}
+                  max={product.stock_quantity || undefined}
                   value={quantity}
                   onChange={(e) =>
-                    setQuantity(
-                      Math.min(
-                        product.stock_quantity,
-                        Math.max(1, parseInt(e.target.value) || 1)
-                      )
-                    )
+                    handleQuantityChange(parseInt(e.target.value) || 1)
                   }
                   className="w-16 text-center bg-transparent border-gray-600"
+                  disabled={isOutOfStock || product.sold_individually}
                 />
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() =>
-                    setQuantity(Math.min(product.stock_quantity, quantity + 1))
-                  }
+                  onClick={() => handleQuantityChange(quantity + 1)}
+                  disabled={isOutOfStock || product.sold_individually}
                 >
                   +
                 </Button>
               </div>
+              {product.manage_stock && product.stock_quantity !== null && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {product.stock_quantity} in stock
+                </p>
+              )}
+              {product.sold_individually && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  This product can only be purchased one at a time.
+                </p>
+              )}
             </motion.div>
 
             <motion.div variants={fadeInUp} className="flex gap-2.5 mb-6">
               <Button
                 className="flex-1 mr-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white transition-all duration-300"
                 onClick={handleAddToCart}
+                disabled={isOutOfStock}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
@@ -286,6 +380,7 @@ export default function SingleProductPage({
               <Button
                 variant="outline"
                 className="flex-1 transition-all duration-300"
+                disabled={isOutOfStock}
               >
                 Buy now
               </Button>
@@ -310,6 +405,25 @@ export default function SingleProductPage({
                 <Share2 className="h-5 w-5" />
               </Button>
             </motion.div>
+
+            {isOutOfStock && (
+              <motion.div variants={fadeInUp} className="mb-6">
+                <Button onClick={handleNotifyMe} className="w-full">
+                  <Bell className="w-4 h-4 mr-2" />
+                  Notify Me When Available
+                </Button>
+              </motion.div>
+            )}
+
+            {product.backorders_allowed && product.backorders !== "no" && (
+              <motion.div variants={fadeInUp} className="mb-6">
+                <Badge variant="secondary">Backorder Available</Badge>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This product can be backordered. We'll ship it as soon as it's
+                  back in stock.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>
@@ -366,17 +480,24 @@ export default function SingleProductPage({
               <h4 className="text-md font-semibold text-gray-300">
                 Shipping Zones and Rates:
               </h4>
-              {shippingZones.map((zone) => (
-                <div
-                  key={zone.id}
-                  className="flex justify-between items-center border-b border-gray-700 pb-2"
-                >
-                  <span className="text-gray-300">{zone.name}:</span>
-                  <span className="text-gray-300">
-                    {zone.price.toFixed(2)} NIS
-                  </span>
-                </div>
-              ))}
+              {shippingZones && shippingZones.length > 0 ? (
+                shippingZones.map((zone) => (
+                  <div
+                    key={zone.id}
+                    className="flex justify-between items-center border-b border-gray-700 pb-2"
+                  >
+                    <span className="text-gray-300">{zone.name}:</span>
+                    <span className="text-gray-300">
+                      {typeof zone.price === "number"
+                        ? zone.price.toFixed(2)
+                        : "N/A"}{" "}
+                      NIS
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p>No shipping zones available.</p>
+              )}
               <p className="mt-4 text-gray-300">
                 Free standard shipping on orders over 100 NIS. Expedited and
                 international shipping options available at checkout. Please

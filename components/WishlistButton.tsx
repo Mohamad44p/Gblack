@@ -62,7 +62,7 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({ product }) => {
       size="icon"
       className={`rounded-full ${inWishlist
           ? 'bg-red-500 text-white hover:bg-red-600'
-          : 'bg-white text-black hover:bg-gray-100'
+          : 'bg-white text-black hover:bg-gray-950'
         } transition-all duration-300`}
       onClick={handleClick}
       disabled={isLoading}

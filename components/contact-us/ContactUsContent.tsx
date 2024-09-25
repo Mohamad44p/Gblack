@@ -13,7 +13,6 @@ import { Button } from "../ui/button";
 export default function ContactUsContent() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Form submitted");
     };
 
     return (

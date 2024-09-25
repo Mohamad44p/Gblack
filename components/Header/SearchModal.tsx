@@ -87,7 +87,6 @@ export default function SearchModal() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Search submitted:", searchQuery)
   }
 
   return (

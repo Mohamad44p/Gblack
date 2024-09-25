@@ -22,7 +22,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const user = await login(usernameOrEmail, password);
-      console.log("Login successful:", user);
       router.push("/");
     } catch (err: any) {
       console.error("Login error:", err);

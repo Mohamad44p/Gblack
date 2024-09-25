@@ -48,8 +48,6 @@ export async function GET(request: NextRequest) {
     response.success = true;
     response.products = data;
 
-    console.log("API Response:", JSON.stringify(response, null, 2));
-
     return NextResponse.json(response);
   } catch (error: any) {
     console.error("API Error:", error);

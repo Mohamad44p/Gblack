@@ -1,10 +1,17 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Compass } from "lucide-react";
 import { useInView } from "react-intersection-observer";
+import useSWR from "swr";
 
 interface CarouselItem {
   id: number;
@@ -53,6 +60,7 @@ export default function ImprovedCarousel({
 
   const showSlider = useCallback(
     (index: number) => {
+      if (!carouselItems) return;
       const type = index > currentIndex ? "next" : "prev";
       setDirection(type);
       setCurrentIndex(index);
@@ -76,11 +84,11 @@ export default function ImprovedCarousel({
         setDirection(null);
       }, 500);
     },
-    [currentIndex]
+    [currentIndex, carouselItems]
   );
 
   useEffect(() => {
-    if (carouselItems.length === 0) return;
+    if (!carouselItems || carouselItems.length === 0) return;
 
     const autoNext = setInterval(() => {
       showSlider((currentIndex + 1) % carouselItems.length);
@@ -92,7 +100,7 @@ export default function ImprovedCarousel({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, carouselItems.length, showSlider]);
+  }, [currentIndex, carouselItems, showSlider]);
 
   useEffect(() => {
     if (inView && videoRefs.current[currentIndex]) {
@@ -102,15 +110,11 @@ export default function ImprovedCarousel({
     }
   }, [currentIndex, inView]);
 
-  if (carouselItems.length === 0) {
-    return <div>No items to display</div>;
-  }
-
-  return (
-    <div
-      className="relative h-[85vh] w-full overflow-hidden bg-black"
-      ref={carouselRef}
-    >
+  const memoizedCarouselContent = useMemo(() => {
+    if (!carouselItems || carouselItems.length === 0) {
+      return null;
+    }
+    return (
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={currentIndex}
@@ -192,6 +196,19 @@ export default function ImprovedCarousel({
           </motion.div>
         </motion.div>
       </AnimatePresence>
+    );
+  }, [carouselItems, currentIndex, direction]);
+
+  if (!carouselItems) {
+    return null;
+  }
+
+  return (
+    <div
+      className="relative h-[85vh] w-full overflow-hidden bg-black"
+      ref={carouselRef}
+    >
+      {memoizedCarouselContent}
       <div
         className="absolute bottom-4 right-4 z-10 flex gap-2 md:bottom-8 md:right-8 lg:bottom-12 lg:right-12"
         role="tablist"
@@ -216,7 +233,8 @@ export default function ImprovedCarousel({
               fill
               sizes="(max-width: 768px) 64px, (max-width: 1024px) 96px, 112px"
               className="transition-transform object-cover w-full h-full group-hover:scale-110"
-              loading="lazy"
+              loading="eager"
+              priority={index === 0}
               placeholder="blur"
               blurDataURL={`data:image/svg+xml;base64,${toBase64(
                 shimmer(112, 160)

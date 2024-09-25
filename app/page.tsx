@@ -1,35 +1,40 @@
-import { Suspense } from "react";
+import { cache } from "react";
 import { ProductShowcase } from "@/components/ProdcutsGrid/BentoGrid";
 import SecSection from "@/components/Sec/SecSection";
 import ImagesShow from "@/components/ThirdSec/ImagesShow";
-import Loading from "@/components/Loading";
 import { Product } from "@/types/product";
 import dynamic from "next/dynamic";
-import { unstable_noStore as noStore } from "next/cache";
-import ImprovedAllHome from "@/components/AllProductsHome/AllHome";
 import CarouselSSR from "@/components/slider/CarouselSSR";
 
-async function getProducts(perPage: number): Promise<{ products: Product[] }> {
-  noStore();
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/products?per_page=${perPage}`,
-    {
-      next: { revalidate: 3600 },
-    }
-  );
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
+const DynamicImprovedAllHome = dynamic(
+  () => import("@/components/AllProductsHome/AllHome"),
+  {
+    loading: () => null,
+    ssr: false,
   }
-  return res.json();
-}
+);
 
-async function getProductRatings(
-  productIds: number[]
-): Promise<{
-  [key: number]: { average_rating: string; rating_count: number };
-}> {
-  noStore();
-  try {
+const getProducts = cache(
+  async (perPage: number): Promise<{ products: Product[] }> => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/products?per_page=${perPage}`,
+      {
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) {
+      throw new Error("Failed to fetch products");
+    }
+    return res.json();
+  }
+);
+
+const getProductRatings = cache(
+  async (
+    productIds: number[]
+  ): Promise<{
+    [key: number]: { average_rating: string; rating_count: number };
+  }> => {
     const res = await fetch(
       `${
         process.env.NEXT_PUBLIC_API_URL
@@ -43,11 +48,8 @@ async function getProductRatings(
       return {};
     }
     return res.json();
-  } catch (error) {
-    console.error("Error fetching product ratings:", error);
-    return {};
   }
-}
+);
 
 function transformProduct(
   product: Product,
@@ -109,17 +111,19 @@ async function ProductShowcases() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const showcases = await ProductShowcases();
+
   return (
     <main className="min-h-screen">
       <h1 className="sr-only">Welcome to GBLACK - Your Fashion Destination</h1>
       <CarouselSSR />
       <SecSection />
-      <ImagesShow />
-      <Suspense fallback={<Loading />}>
-        <ProductShowcases />
-      </Suspense>
-      <ImprovedAllHome />
+      <section className="min-h-screen">
+        <ImagesShow />
+      </section>
+      {showcases}
+      <DynamicImprovedAllHome />
     </main>
   );
 }

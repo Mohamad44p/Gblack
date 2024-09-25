@@ -80,11 +80,34 @@ export async function POST(request: NextRequest) {
         },
       ];
     }
-
-    console.log("Order Data:", orderData);
     const response = await api.post("orders", orderData);
 
-    return NextResponse.json({ orderId: response.data.id }, { status: 201 });
+    let stockAlert = false;
+
+    for (const item of cart) {
+      try {
+        const productResponse = await api.get(`products/${item.id}`);
+        const product = productResponse.data;
+
+        if (product.manage_stock) {
+          let newStockQuantity = product.stock_quantity - item.quantity;
+          if (newStockQuantity < 0) {
+            newStockQuantity = 0;
+            stockAlert = true;
+          }
+          await api.put(`products/${item.id}`, {
+            stock_quantity: newStockQuantity,
+          });
+        }
+      } catch (error) {
+        console.error(`Error updating stock for product ${item.id}:`, error);
+      }
+    }
+
+    return NextResponse.json({
+      orderId: response.data.id,
+      stockAlert: stockAlert
+    }, { status: 201 });
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json(

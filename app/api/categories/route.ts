@@ -1,29 +1,22 @@
+import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api';
 import { NextResponse } from 'next/server';
-import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+import { cache } from 'react'
 
-const api = new WooCommerceRestApi({
-  url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,
-  consumerKey: process.env.WP_CONSUMER_KEY!,
-  consumerSecret: process.env.WP_CONSUMER_SECRET!,
-  version: "wc/v3",
+const getCategories = cache(async () => {
+  const api = new WooCommerceRestApi({
+    url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,
+    consumerKey: process.env.WP_CONSUMER_KEY!,
+    consumerSecret: process.env.WP_CONSUMER_SECRET!,
+    version: "wc/v3",
+  });
+
+  const { data } = await api.get("products/categories");
+  return data;
 });
 
 export async function GET() {
-  const response = {
-    success: false,
-    categories: [],
-    error: null as string | null,
-  };
-
-  try {
-    const { data } = await api.get("products/categories");
-
-    response.success = true;
-    response.categories = data;
-
-    return NextResponse.json(response);
-  } catch (error: any) {
-    response.error = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json(response, { status: 500 });
-  }
+  const categories = await getCategories();
+  return NextResponse.json({ categories });
 }
+
+export const revalidate = 3600;

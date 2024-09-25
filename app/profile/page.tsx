@@ -79,7 +79,6 @@ function EcommerceProfileRedesignContent() {
     const fetchOrders = async () => {
         const userId = localStorage.getItem('userId');
         if (userId) {
-          console.log('Fetching orders for user ID:', userId);
           try {
             const response = await fetch(`/api/ordersuser?userId=${userId}`);
             if (!response.ok) {

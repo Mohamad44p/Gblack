@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, ChevronDown } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -11,49 +11,34 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu";
 
 interface Category {
-  id: number
-  name: string
-  slug: string
+  id: number;
+  name: string;
+  slug: string;
 }
 
 const staticNavItems = [
   { name: "Home", href: "/" },
   { name: "All Products", href: "/all" },
   { name: "Contact Us", href: "/contact-us" },
-]
+];
 
-export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default function Navbar({ categories }: { categories: Category[] }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('/api/categories')
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories')
-        }
-        const data = await response.json()
-        setCategories(data.categories)
-      } catch (err) {
-        setError('Error fetching categories')
-        console.error('Error fetching categories:', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchCategories()
-  }, [])
-
-  const allNavItems = [...staticNavItems, ...categories.map(cat => ({ name: cat.name, href: `/category/${cat.slug}` }))]
-  const visibleNavItems = allNavItems.slice(0, 5)
-  const dropdownNavItems = allNavItems.slice(5)
+  const allNavItems = [
+    ...staticNavItems,
+    ...categories.map((cat) => ({
+      name: cat.name,
+      href: `/category/${cat.slug}`,
+    })),
+  ];
+  const visibleNavItems = allNavItems.slice(0, 5);
+  const dropdownNavItems = allNavItems.slice(5);
 
   return (
     <nav className="bg-black hidden md:block text-white py-4 px-6 border-t border-gray-800">
@@ -90,7 +75,9 @@ export default function Navbar() {
                               href={item.href}
                               className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                             >
-                              <div className="text-sm font-medium leading-none">{item.name}</div>
+                              <div className="text-sm font-medium leading-none">
+                                {item.name}
+                              </div>
                             </Link>
                           </NavigationMenuLink>
                         </li>
@@ -143,5 +130,5 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

@@ -33,11 +33,35 @@ export const metadata: Metadata = {
   },
 };
 
+async function getCategories() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`, {
+    next: { revalidate: 3600 },
+  });
+  if (!res.ok) throw new Error("Failed to fetch categories");
+  return res.json();
+}
+
+async function getSocialLinks() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/get-social-links`,
+    {
+      next: { revalidate: 3600 },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to fetch social links");
+  return res.json();
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [categoriesData, socialLinksData] = await Promise.all([
+    getCategories(),
+    getSocialLinks(),
+  ]);
+
   return (
     <html lang="en">
       <body className={`${raleway.variable} font-sans`}>
@@ -47,10 +71,10 @@ export default async function RootLayout({
               <CartProvider>
                 <WishlistProvider>
                   <header>
-                    <TopBar />
-                    <Navbar />
+                    <TopBar socialLinks={socialLinksData} />
+                    <Navbar categories={categoriesData.categories} />
                   </header>
-                  <CircularMenu />
+                  <CircularMenu  socialLinks={socialLinksData} categories={categoriesData.categories}/>
                   <div className="hidden">
                     <CartSheet />
                   </div>

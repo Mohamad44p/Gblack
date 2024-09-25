@@ -56,13 +56,17 @@ const slideIn = {
   }),
 };
 
-export default function AnimatedMenu() {
+export default function AnimatedMenu({
+  categories,
+  socialLinks,
+}: {
+  categories: Category[];
+  socialLinks: SocialLink[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const { isLoggedIn, logout } = useAuth();
   const router = useRouter();
   const { wishlist } = useWishlist();
@@ -70,28 +74,6 @@ export default function AnimatedMenu() {
   const { getCartCount } = useCart();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [socialResponse, categoriesResponse] = await Promise.all([
-          fetch("/api/get-social-links"),
-          fetch("/api/categories"),
-        ]);
-
-        if (socialResponse.ok && categoriesResponse.ok) {
-          const socialData = await socialResponse.json();
-          const categoriesData = await categoriesResponse.json();
-          setSocialLinks(socialData);
-          setCategories(categoriesData.categories);
-        } else {
-          console.error("Failed to fetch data");
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };

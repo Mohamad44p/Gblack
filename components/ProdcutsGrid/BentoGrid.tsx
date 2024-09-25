@@ -32,6 +32,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { OptimizedImage } from "../OptimizedImage";
 
 export interface Product {
   id: number;
@@ -134,7 +135,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
           href={`/product/${product.id}`}
           className="relative w-full h-[250px] overflow-hidden"
         >
-          <Image
+          <OptimizedImage
             src={product.images[0].src}
             alt={product.images[0].alt || product.name}
             fill
@@ -177,10 +178,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${i < Math.round(product.rating ?? 0)
+                  className={`w-4 h-4 ${
+                    i < Math.round(product.rating ?? 0)
                       ? "text-yellow-400 fill-current"
                       : "text-white/20"
-                    }`}
+                  }`}
                 />
               ))}
               <span className="ml-2 text-sm text-white/60">
@@ -285,19 +287,23 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${i < Math.round(product.rating ?? 0)
+                      className={`w-5 h-5 ${
+                        i < Math.round(product.rating ?? 0)
                           ? "text-yellow-400 fill-current"
                           : "text-white/20"
-                        }`}
+                      }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-white/60">
                     ({product.ratingCount} reviews)
                   </span>
                 </div>
-                <p className="text-white/80 mb-4">
-                  {product.short_description}
-                </p>
+                <p
+                  className="text-white/80 mb-4"
+                  dangerouslySetInnerHTML={{
+                    __html: product.short_description,
+                  }}
+                ></p>
                 {sizeAttribute && (
                   <div className="mb-4">
                     <Label className="mb-2 block">Size</Label>
@@ -439,7 +445,7 @@ export function ProductShowcase({
           transition={{ duration: 0.5 }}
         >
           <Card className="overflow-hidden h-[300px] border-0 shadow-2xl relative rounded-lg">
-            <Image
+            <OptimizedImage
               src={featuredImage}
               alt="Featured product"
               fill
@@ -447,7 +453,7 @@ export function ProductShowcase({
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>
-            <CardContent className="p-10 relative h-full z-20 flex items-center">
+            <CardContent className="p-10 absolute top-0 h-full z-20 flex items-center">
               <div className="max-w-lg">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
