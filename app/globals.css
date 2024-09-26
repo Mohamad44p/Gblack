@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Edu+AU+VIC+WA+NT+Guides:wght@400..700&display=swap');
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,14 +15,14 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --background-color: #210002;
+  --text-color: #eee;
 }
 
 *::selection {
   background-color: #fff;
   color: #000;
 }
-
-
 
 /* Lenis */
 html.lenis,
@@ -61,7 +64,8 @@ html.lenis body {
 
 @font-face {
   font-family: "GTWalsheim";
-  src: url("/fonts/GT-Walsheim-Condensed-Thin-Trial-BF651b7fc72dc1c.otf") format("opentype");
+  src: url("/fonts/GT-Walsheim-Condensed-Thin-Trial-BF651b7fc72dc1c.otf")
+    format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -301,14 +305,97 @@ html {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
-
-.bg-image{
+.bg-image {
   background-image: url("/assets/TestWavy.jpeg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
+.banner {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner .bg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  transition: 0.1s;
+}
+
+.banner h1 {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 11rem;
+  color: #fff;
+  font-family: "Edu AU VIC WA NT Guides", system-ui;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.animation-show {
+  transform: translateY(50px);
+  opacity: 0;
+  transition: 0.7s;
+}
+
+.active .animation-show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.active .animation-show:nth-child(2) {
+  transition-delay: 0.3s;
+}
+
+.active .animation-show:nth-child(3) {
+  transition-delay: 0.6s;
+}
+
+.active .animation-show:nth-child(4) {
+  transition-delay: 0.9s;
+}
+
+.library {
+  margin-top: 50px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 20px;
+  text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  .banner h1 {
+    font-size: 5rem;
+  }
+
+  .library {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
+.animate-fadeIn {
+  animation: fadeIn 1s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

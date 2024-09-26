@@ -39,6 +39,7 @@
     "embla-carousel-react": "^8.2.0",
     "framer-motion": "^11.3.31",
     "gsap": "^3.12.5",
+    "jsdom": "^25.0.1",
     "jspdf": "^2.5.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.436.0",
@@ -56,6 +57,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/date-fns": "^2.6.0",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/jwt-decode": "^3.1.0",
     "@types/node": "^20",
@@ -63,6 +65,7 @@
     "@types/react-dom": "^18",
     "@types/woocommerce__woocommerce-rest-api": "^1.0.5",
     "bcryptjs": "^2.4.3",
+    "date-fns": "^4.1.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.7",
     "jsonwebtoken": "^9.0.2",
