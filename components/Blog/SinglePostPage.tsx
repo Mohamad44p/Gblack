@@ -38,7 +38,7 @@ export default function SinglePostPage({ post }: { post: PostData }) {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <header className="relative top-0 left-0 right-0 z-50 bg-black bg-opacity-80 backdrop-blur-md shadow-md">
+            <header className="sticky top-0 left-0 right-0 z-50 bg-black bg-opacity-80 backdrop-blur-md shadow-md">
                 <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <nav className="flex items-center justify-between">
                         <Link href="/blog" passHref>

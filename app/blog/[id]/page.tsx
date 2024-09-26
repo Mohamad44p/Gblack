@@ -12,6 +12,8 @@ async function getPost(id: string) {
   return res.json()
 }
 
+export const revalidate = 360000;
+
 export default async function Post({ params }: { params: { id: string } }) {
   const post = await getPost(params.id)
 

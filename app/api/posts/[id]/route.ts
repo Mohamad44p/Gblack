@@ -9,7 +9,14 @@ export async function GET(
 
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/wp/v2/posts/${id}?_embed`
+      `${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/wp/v2/posts/${id}?_embed`,
+      {
+        headers: {
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.WP_CONSUMER_KEY}:${process.env.WP_CONSUMER_SECRET}`
+          ).toString("base64")}`,
+        },
+      }
     );
 
     if (!res.ok) {
@@ -28,16 +35,11 @@ export async function GET(
     post.featuredImage = featuredImageUrl;
     const dom = new JSDOM(post.content.rendered);
     const images = dom.window.document.querySelectorAll("img");
-    images.forEach(
-      (img: {
-        setAttribute: (arg0: string, arg1: string) => void;
-        classList: { add: (arg0: string, arg1: string) => void };
-      }) => {
-        img.setAttribute("loading", "lazy");
-        img.setAttribute("decoding", "async");
-        img.classList.add("w-full", "h-auto");
-      }
-    );
+    images.forEach((img: HTMLImageElement) => {
+      img.setAttribute("loading", "lazy");
+      img.setAttribute("decoding", "async");
+      img.classList.add("w-full", "h-auto");
+    });
     post.content.rendered = dom.window.document.body.innerHTML;
 
     return NextResponse.json(post);
