@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { OptimizedImage } from "../OptimizedImage";
+import { Badge } from "../ui/badge";
 
 export interface Product {
   id: number;
@@ -174,20 +175,26 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 {product.name}
               </h3>
             </Link>
-            <div className="flex items-center mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.round(product.rating ?? 0)
-                      ? "text-yellow-400 fill-current"
-                      : "text-white/20"
-                  }`}
-                />
-              ))}
-              <span className="ml-2 text-sm text-white/60">
-                ({product.ratingCount})
-              </span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.round(product.rating ?? 0)
+                        ? "text-yellow-400 fill-current"
+                        : "text-white/20"
+                    }`}
+                  />
+                ))}
+                <span className="ml-2 text-sm text-white/60">
+                  ({product.ratingCount})
+                </span>
+              </div>
+
+              <Badge className="text-sm uppercase">
+                {product.stock_status}
+              </Badge>
             </div>
           </div>
           <div className="flex items-center justify-between">
@@ -207,26 +214,28 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 </span>
               )}
             </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <Button
+              className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+              onClick={() => handleAddToCart(product)}
+              disabled={product.stock_status === "onbackorder"}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
             <WishlistButton
               product={{
                 id: product.id,
                 name: product.name,
                 price: isOnSale ? product.sale_price : product.regular_price,
-                image: product.images[0].src,
+                image: product.images[0]?.src,
                 average_rating: product.average_rating,
                 rating_count: product.ratingCount,
                 short_description: product.short_description,
               }}
             />
           </div>
-          <Button
-            size="sm"
-            className="mt-2 bg-white text-black hover:bg-white/80 transition-all duration-300 rounded-full"
-            onClick={handleAddToCartClick}
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
-          </Button>
         </div>
       </CardContent>
 
@@ -247,7 +256,12 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
             </RadioGroup>
           </div>
           <div className="flex justify-end">
-            <Button onClick={handleSizeSelection}>Add to Cart</Button>
+            <Button
+              onClick={handleSizeSelection}
+              disabled={product.stock_status === "onbackorder"}
+            >
+              Add to Cart
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -339,6 +353,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                     handleAddToCartClick();
                     setIsQuickViewOpen(false);
                   }}
+                  disabled={product.stock_status === "onbackorder"}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Add to Cart

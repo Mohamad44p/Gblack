@@ -29,7 +29,7 @@ export default function Banner() {
                             }px)`,
                     }}
                 >
-                    <Image src={bg} alt={`Background ${index + 1}`} layout="fill" objectFit="cover" />
+                    <Image src={bg} alt={`Background ${index + 1}`} fill className='object-cover'  />
                 </div>
             ))}
             <h1 style={{ transform: `translateY(${(scrollY * 4) / 2}px)` }}>GBLACK!</h1>

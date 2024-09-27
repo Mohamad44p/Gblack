@@ -157,6 +157,7 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
               <Button
                 className="flex-1 bg-white text-black hover:bg-gray-200"
                 onClick={handleAddToCart}
+                disabled={product.stock_status === "onbackorder"}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
@@ -250,20 +251,23 @@ export default function CategoryPage({
     }
   });
 
-  const handleAddToCart = useCallback((product: Product, size: string) => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[0]?.src || "/placeholder.svg",
-      quantity: 1,
-      size: size,
-    });
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
-    });
-  }, [addToCart]);
+  const handleAddToCart = useCallback(
+    (product: Product, size: string) => {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0]?.src || "/placeholder.svg",
+        quantity: 1,
+        size: size,
+      });
+      toast({
+        title: "Added to cart",
+        description: `${product.name} has been added to your cart.`,
+      });
+    },
+    [addToCart]
+  );
 
   if (isLoading) {
     return (
@@ -293,7 +297,9 @@ export default function CategoryPage({
               {categorySlug.replace("-", " ")}
             </h1>
             <div>
-              <label htmlFor="sort-select" className="sr-only">Sort by</label>
+              <label htmlFor="sort-select" className="sr-only">
+                Sort by
+              </label>
               <select
                 id="sort-select"
                 className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -400,6 +406,7 @@ export default function CategoryPage({
                           <Button
                             className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
                             onClick={() => setSelectedProduct(product)}
+                            disabled={product.stock_status === "onbackorder"}
                           >
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Add to Cart

@@ -56,9 +56,8 @@ export default function TopBar({ socialLinks }: TopBarProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
-                className="text-white hover:text-gray-300"
               >
                 {lang === "en" ? "EN" : "AR"}
               </Button>

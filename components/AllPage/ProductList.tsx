@@ -10,6 +10,7 @@ import {
   X,
   AlertCircle,
   Filter,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -180,10 +181,11 @@ const QuickViewModal = ({
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating))
-                    ? "text-yellow-400"
-                    : "text-gray-300"
-                    } fill-current`}
+                  className={`w-5 h-5 ${
+                    i < Math.floor(parseFloat(product.average_rating))
+                      ? "text-yellow-400"
+                      : "text-gray-300"
+                  } fill-current`}
                 />
               ))}
               <span className="ml-2 text-gray-400">
@@ -237,6 +239,7 @@ const QuickViewModal = ({
               <Button
                 onClick={handleAddToCart}
                 className="flex-1 bg-white hover:bg-gray-200 text-black"
+                disabled={product.stock_status === "onbackorder"}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
@@ -247,6 +250,17 @@ const QuickViewModal = ({
               >
                 <Heart className="w-4 h-4" />
               </Button>
+            </div>
+            <div className="mt-5">
+              <Link href={`/product/${product.id}`} className="cursor-pointer">
+                <Button
+                  variant="outline"
+                  className="px-3 border-white hover:bg-white hover:text-black"
+                >
+                  View Product Details
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -447,10 +461,11 @@ export default function ProductList({
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${selectedCategory === category.name
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${
+                  selectedCategory === category.name
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
               >
                 {category.name}
               </button>
@@ -513,10 +528,11 @@ export default function ProductList({
               <button
                 key={gender}
                 onClick={() => setSelectedGender(gender)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${selectedGender === gender
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${
+                  selectedGender === gender
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
               >
                 {gender}
               </button>
@@ -534,10 +550,11 @@ export default function ProductList({
               <button
                 key={status}
                 onClick={() => setStockFilter(status)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${stockFilter === status
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${
+                  stockFilter === status
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
               >
                 {status}
               </button>
@@ -555,10 +572,11 @@ export default function ProductList({
               <button
                 key={status}
                 onClick={() => setSaleFilter(status)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${saleFilter === status
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${
+                  saleFilter === status
+                    ? "bg-gray-700 text-white"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
               >
                 {status}
               </button>
@@ -640,136 +658,140 @@ export default function ProductList({
                 <AnimatePresence>
                   {loading
                     ? [...Array(9)].map((_, index) => (
-                      <motion.div
-                        key={`skeleton-${index}`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <SkeletonProduct />
-                      </motion.div>
-                    ))
-                    : paginatedProducts.map((product) => (
-                      <motion.div
-                        key={product.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.5 }}
-                        className="relative group"
-                        onHoverStart={() => setHoveredProduct(product.id)}
-                        onHoverEnd={() => setHoveredProduct(null)}
-                      >
                         <motion.div
-                          className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
-                          whileHover={{ scale: 1.05, rotateY: 5 }}
-                          transition={{ duration: 0.3 }}
+                          key={`skeleton-${index}`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
                         >
-                          <div className="relative overflow-hidden">
-                            <Image
-                              src={
-                                product.images[0]?.src ||
-                                "/placeholder.svg?height=400&width=600"
-                              }
-                              alt={product.name}
-                              width={600}
-                              height={400}
-                              className="w-full h-80 object-cover"
-                              placeholder="blur"
-                              blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                                shimmer(600, 400)
-                              )}`}
-                            />
-                            {product.on_sale && (
-                              <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md">
-                                Sale
-                              </div>
-                            )}
-                            <motion.div
-                              className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                              initial={{ opacity: 0 }}
-                              animate={{
-                                opacity:
-                                  hoveredProduct === product.id ? 1 : 0,
-                              }}
-                            >
-                              <Button
-                                className="bg-white text-black hover:bg-gray-200"
-                                onClick={() => setSelectedProduct(product)}
-                              >
-                                Quick View
-                              </Button>
-                            </motion.div>
-                          </div>
-                          <div className="p-6">
-                            <Link
-                              href={`/product/${product.id}`}
-                              className="block"
-                            >
-                              <h3 className="text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
-                                {product.name}
-                              </h3>
-                            </Link>
-                            <div className="flex justify-between items-center mb-4">
-                              {product.on_sale ? (
-                                <div>
-                                  <span className="text-3xl font-bold text-red-500">
-                                    {product.sale_price} NIS
-                                  </span>
-                                  <span className="ml-2 text-lg text-gray-400 line-through">
-                                    {product.regular_price} NIS
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-3xl font-bold">
-                                  {product.price} NIS
-                                </span>
-                              )}
-                              <Badge
-                                variant="secondary"
-                                className="bg-white text-black px-3 py-1 rounded-full"
-                              >
-                                {product.categories[0]?.name ||
-                                  "Uncategorized"}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center mb-4">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-5 h-5 ${i <
-                                    Math.floor(
-                                      parseFloat(product.average_rating)
-                                    )
-                                    ? "text-yellow-400"
-                                    : "text-gray-600"
-                                    } fill-current`}
-                                />
-                              ))}
-                              <span className="ml-2 text-gray-400">
-                                {product.average_rating}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <Button
-                                onClick={() => handleAddToCart(product)}
-                                className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                              >
-                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                Add to Cart
-                              </Button>
-                              <Button
-                                variant="outline"
-                                className="px-3 border-white text-white hover:bg-white hover:text-black"
-                              >
-                                <Heart className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
+                          <SkeletonProduct />
                         </motion.div>
-                      </motion.div>
-                    ))}
+                      ))
+                    : paginatedProducts.map((product) => (
+                        <motion.div
+                          key={product.id}
+                          layout
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.5 }}
+                          className="relative group"
+                          onHoverStart={() => setHoveredProduct(product.id)}
+                          onHoverEnd={() => setHoveredProduct(null)}
+                        >
+                          <motion.div
+                            className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+                            whileHover={{ scale: 1.05, rotateY: 5 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="relative overflow-hidden">
+                              <Image
+                                src={
+                                  product.images[0]?.src ||
+                                  "/placeholder.svg?height=400&width=600"
+                                }
+                                alt={product.name}
+                                width={600}
+                                height={400}
+                                className="w-full h-80 object-cover"
+                                placeholder="blur"
+                                blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                                  shimmer(600, 400)
+                                )}`}
+                              />
+                              {product.on_sale && (
+                                <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md">
+                                  Sale
+                                </div>
+                              )}
+                              <motion.div
+                                className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                initial={{ opacity: 0 }}
+                                animate={{
+                                  opacity:
+                                    hoveredProduct === product.id ? 1 : 0,
+                                }}
+                              >
+                                <Button
+                                  className="bg-white text-black hover:bg-gray-200"
+                                  onClick={() => setSelectedProduct(product)}
+                                >
+                                  Quick View
+                                </Button>
+                              </motion.div>
+                            </div>
+                            <div className="p-6">
+                              <Link
+                                href={`/product/${product.id}`}
+                                className="block"
+                              >
+                                <h3 className="text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
+                                  {product.name}
+                                </h3>
+                              </Link>
+                              <div className="flex justify-between items-center mb-4">
+                                {product.on_sale ? (
+                                  <div>
+                                    <span className="text-3xl font-bold text-red-500">
+                                      {product.sale_price} NIS
+                                    </span>
+                                    <span className="ml-2 text-lg text-gray-400 line-through">
+                                      {product.regular_price} NIS
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-3xl font-bold">
+                                    {product.price} NIS
+                                  </span>
+                                )}
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-white text-black px-3 py-1 rounded-full"
+                                >
+                                  {product.categories[0]?.name ||
+                                    "Uncategorized"}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center mb-4">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-5 h-5 ${
+                                      i <
+                                      Math.floor(
+                                        parseFloat(product.average_rating)
+                                      )
+                                        ? "text-yellow-400"
+                                        : "text-gray-600"
+                                    } fill-current`}
+                                  />
+                                ))}
+                                <span className="ml-2 text-gray-400">
+                                  {product.average_rating}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <Button
+                                  onClick={() => handleAddToCart(product)}
+                                  className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                                  disabled={
+                                    product.stock_status === "onbackorder"
+                                  }
+                                >
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  Add to Cart
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  className="px-3 border-white text-white hover:bg-white hover:text-black"
+                                >
+                                  <Heart className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </motion.div>
+                      ))}
                 </AnimatePresence>
               </motion.div>
 

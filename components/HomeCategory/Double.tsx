@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -35,16 +35,8 @@ const categories: [Category, Category] = [
 function Double({ categories }: DoubleCategoryProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const handleHoverStart = useCallback((index: number) => {
-    setHoverIndex(index);
-  }, []);
-
-  const handleHoverEnd = useCallback(() => {
-    setHoverIndex(null);
-  }, []);
-
   return (
-    <div className="flex flex-col lg:flex-row h-auto lg:h-screen w-full">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh)] md:w-full w-[900px]">
       {categories.map((category, index) => (
         <motion.div
           key={category.name}
@@ -58,16 +50,15 @@ function Double({ categories }: DoubleCategoryProps) {
                 ? "50%"
                 : "40%",
           }}
-          onHoverStart={() => handleHoverStart(index)}
-          onHoverEnd={handleHoverEnd}
+          onHoverStart={() => setHoverIndex(index)}
+          onHoverEnd={() => setHoverIndex(null)}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
-          <Link href={category.link} className="block h-full relative">
+          <Link href={category.link} className="block h-full">
             <Image
               src={category.src}
               alt={category.name}
               fill
-              sizes="(max-width: 768px) 100vw, 50vw"
               blurDataURL="/BlurImage.jpg"
               placeholder="blur"
               className="transition-transform object-cover duration-500 ease-in-out hover:scale-105"

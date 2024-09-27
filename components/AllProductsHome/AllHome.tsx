@@ -34,6 +34,7 @@ interface Product {
   attributes: { name: string; options: string[] }[];
   ratingCount: number;
   short_description: string;
+  stock_status: string;
 }
 
 interface Category {
@@ -200,6 +201,7 @@ const QuickViewModal = ({
               <Button
                 className="flex-1 bg-white hover:bg-gray-200 text-black"
                 onClick={handleAddToCart}
+                disabled={product.stock_status === "onbackorder"}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Cart
@@ -384,77 +386,95 @@ export default function AllHome() {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
             layout
           >
-            <AnimatePresence>
-              {loading
-                ? [...Array(6)].map((_, index) => (
-                    <motion.div
-                      key={`skeleton-${index}`}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <ProductSkeleton />
-                    </motion.div>
-                  ))
-                : filteredProducts.map((product) => {
-                    const isOnSale =
-                      product.sale_price !== "" &&
-                      product.sale_price !== product.regular_price;
-                    return (
+            {filteredProducts.length > 0 ? (
+              <AnimatePresence>
+                {loading
+                  ? [...Array(6)].map((_, index) => (
                       <motion.div
-                        key={product.id}
-                        layout
+                        key={`skeleton-${index}`}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.5 }}
-                        className="relative group"
-                        onHoverStart={() => setHoveredProduct(product.id)}
-                        onHoverEnd={() => setHoveredProduct(null)}
                       >
+                        <ProductSkeleton />
+                      </motion.div>
+                    ))
+                  : filteredProducts.map((product) => {
+                      const isOnSale =
+                        product.sale_price !== "" &&
+                        product.sale_price !== product.regular_price;
+                      return (
                         <motion.div
-                          className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
-                          whileHover={{ scale: 1.05, rotateY: 5 }}
-                          transition={{ duration: 0.3 }}
+                          key={product.id}
+                          layout
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.5 }}
+                          className="relative group"
+                          onHoverStart={() => setHoveredProduct(product.id)}
+                          onHoverEnd={() => setHoveredProduct(null)}
                         >
-                          <div className="relative overflow-hidden">
-                            <OptimizedImage
-                              src={product.images[0]?.src || "/BlurImage.jpg"}
-                              alt={product.name}
-                              width={400}
-                              height={320}
-                              className="w-full h-80 object-cover"
-                            />
-                            {isOnSale && (
-                              <Badge className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-full">
-                                Sale
-                              </Badge>
-                            )}
-                            <motion.div
-                              className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                              initial={{ opacity: 0 }}
-                              animate={{
-                                opacity: hoveredProduct === product.id ? 1 : 0,
-                              }}
-                            >
-                              <Button
-                                className="bg-white text-black hover:bg-gray-200"
-                                onClick={() => setSelectedProduct(product)}
+                          <motion.div
+                            className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+                            whileHover={{ scale: 1.05, rotateY: 5 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="relative overflow-hidden">
+                              <OptimizedImage
+                                src={product.images[0]?.src || "/BlurImage.jpg"}
+                                alt={product.name}
+                                width={400}
+                                height={320}
+                                className="w-full h-80 object-cover"
+                              />
+                              {isOnSale && (
+                                <Badge className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-full">
+                                  Sale
+                                </Badge>
+                              )}
+                              <motion.div
+                                className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                initial={{ opacity: 0 }}
+                                animate={{
+                                  opacity:
+                                    hoveredProduct === product.id ? 1 : 0,
+                                }}
                               >
-                                Quick View
-                              </Button>
-                            </motion.div>
-                          </div>
-                          <div className="p-6">
-                            <h3 className="text-2xl font-bold mb-2">
-                              {product.name}
-                            </h3>
-                            <div className="flex justify-between items-center mb-4">
-                              {isOnSale ? (
-                                <div>
+                                <Button
+                                  className="bg-white text-black hover:bg-gray-200"
+                                  onClick={() => setSelectedProduct(product)}
+                                >
+                                  Quick View
+                                </Button>
+                              </motion.div>
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-2xl font-bold mb-2">
+                                {product.name}
+                              </h3>
+                              <div className="flex justify-between items-center mb-4">
+                                {isOnSale ? (
+                                  <div>
+                                    <span
+                                      className="text-3xl font-bold mr-2"
+                                      style={{
+                                        background:
+                                          "linear-gradient(to right, #fff, #888)",
+                                        WebkitBackgroundClip: "text",
+                                        WebkitTextFillColor: "transparent",
+                                      }}
+                                    >
+                                      ${product.sale_price}
+                                    </span>
+                                    <span className="text-xl text-gray-400 line-through">
+                                      {product.regular_price} NIS
+                                    </span>
+                                  </div>
+                                ) : (
                                   <span
-                                    className="text-3xl font-bold mr-2"
+                                    className="text-3xl font-bold"
                                     style={{
                                       background:
                                         "linear-gradient(to right, #fff, #888)",
@@ -462,78 +482,81 @@ export default function AllHome() {
                                       WebkitTextFillColor: "transparent",
                                     }}
                                   >
-                                    ${product.sale_price}
-                                  </span>
-                                  <span className="text-xl text-gray-400 line-through">
                                     {product.regular_price} NIS
                                   </span>
-                                </div>
-                              ) : (
-                                <span
-                                  className="text-3xl font-bold"
-                                  style={{
-                                    background:
-                                      "linear-gradient(to right, #fff, #888)",
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                  }}
+                                )}
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-white text-black px-3 py-1 rounded-full"
                                 >
-                                  {product.regular_price} NIS
+                                  {product.categories[0]?.name ||
+                                    "Uncategorized"}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center mb-4">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-5 h-5 ${
+                                      i <
+                                      Math.floor(
+                                        parseFloat(product.average_rating)
+                                      )
+                                        ? "text-yellow-400"
+                                        : "text-gray-600"
+                                    } fill-current`}
+                                  />
+                                ))}
+                                <span className="ml-2 text-gray-400">
+                                  {product.average_rating}
                                 </span>
-                              )}
-                              <Badge
-                                variant="secondary"
-                                className="bg-white text-black px-3 py-1 rounded-full"
-                              >
-                                {product.categories[0]?.name || "Uncategorized"}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center mb-4">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-5 h-5 ${
-                                    i <
-                                    Math.floor(
-                                      parseFloat(product.average_rating)
-                                    )
-                                      ? "text-yellow-400"
-                                      : "text-gray-600"
-                                  } fill-current`}
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <Button
+                                  className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                                  onClick={() => handleAddToCart(product)}
+                                  disabled={
+                                    product.stock_status === "onbackorder"
+                                  }
+                                >
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  Add to Cart
+                                </Button>
+                                <WishlistButton
+                                  product={{
+                                    id: product.id,
+                                    name: product.name,
+                                    price: isOnSale
+                                      ? product.sale_price
+                                      : product.regular_price,
+                                    image: product.images[0]?.src,
+                                    average_rating: product.average_rating,
+                                    rating_count: product.ratingCount,
+                                    short_description:
+                                      product.short_description,
+                                  }}
                                 />
-                              ))}
-                              <span className="ml-2 text-gray-400">
-                                {product.average_rating}
-                              </span>
+                              </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                              <Button
-                                className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                                onClick={() => handleAddToCart(product)}
-                              >
-                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                Add to Cart
-                              </Button>
-                              <WishlistButton
-                                product={{
-                                  id: product.id,
-                                  name: product.name,
-                                  price: isOnSale
-                                    ? product.sale_price
-                                    : product.regular_price,
-                                  image: product.images[0]?.src,
-                                  average_rating: product.average_rating,
-                                  rating_count: product.ratingCount,
-                                  short_description: product.short_description,
-                                }}
-                              />
-                            </div>
-                          </div>
+                          </motion.div>
                         </motion.div>
-                      </motion.div>
-                    );
-                  })}
-            </AnimatePresence>
+                      );
+                    })}
+              </AnimatePresence>
+            ) : (
+              <motion.div
+                className="col-span-full text-center py-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+              >
+                <h2 className="text-2xl font-bold mb-4">No products found</h2>
+                <p className="text-gray-400 mb-8">
+                  We couldn&lsquo;t find any products in the {selectedCategory}{" "}
+                  category Try another category or check back later.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
 
           <motion.div
