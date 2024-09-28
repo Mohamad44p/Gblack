@@ -24,19 +24,19 @@ export default function SecSection() {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.8,
+        duration: 0.4, // Reduced from 0.8
         ease: "easeOut",
-        staggerChildren: 0.1,
+        staggerChildren: 0.02, // Reduced from 0.1
       },
     },
   }
 
   const letterVariants = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { opacity: 0, y: 20 }, // Reduced y from 50
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.01, ease: "easeOut" },
+      transition: { duration: 0.1, ease: "easeOut" }, // Increased from 0.01
     },
   }
 
@@ -67,7 +67,7 @@ export default function SecSection() {
           className="relative"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
         >
           <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-[#facc15] to-[#ecc010] opacity-75 blur"></div>
           <div className="relative overflow-hidden rounded-lg">

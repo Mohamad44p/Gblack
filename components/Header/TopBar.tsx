@@ -62,12 +62,12 @@ export default function TopBar({ socialLinks }: TopBarProps) {
                 {lang === "en" ? "EN" : "AR"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="bg-white text-black">
               <DropdownMenuItem onClick={() => setLang("en")}>
-                English
+                EN
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setLang("ar")}>
-                العربية
+                AR
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -42,6 +42,7 @@ import { openCart } from "@/lib/hooks/events";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 import Image from "next/image";
+import { WishlistButton } from "../WishlistButton";
 
 interface Product {
   id: number;
@@ -58,6 +59,7 @@ interface Product {
   date_created: string;
   stock_status: string;
   attributes: { name: string; options: string[] }[];
+  ratingCount: number;
 }
 
 interface Category {
@@ -147,9 +149,7 @@ const QuickViewModal = ({
           <div className="md:w-1/2">
             <Image
               src={
-                product.images[0]?.src ||
-                "/placeholder.svg?height=400&width=600"
-              }
+                product.images[0]?.src}
               alt={product.name}
               width={600}
               height={400}
@@ -174,7 +174,7 @@ const QuickViewModal = ({
               </h2>
             </Link>
             <p
-              className="text-gray-300 mb-4"
+              className="text-gray-300 mb-4 line-clamp-2"
               dangerouslySetInnerHTML={{ __html: product.short_description }}
             ></p>
             <div className="flex items-center mb-4">
@@ -463,8 +463,8 @@ export default function ProductList({
                 onClick={() => setSelectedCategory(category.name)}
                 className={`block w-full text-left px-3 py-2 rounded-md ${
                   selectedCategory === category.name
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    ? "bg-white text-black font-bold"
+                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
                 }`}
               >
                 {category.name}
@@ -530,8 +530,8 @@ export default function ProductList({
                 onClick={() => setSelectedGender(gender)}
                 className={`block w-full text-left px-3 py-2 rounded-md ${
                   selectedGender === gender
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    ? "bg-white text-black font-bold"
+                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
                 }`}
               >
                 {gender}
@@ -552,8 +552,8 @@ export default function ProductList({
                 onClick={() => setStockFilter(status)}
                 className={`block w-full text-left px-3 py-2 rounded-md ${
                   stockFilter === status
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    ? "bg-white text-black font-bold"
+                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
                 }`}
               >
                 {status}
@@ -574,8 +574,8 @@ export default function ProductList({
                 onClick={() => setSaleFilter(status)}
                 className={`block w-full text-left px-3 py-2 rounded-md ${
                   saleFilter === status
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    ? "bg-white text-black"
+                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
                 }`}
               >
                 {status}
@@ -589,16 +589,28 @@ export default function ProductList({
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
-      <div className="w-full bg-black bg-grid-gray-800 relative flex items-center justify-center">
-        <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-gray-800 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
-        <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
-        <div className="absolute inset-0 bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
-        <div className="absolute inset-0 bg-dot-white/[0.2] -z-10" />
+    <div className="w-full bg-black bg-grid-gray-800 relative flex items-center justify-center">
+      <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-gray-800 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+      <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
+      <div className="absolute inset-0 bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
+      <div className="absolute inset-0 bg-dot-white/[0.2] -z-10" />
 
-        <div className="container mx-auto px-4 py-16 relative z-10">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold">All Products</h1>
-            <div className="flex items-center space-x-4">
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        <h1 className="text-4xl font-bold text-center mb-8">All Products</h1>
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="hidden lg:block lg:w-1/4 space-y-6 bg-black p-6 rounded-lg border border-gray-700">
+            <h2 className="text-2xl font-semibold mb-4">Filters</h2>
+            <FilterContent />
+            <div className="flex justify-between mt-4">
+              <Button onClick={clearFilters} variant="outline" className="w-full">
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <div className="flex justify-end items-center mb-8">
               <select
                 className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
                 value={sortBy}
@@ -609,19 +621,13 @@ export default function ProductList({
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
               </select>
-              <Sheet
-                open={isFilterSheetOpen}
-                onOpenChange={setIsFilterSheetOpen}
-              >
+              <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="md:hidden">
+                  <Button variant="outline" size="icon" className="lg:hidden">
                     <Filter className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent
-                  side="left"
-                  className="w-[300px] sm:w-[400px] bg-black overflow-y-auto"
-                >
+                <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-black overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle className="text-white">Filters</SheetTitle>
                     <SheetDescription className="text-gray-400">
@@ -634,232 +640,182 @@ export default function ProductList({
                 </SheetContent>
               </Sheet>
             </div>
-          </div>
 
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="hidden md:block md:w-1/4 space-y-6 bg-black p-6 rounded-lg border border-gray-800">
-              <FilterContent />
-              <div className="flex justify-between mt-4">
-                <Button
-                  onClick={clearFilters}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Clear Filters
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex-1">
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                layout
-              >
-                <AnimatePresence>
-                  {loading
-                    ? [...Array(9)].map((_, index) => (
+            <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" layout>
+              <AnimatePresence>
+                {loading
+                  ? [...Array(9)].map((_, index) => (
+                      <motion.div key={`skeleton-${index}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <SkeletonProduct />
+                      </motion.div>
+                    ))
+                  : paginatedProducts.map((product) => (
+                      <motion.div
+                        key={product.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative group"
+                        onHoverStart={() => setHoveredProduct(product.id)}
+                        onHoverEnd={() => setHoveredProduct(null)}
+                      >
                         <motion.div
-                          key={`skeleton-${index}`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
+                          className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+                          whileHover={{ scale: 1.05, rotateY: 5 }}
+                          transition={{ duration: 0.3 }}
                         >
-                          <SkeletonProduct />
-                        </motion.div>
-                      ))
-                    : paginatedProducts.map((product) => (
-                        <motion.div
-                          key={product.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.5 }}
-                          className="relative group"
-                          onHoverStart={() => setHoveredProduct(product.id)}
-                          onHoverEnd={() => setHoveredProduct(null)}
-                        >
-                          <motion.div
-                            className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
-                            whileHover={{ scale: 1.05, rotateY: 5 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <div className="relative overflow-hidden">
-                              <Image
-                                src={
-                                  product.images[0]?.src ||
-                                  "/placeholder.svg?height=400&width=600"
-                                }
-                                alt={product.name}
-                                width={600}
-                                height={400}
-                                className="w-full h-80 object-cover"
-                                placeholder="blur"
-                                blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                                  shimmer(600, 400)
-                                )}`}
-                              />
-                              {product.on_sale && (
-                                <div className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 m-2 rounded-md">
-                                  Sale
-                                </div>
-                              )}
-                              <motion.div
-                                className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                initial={{ opacity: 0 }}
-                                animate={{
-                                  opacity:
-                                    hoveredProduct === product.id ? 1 : 0,
-                                }}
+                          <div className="relative overflow-hidden">
+                            <Image
+                              src={product.images[0]?.src || "/placeholder.svg?height=400&width=600"}
+                              alt={product.name}
+                              width={600}
+                              height={400}
+                              className="w-full h-80 object-cover"
+                              placeholder="blur"
+                              blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(600, 400))}`}
+                            />
+                            {product.on_sale && (
+                              <div className="absolute text-[10px] top-0 left-0 bg-red-500 text-white px-1 py-1 m-2 rounded-md">
+                                On Sale
+                              </div>
+                            )}
+                            <motion.div
+                              className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: hoveredProduct === product.id ? 1 : 0 }}
+                            >
+                              <Button
+                                className="bg-white text-black hover:bg-gray-200"
+                                onClick={() => setSelectedProduct(product)}
                               >
-                                <Button
-                                  className="bg-white text-black hover:bg-gray-200"
-                                  onClick={() => setSelectedProduct(product)}
-                                >
-                                  Quick View
-                                </Button>
-                              </motion.div>
-                            </div>
-                            <div className="p-6">
-                              <Link
-                                href={`/product/${product.id}`}
-                                className="block"
-                              >
-                                <h3 className="text-2xl font-bold mb-2 hover:text-gray-300 transition-colors">
+                                Quick View
+                              </Button>
+                            </motion.div>
+                          </div>
+                          <div className="p-6">
+                            <div className="flex justify-between items-center mb-2">
+                              <Link href={`/product/${product.id}`} className="block">
+                                <h3 className="text-xl font-bold hover:text-gray-300 transition-colors">
                                   {product.name}
                                 </h3>
                               </Link>
-                              <div className="flex justify-between items-center mb-4">
-                                {product.on_sale ? (
-                                  <div>
-                                    <span className="text-3xl font-bold text-red-500">
-                                      {product.sale_price} NIS
-                                    </span>
-                                    <span className="ml-2 text-lg text-gray-400 line-through">
-                                      {product.regular_price} NIS
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-3xl font-bold">
-                                    {product.price} NIS
-                                  </span>
-                                )}
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-white text-black px-3 py-1 rounded-full"
-                                >
-                                  {product.categories[0]?.name ||
-                                    "Uncategorized"}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center mb-4">
+                              <Badge>
+                                {product.stock_status === "instock" ? "In Stock" : "Out of Stock"}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-400 mb-4 line-clamp-2" dangerouslySetInnerHTML={{ __html: product.short_description }}></p>
+                            <div className="flex justify-between items-center mb-4">
+                              {product.on_sale ? (
+                                <div>
+                                  <span className="text-xl font-bold text-white">{product.sale_price} NIS</span>
+                                  <span className="ml-2 text-lg text-red-500 line-through">{product.regular_price} NIS</span>
+                                </div>
+                              ) : (
+                                <span className="text-3xl font-bold">{product.price} NIS</span>
+                              )}
+                              <div className="flex items-center">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
                                     className={`w-5 h-5 ${
-                                      i <
-                                      Math.floor(
-                                        parseFloat(product.average_rating)
-                                      )
+                                      i < Math.floor(parseFloat(product.average_rating))
                                         ? "text-yellow-400"
                                         : "text-gray-600"
                                     } fill-current`}
                                   />
                                 ))}
-                                <span className="ml-2 text-gray-400">
-                                  {product.average_rating}
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <Button
-                                  onClick={() => handleAddToCart(product)}
-                                  className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                                  disabled={
-                                    product.stock_status === "onbackorder"
-                                  }
-                                >
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  Add to Cart
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  className="px-3 border-white text-white hover:bg-white hover:text-black"
-                                >
-                                  <Heart className="w-4 h-4" />
-                                </Button>
+                                <span className="ml-2 text-gray-400">{product.average_rating}</span>
                               </div>
                             </div>
-                          </motion.div>
+                            <div className="flex justify-between items-center">
+                              <Button
+                                onClick={() => handleAddToCart(product)}
+                                className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                                disabled={product.stock_status === "outofstock"}
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Add to Cart
+                              </Button>
+                              <WishlistButton
+                                product={
+                                  {
+                                    id: product.id,
+                                    name: product.name,
+                                    average_rating: product.average_rating,
+                                    price: product.price,
+                                    image: product.images[0]?.src,
+                                    rating_count: product.ratingCount,
+                                    short_description: product.short_description,
+                                    attributes: product.attributes,
+                                  }
+                                }
+                              />
+                            </div>
+                          </div>
                         </motion.div>
-                      ))}
-                </AnimatePresence>
-              </motion.div>
-
-              {!loading && paginatedProducts.length === 0 && (
-                <div className="text-center py-12">
-                  <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-200">
-                    No products found
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-400">
-                    Try changing your filters or search criteria.
-                  </p>
-                </div>
-              )}
-
-              {filteredProducts.length > 0 && (
-                <Pagination className="mt-8">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage((prev) => Math.max(prev - 1, 1));
-                        }}
-                      />
-                    </PaginationItem>
-                    {[...Array(totalPages)].map((_, index) => (
-                      <PaginationItem key={index}>
-                        <PaginationLink
-                          href="#"
-                          isActive={currentPage === index + 1}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCurrentPage(index + 1);
-                          }}
-                        >
-                          {index + 1}
-                        </PaginationLink>
-                      </PaginationItem>
+                      </motion.div>
                     ))}
-                    <PaginationItem>
-                      <PaginationNext
+              </AnimatePresence>
+            </motion.div>
+
+            {!loading && paginatedProducts.length === 0 && (
+              <div className="text-center py-12">
+                <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-200">No products found</h3>
+                <p className="mt-1 text-sm text-gray-400">Try changing your filters or search criteria.</p>
+              </div>
+            )}
+
+            {filteredProducts.length > 0 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }}
+                    />
+                  </PaginationItem>
+                  {[...Array(totalPages)].map((_, index) => (
+                    <PaginationItem key={index}>
+                      <PaginationLink
                         href="#"
+                        isActive={currentPage === index + 1}
                         onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                          );
+                          e.preventDefault()
+                          setCurrentPage(index + 1)
                         }}
-                      />
+                      >
+                        {index + 1}
+                      </PaginationLink>
                     </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </div>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {selectedProduct && (
-          <QuickViewModal
-            product={selectedProduct}
-            onClose={() => setSelectedProduct(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
+
+    <AnimatePresence>
+      {selectedProduct && (
+        <QuickViewModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+      )}
+    </AnimatePresence>
+  </div>
   );
 }

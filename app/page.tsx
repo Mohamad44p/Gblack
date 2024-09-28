@@ -1,18 +1,9 @@
 import { cache } from "react";
-import { ProductShowcase } from "@/components/ProdcutsGrid/BentoGrid";
+import { Product } from "@/types/product";
 import SecSection from "@/components/Sec/SecSection";
 import ImagesShow from "@/components/ThirdSec/ImagesShow";
-import { Product } from "@/types/product";
-import dynamic from "next/dynamic";
 import CarouselSSR from "@/components/slider/CarouselSSR";
-
-const DynamicImprovedAllHome = dynamic(
-  () => import("@/components/AllProductsHome/AllHome"),
-  {
-    loading: () => null,
-    ssr: false,
-  }
-);
+import ClientHome from "@/components/ClientHome";
 
 const getProducts = cache(
   async (perPage: number): Promise<{ products: Product[] }> => {
@@ -70,49 +61,14 @@ function transformProduct(
   };
 }
 
-async function ProductShowcases() {
+export default async function Home() {
   const productsData = await getProducts(14);
   const productIds = productsData.products.map((product) => product.id);
   const ratingsData = await getProductRatings(productIds);
 
-  const sortedByDate = [...productsData.products].sort(
-    (a, b) =>
-      new Date(b.date_created).getTime() - new Date(a.date_created).getTime()
+  const transformedProducts = productsData.products.map((product) =>
+    transformProduct(product, ratingsData)
   );
-
-  const sortedByTotalSales = [...productsData.products].sort(
-    (a, b) => b.total_sales - a.total_sales
-  );
-
-  const newestProducts = sortedByDate
-    .slice(0, 7)
-    .map((product) => transformProduct(product, ratingsData));
-  const bestSellers = sortedByTotalSales
-    .slice(0, 7)
-    .map((product) => transformProduct(product, ratingsData));
-
-  return (
-    <>
-      <ProductShowcase
-        title="Newest Products"
-        products={newestProducts}
-        featuredImage="/images/Rotated/img-1.jpg"
-        featuredTitle="Latest Arrivals"
-        featuredDescription="Discover our freshest styles"
-      />
-      <ProductShowcase
-        title="Best Sellers"
-        products={bestSellers}
-        featuredImage="/images/Rotated/img-3.jpg"
-        featuredTitle="Top Picks"
-        featuredDescription="Our most popular items"
-      />
-    </>
-  );
-}
-
-export default async function Home() {
-  const showcases = await ProductShowcases();
 
   return (
     <main className="min-h-screen">
@@ -122,8 +78,7 @@ export default async function Home() {
       <section className="min-h-screen">
         <ImagesShow />
       </section>
-      {showcases}
-      <DynamicImprovedAllHome />
+      <ClientHome initialProducts={transformedProducts} />
     </main>
   );
 }

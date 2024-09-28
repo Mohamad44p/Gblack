@@ -144,9 +144,8 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
             className="transition-all object-cover w-full h-full duration-300 hover:scale-105"
           />
           {isOnSale && (
-            <div className="absolute top-2 left-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
-              <Tag className="w-3 h-3 mr-1" />
-              Sale
+            <div className="absolute top-2 left-2 z-30 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+              On Sale
             </div>
           )}
           {isHovered && (
@@ -167,44 +166,33 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
         </Link>
         <div className="p-4 flex-grow flex flex-col justify-between bg-black">
           <div>
-            <div className="text-sm text-white/60 mb-1 font-medium">
-              {product.categories[0]?.name || "Uncategorized"}
+            <div className="flex justify-between items-center mb-1">
+              <div className="text-sm text-white/60 font-medium">
+                {product.categories[0]?.name || "Uncategorized"}
+              </div>
+              <Badge className="text-[10px] uppercase">
+                {product.stock_status === "onbackorder" ? "Out of Stock" : "In Stock"}
+              </Badge>
             </div>
             <Link href={`/product/${product.id}`} className="block">
               <h3 className="text-lg font-semibold mb-2 text-white hover:text-white/80 transition-colors duration-300">
                 {product.name}
               </h3>
             </Link>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${
-                      i < Math.round(product.rating ?? 0)
-                        ? "text-yellow-400 fill-current"
-                        : "text-white/20"
-                    }`}
-                  />
-                ))}
-                <span className="ml-2 text-sm text-white/60">
-                  ({product.ratingCount})
-                </span>
-              </div>
+            <p className="text-sm text-white/60 mb-2 line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: product.short_description }}
+            >
 
-              <Badge className="text-sm uppercase">
-                {product.stock_status}
-              </Badge>
-            </div>
+            </p>
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex flex-col">
+            <div className="flex items-center">
               {isOnSale ? (
                 <>
-                  <span className="text-xl font-bold text-white">
+                  <span className="text-xl font-bold text-white mr-2">
                     {formattedSalePrice}
                   </span>
-                  <span className="text-sm text-red-500 line-through">
+                  <span className="text-sm text-red-500 font-bold line-through">
                     {formattedPrice}
                   </span>
                 </>
@@ -214,11 +202,25 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 </span>
               )}
             </div>
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-4 h-4 ${i < Math.round(parseFloat(product.average_rating))
+                    ? "text-yellow-400 fill-current"
+                    : "text-white/20"
+                    }`}
+                />
+              ))}
+              <span className="ml-1 text-sm text-white/60">
+                ({product.ratingCount})
+              </span>
+            </div>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-2">
             <Button
               className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-              onClick={() => handleAddToCart(product)}
+              onClick={handleAddToCartClick}
               disabled={product.stock_status === "onbackorder"}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
@@ -301,11 +303,10 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.round(product.rating ?? 0)
-                          ? "text-yellow-400 fill-current"
-                          : "text-white/20"
-                      }`}
+                      className={`w-5 h-5 ${i < Math.round(parseFloat(product.average_rating))
+                        ? "text-yellow-400 fill-current"
+                        : "text-white/20"
+                        }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-white/60">
