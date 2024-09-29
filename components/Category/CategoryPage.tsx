@@ -339,7 +339,7 @@ export default function CategoryPage({
                     >
                       <div className="relative overflow-hidden">
                         <Image
-                          src={product.images[0]?.src || "/placeholder.svg"}
+                          src={product.images[0]?.src}
                           alt={product.name}
                           width={400}
                           height={400}
@@ -362,11 +362,26 @@ export default function CategoryPage({
                         </motion.div>
                       </div>
                       <div className="p-6">
-                        <Link href={`/product/${product.id}`}>
-                          <h3 className="text-2xl font-bold mb-2">
-                            {product.name}
-                          </h3>
-                        </Link>
+                        <div className="flex justify-between items-start mb-2">
+                          <Link href={`/product/${product.id}`}>
+                            <h3 className="text-2xl font-bold">
+                              {product.name}
+                            </h3>
+                          </Link>
+                          <Badge>
+                            {product.stock_status === "instock"
+                              ? "In Stock"
+                              : product.stock_status === "outofstock"
+                              ? "Out of Stock"
+                              : "Out of Stock"}
+                          </Badge>
+                        </div>
+                        <p
+                          className="text-sm text-gray-400 mb-4 line-clamp-2"
+                          dangerouslySetInnerHTML={{
+                            __html: product.short_description,
+                          }}
+                        ></p>
                         <div className="flex justify-between items-center mb-4">
                           <span
                             className="text-3xl font-bold"
@@ -379,34 +394,28 @@ export default function CategoryPage({
                           >
                             {product.price} NIS
                           </span>
-                          <Badge
-                            variant="secondary"
-                            className="bg-white text-black px-3 py-1 rounded-full"
-                          >
-                            {product.categories[0]?.name || "Uncategorized"}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center mb-4">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-5 h-5 ${
-                                i <
-                                Math.floor(parseFloat(product.average_rating))
-                                  ? "text-yellow-400"
-                                  : "text-gray-600"
-                              } fill-current`}
-                            />
-                          ))}
-                          <span className="ml-2 text-gray-400">
-                            {product.average_rating}
-                          </span>
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-5 h-5 ${
+                                  i <
+                                  Math.floor(parseFloat(product.average_rating))
+                                    ? "text-yellow-400"
+                                    : "text-gray-600"
+                                } fill-current`}
+                              />
+                            ))}
+                            <span className="ml-2 text-gray-400">
+                              {product.average_rating}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex justify-between items-center">
                           <Button
                             className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
                             onClick={() => setSelectedProduct(product)}
-                            disabled={product.stock_status === "onbackorder"}
+                            disabled={product.stock_status === "outofstock"}
                           >
                             <ShoppingCart className="w-4 h-4 mr-2" />
                             Add to Cart
@@ -416,8 +425,7 @@ export default function CategoryPage({
                               id: product.id,
                               name: product.name,
                               price: product.price,
-                              image:
-                                product.images[0]?.src || "/placeholder.svg",
+                              image: product.images[0]?.src,
                               average_rating: product.average_rating,
                               rating_count: product.ratingCount,
                               attributes: product.attributes,

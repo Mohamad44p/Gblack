@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag,
   X,
@@ -9,6 +9,7 @@ import {
   Minus,
   Trash2,
   ShoppingCart,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
@@ -39,6 +40,7 @@ export default function CartSheet() {
 
   useEffect(() => {
     if (isCartOpen) {
+      scrollPositionRef.current = window.pageYOffset;
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -49,15 +51,24 @@ export default function CartSheet() {
     };
   }, [isCartOpen]);
 
-  const handleQuantityChange = (id: number, change: number) => {
-    const item = cart.find((item) => item.id === id);
-    if (item) {
-      updateCartItemQuantity(id, item.quantity + change);
+  const handleQuantityChange = useCallback(
+    (id: number, change: number) => {
+      const item = cart.find((item) => item.id === id);
+      if (item) {
+        updateCartItemQuantity(id, item.quantity + change);
+      }
+    },
+    [cart, updateCartItemQuantity]
+  );
+
+  const handleSheetOpenChange = (open: boolean) => {
+    if (!open) {
+      closeCart();
     }
   };
 
   return (
-    <Sheet open={isCartOpen} onOpenChange={closeCart}>
+    <Sheet open={isCartOpen} onOpenChange={handleSheetOpenChange}>
       <SheetTrigger asChild>
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -93,70 +104,23 @@ export default function CartSheet() {
                 </p>
               </div>
             ) : (
-              <ul className="space-y-6">
+              <AnimatePresence>
                 {cart.map((item) => (
-                  <li
+                  <motion.div
                     key={item.id}
-                    className="flex items-center space-x-4 bg-secondary/10 p-4 rounded-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={96}
-                      height={96}
-                      priority
-                      className="w-24 h-24 object-cover rounded-md"
+                    <CartItem
+                      item={item}
+                      onQuantityChange={handleQuantityChange}
+                      onRemove={removeFromCart}
                     />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg truncate">
-                        {item.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {parseFloat(item.price).toFixed(2)} NIS
-                      </p>
-                      {item.size && (
-                        <p className="text-sm text-muted-foreground">
-                          Size: {item.size}
-                        </p>
-                      )}
-                      <div className="flex items-center mt-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleQuantityChange(item.id, -1)}
-                        >
-                          <Minus size={16} />
-                        </Button>
-                        <span className="mx-3 font-medium">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleQuantityChange(item.id, 1)}
-                        >
-                          <Plus size={16} />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end space-y-2">
-                      <span className="font-semibold">
-                        {(parseFloat(item.price) * item.quantity).toFixed(2)} NIS
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive/80"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        <Trash2 size={20} />
-                      </Button>
-                    </div>
-                  </li>
+                  </motion.div>
                 ))}
-              </ul>
+              </AnimatePresence>
             )}
           </ScrollArea>
         </div>
@@ -165,7 +129,7 @@ export default function CartSheet() {
             <span>Total:</span>
             <span className="text-2xl">{getCartTotal().toFixed(2)} NIS</span>
           </div>
-          <Link href="/checkout">
+          <Link href="/cart">
             <Button
               className="w-full text-lg py-6"
               disabled={cart.length === 0}
@@ -191,5 +155,78 @@ export default function CartSheet() {
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+type CartItem = {
+  id: number;
+  name: string;
+  image: string;
+  price: string;
+  size?: string;
+  quantity: number;
+};
+
+function CartItem({
+  item,
+  onQuantityChange,
+  onRemove,
+}: {
+  item: CartItem;
+  onQuantityChange: (id: number, change: number) => void;
+  onRemove: (id: number) => void;
+}) {
+  return (
+    <div className="flex items-center space-x-4 bg-secondary/10 p-4 rounded-lg mb-4">
+      <Image
+        src={item.image}
+        alt={item.name}
+        width={96}
+        height={96}
+        loading="lazy"
+        className="w-24 h-24 object-cover rounded-md"
+      />
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-lg truncate">{item.name}</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          {parseFloat(item.price).toFixed(2)} NIS
+        </p>
+        {item.size && (
+          <p className="text-sm text-muted-foreground">Size: {item.size}</p>
+        )}
+        <div className="flex items-center mt-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onQuantityChange(item.id, -1)}
+          >
+            <Minus size={16} />
+          </Button>
+          <span className="mx-3 font-medium">{item.quantity}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => onQuantityChange(item.id, 1)}
+          >
+            <Plus size={16} />
+          </Button>
+        </div>
+      </div>
+      <div className="flex flex-col items-end space-y-2">
+        <span className="font-semibold">
+          {(parseFloat(item.price) * item.quantity).toFixed(2)} NIS
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive hover:text-destructive/80"
+          onClick={() => onRemove(item.id)}
+        >
+          <Trash2 size={20} />
+        </Button>
+      </div>
+    </div>
   );
 }

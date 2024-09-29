@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import SingleProductPage from "@/components/singel/ProductPage";
 import ProductImageSlider from "@/components/singel/image-slider";
 import { cache } from "react";
+import SingleProductPage from "@/components/singel/ProductPage";
 
 const api = new WooCommerceRestApi({
   url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,

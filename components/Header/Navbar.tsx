@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -22,28 +22,40 @@ interface Category {
 const staticNavItems = [
   { name: "Home", href: "/" },
   { name: "All Products", href: "/all" },
-  { name: "Blog", href: "/blog" },
-  { name: "AboutUs", href: "/About-us" },
+  { name: "About Us", href: "/About-us" },
   { name: "Contact Us", href: "/contact-us" },
 ];
 
 export default function Navbar({ categories }: { categories: Category[] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const allNavItems = [
-    ...staticNavItems,
-    ...categories.map((cat) => ({
-      name: cat.name,
-      href: `/category/${cat.slug}`,
-    })),
+  const menCategory = categories.find(
+    (cat) => cat.name.toLowerCase() === "men"
+  );
+  const womenCategory = categories.find(
+    (cat) => cat.name.toLowerCase() === "women"
+  );
+
+  const visibleNavItems = [
+    ...staticNavItems.slice(0, 3),
+    ...(menCategory
+      ? [{ name: "Men", href: `/category/${menCategory.slug}` }]
+      : []),
+    ...(womenCategory
+      ? [{ name: "Women", href: `/category/${womenCategory.slug}` }]
+      : []),
+    ...staticNavItems.slice(3), // Add "About Us" and "Contact Us" to visible items
   ];
-  const visibleNavItems = allNavItems.slice(0, 5);
-  const dropdownNavItems = allNavItems.slice(5);
+
+  const dropdownNavItems = categories
+    .filter(
+      (cat) =>
+        cat.name.toLowerCase() !== "men" && cat.name.toLowerCase() !== "women"
+    )
+    .map((cat) => ({ name: cat.name, href: `/category/${cat.slug}` }));
 
   return (
-    <nav className="bg-black hidden md:block text-white py-4 px-6 border-t border-gray-800">
+    <nav className="bg-black text-white py-4 px-6 border-t border-gray-800">
       <div className="container mx-auto">
         <div className="hidden md:flex justify-center space-x-8 items-center">
           {visibleNavItems.map((item, index) => (
@@ -109,7 +121,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
                 transition={{ duration: 0.3 }}
                 className="absolute left-0 right-0 bg-black z-50"
               >
-                {allNavItems.map((item) => (
+                {[...visibleNavItems, ...dropdownNavItems].map((item) => (
                   <motion.div
                     key={item.name}
                     initial={{ opacity: 0, x: -20 }}

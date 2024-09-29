@@ -6,6 +6,7 @@ import Head from "next/head";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import { Product } from "@/types/product";
 import { unstable_noStore as noStore } from "next/cache";
+import React from "react";
 
 const CategoryPage = dynamic(
   () => import("@/components/Category/CategoryPage"),

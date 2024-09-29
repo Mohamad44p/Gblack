@@ -69,11 +69,9 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
 
     const doc = new jsPDF()
 
-    // Set background color
     doc.setFillColor(41, 37, 36)
     doc.rect(0, 0, 210, 297, 'F')
 
-    // Header
     doc.setFillColor(82, 74, 72)
     doc.roundedRect(10, 10, 190, 40, 3, 3, 'F')
     doc.setTextColor(255, 255, 255)
@@ -84,7 +82,6 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
     doc.setFont('helvetica', 'normal')
     doc.text(`Order ID: ${orderDetails.id}`, 105, 40, { align: 'center' })
 
-    // Order Details
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(16)
     doc.setFont('helvetica', 'bold')
@@ -95,7 +92,6 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
     doc.text(`Status: ${orderDetails.status}`, 20, 90)
     doc.text(`Total: ${totalWithExtras} NIS`, 20, 100)
 
-    // Shipping Address
     doc.setFontSize(16)
     doc.setFont('helvetica', 'bold')
     doc.text('Shipping Address', 20, 120)
@@ -106,7 +102,6 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
     doc.text(`${orderDetails.shipping.city}, ${orderDetails.shipping.state} ${orderDetails.shipping.postcode}`, 20, 150)
     doc.text(orderDetails.shipping.country, 20, 160)
 
-    // Order Items
     doc.setFontSize(16)
     doc.setFont('helvetica', 'bold')
     doc.text('Order Items', 20, 180)
@@ -118,7 +113,6 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
       yPos += 10
     })
 
-    // Footer
     doc.setFillColor(82, 74, 72)
     doc.roundedRect(10, 267, 190, 20, 3, 3, 'F')
     doc.setTextColor(255, 255, 255)
@@ -178,7 +172,7 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
-            className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-green-500 to-blue-500 opacity-20"
+            className="absolute top-0 left-0 w-full h-full opacity-20"
           />
           <motion.div
             initial={{ y: -50, opacity: 0 }}
@@ -206,17 +200,17 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
             >
               <div className="bg-stone-700 p-6 rounded-lg shadow-lg">
                 <h3 className="font-semibold mb-4 text-2xl flex items-center">
-                  <Calendar className="mr-2 text-blue-400" size={24} />
+                  <Calendar className="mr-2 text-white" size={24} />
                   Order Details
                 </h3>
                 <p className="mb-2"><strong>Order ID:</strong> {orderDetails.id}</p>
                 <p className="mb-2"><strong>Date:</strong> {new Date(orderDetails.date_created).toLocaleDateString()}</p>
                 <p className="mb-2"><strong>Status:</strong> {orderDetails.status}</p>
-                <p className="text-2xl font-bold mt-4 text-green-400">Total: {totalWithExtras} NIS</p>
+                <p className="text-2xl font-bold mt-4 text-white">Total: {totalWithExtras} NIS</p>
               </div>
               <div className="bg-stone-700 p-6 rounded-lg shadow-lg">
                 <h3 className="font-semibold mb-4 text-2xl flex items-center">
-                  <Truck className="mr-2 text-blue-400" size={24} />
+                  <Truck className="mr-2 text-white" size={24} />
                   Shipping Address
                 </h3>
                 <p className="mb-2">{orderDetails.shipping.first_name} {orderDetails.shipping.last_name}</p>
@@ -232,7 +226,7 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
             transition={{ delay: 0.6, duration: 0.5 }}
           >
             <h3 className="font-semibold mb-4 text-2xl flex items-center">
-              <ShoppingBag className="mr-2 text-blue-400" size={24} />
+              <ShoppingBag className="mr-2 text-white" size={24} />
               Order Items
             </h3>
             <div className="overflow-x-auto">
@@ -268,8 +262,9 @@ export default function OrderConfirmation({ params }: { params: { id: string } }
             whileTap={{ scale: 0.95 }}
           >
             <Button
+              variant={"default"}
               onClick={() => router.push('/')}
-              className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
+              className="w-full sm:w-auto"
             >
               <ShoppingBag className="mr-2 h-4 w-4" />
               Continue Shopping

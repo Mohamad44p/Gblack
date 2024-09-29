@@ -74,13 +74,16 @@ export default async function RootLayout({
                     <TopBar socialLinks={socialLinksData} />
                     <Navbar categories={categoriesData.categories} />
                   </header>
-                  <CircularMenu  socialLinks={socialLinksData} categories={categoriesData.categories}/>
+                  <CircularMenu
+                    socialLinks={socialLinksData}
+                    categories={categoriesData.categories}
+                  />
                   <div className="hidden">
                     <CartSheet />
                   </div>
                   <section className="pt-16 md:pt-0">{children}</section>
                   <Toaster />
-                  <AnimatedFooter />
+                  <AnimatedFooter categories={categoriesData.categories} />
                 </WishlistProvider>
               </CartProvider>
             </CartSheetProvider>
