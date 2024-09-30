@@ -12,7 +12,7 @@ export interface WordPressData {
 async function getWordPressData(): Promise<WordPressData> {
   try {
     const res = await fetch(
-      "https://lightpink-oryx-206000.hostingersite.com/wp-json/feacter-products/v1/section",
+      `${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/feacter-products/v1/section`,
       {
         cache: "no-store",
         headers: {
