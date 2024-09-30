@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ProductShowcase } from "@/components/ProdcutsGrid/BentoGrid";
 import { Product } from "@/types/product";
 import dynamic from "next/dynamic";
+import React from "react";
 
 const DynamicImprovedAllHome = dynamic(
   () => import("@/components/AllProductsHome/AllHome"),

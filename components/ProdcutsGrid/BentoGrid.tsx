@@ -34,6 +34,7 @@ import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { OptimizedImage } from "../OptimizedImage";
 import { Badge } from "../ui/badge";
+import React from "react";
 
 export interface Product {
   id: number;

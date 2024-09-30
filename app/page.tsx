@@ -4,6 +4,7 @@ import SecSection from "@/components/Sec/SecSection";
 import ImagesShow from "@/components/ThirdSec/ImagesShow";
 import CarouselSSR from "@/components/slider/CarouselSSR";
 import ClientHome from "@/components/ClientHome";
+import ServerImages from "@/components/ThirdSec/ServerImages";
 
 const getProducts = cache(
   async (perPage: number): Promise<{ products: Product[] }> => {
@@ -76,7 +77,7 @@ export default async function Home() {
       <CarouselSSR />
       <SecSection />
       <section className="min-h-screen">
-        <ImagesShow />
+        <ServerImages />
       </section>
       <ClientHome initialProducts={transformedProducts} />
     </main>

@@ -80,7 +80,7 @@ export default function ContactUsContent() {
                     name="firstname"
                     value={formData.firstname}
                     onChange={handleChange}
-                    placeholder="John"
+                    placeholder="Mohammad"
                     type="text"
                     required
                   />
@@ -92,7 +92,7 @@ export default function ContactUsContent() {
                     name="lastname"
                     value={formData.lastname}
                     onChange={handleChange}
-                    placeholder="Doe"
+                    placeholder="Omar"
                     type="text"
                     required
                   />
@@ -105,7 +105,7 @@ export default function ContactUsContent() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="john.doe@example.com"
+                  placeholder="mohammad.abu@example.com"
                   type="email"
                   required
                 />

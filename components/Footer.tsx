@@ -145,7 +145,7 @@ export default function AnimatedFooter({
           <div className="md:col-span-3 lg:col-span-1">
             <Link
               href="/contact-us"
-              className="inline-block bg-[#FF5C00] text-white py-2 px-6 rounded-md hover:bg-[#FF7D00] transition-colors duration-300"
+              className="inline-block bg-zinc-800 text-white py-2 px-6 rounded-md hover:bg-[#858585] transition-colors duration-300"
             >
               CONTACT US
             </Link>

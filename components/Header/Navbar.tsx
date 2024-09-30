@@ -21,12 +21,13 @@ interface Category {
 
 const staticNavItems = [
   { name: "Home", href: "/" },
+  { name: "Accessories", href: "/category/accessories" },
   { name: "All Products", href: "/all" },
-  { name: "About Us", href: "/About-us" },
+  { name: "On-Sale", href: "/on-sale" },
   { name: "Contact Us", href: "/contact-us" },
 ];
 
-export default function Navbar({ categories }: { categories: Category[] }) {
+export default function Component({ categories }: { categories: Category[] }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menCategory = categories.find(
@@ -37,14 +38,13 @@ export default function Navbar({ categories }: { categories: Category[] }) {
   );
 
   const visibleNavItems = [
-    ...staticNavItems.slice(0, 3),
     ...(menCategory
       ? [{ name: "Men", href: `/category/${menCategory.slug}` }]
       : []),
     ...(womenCategory
       ? [{ name: "Women", href: `/category/${womenCategory.slug}` }]
       : []),
-    ...staticNavItems.slice(3), // Add "About Us" and "Contact Us" to visible items
+    ...staticNavItems,
   ];
 
   const dropdownNavItems = categories
@@ -55,7 +55,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
     .map((cat) => ({ name: cat.name, href: `/category/${cat.slug}` }));
 
   return (
-    <nav className="bg-black text-white py-4 px-6 border-t border-gray-800">
+    <nav className="bg-black hidden md:block text-white py-4 px-6 border-t border-gray-800">
       <div className="container mx-auto">
         <div className="hidden md:flex justify-center space-x-8 items-center">
           {visibleNavItems.map((item, index) => (
@@ -73,37 +73,7 @@ export default function Navbar({ categories }: { categories: Category[] }) {
               </Link>
             </motion.div>
           ))}
-          {dropdownNavItems.length > 0 && (
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="text-sm tracking-widest hover:text-gray-300 transition-colors duration-200">
-                    More
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      {dropdownNavItems.map((item) => (
-                        <li key={item.name}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href={item.href}
-                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                            >
-                              <div className="text-sm font-medium leading-none">
-                                {item.name}
-                              </div>
-                            </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-          )}
         </div>
-
         <div className="md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}

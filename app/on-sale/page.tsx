@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import OnSaleProducts from '@/components/sale/OnSaleProducts'
 import { Pagination } from './pagination'
+import React from 'react'
+import Loading from '../loading'
 
 async function getProducts() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL
@@ -34,7 +36,7 @@ export default async function OnSalePage({ searchParams }: { searchParams: { pag
           }}>
             On-Sale Products
           </h1>
-          <Suspense fallback={<p>Loading products...</p>}>
+          <Suspense fallback={<Loading/>}>
             <ProductList currentPage={currentPage} />
           </Suspense>
         </div>

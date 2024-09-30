@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ReactLenis } from "@studio-freight/react-lenis";
-import ImageAnimation from "./GblackImage";
-import Image from "next/image";
+import { WordPressData } from "./ServerImages";
+import GblackImages from "./GblackImage";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function ImprovedComponent() {
+export default function ExploreSection({ data }: { data: WordPressData }) {
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -91,40 +92,53 @@ export default function ImprovedComponent() {
   }, []);
 
   const generateRows = () => {
+    if (!data || !data.images) {
+      return null;
+    }
     const rows = [];
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 0; i < 3; i++) {
       rows.push(
         <div className="row" key={i}>
           <div className="card card-left">
             <Image
-              src={`/images/Rotated/img-${2 * i - 1}.jpg`}
+              src={data.images[i * 2]}
               alt=""
               width={1800}
               height={1900}
               className="img"
               loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
             />
           </div>
-          <div className="card card-right">
-            <Image
-              src={`/images/Rotated/img-${2 * i}.jpg`}
-              alt=""
-              width={1800}
-              height={1900}
-              className="img"
-              loading="lazy"
-            />
-          </div>
+          {i * 2 + 1 < data.images.length && (
+            <div className="card card-right">
+              <Image
+                src={data.images[i * 2 + 1]}
+                alt=""
+                width={1800}
+                height={1900}
+                className="img"
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
+              />
+            </div>
+          )}
         </div>
       );
     }
     return rows;
   };
 
+  if (!data) {
+    return <div>Error: No data available</div>;
+  }
+
   return (
     <ReactLenis root>
       <section className="hero section md:my-44">
-        <ImageAnimation />
+        <GblackImages />
       </section>
 
       <div className="hidden md:block">
@@ -136,26 +150,23 @@ export default function ImprovedComponent() {
           <div className="main-content">
             <div className="logo">
               <Image
-                src="/LogoSection.png"
+                src={data.logo}
                 alt="Company Logo"
                 width={100}
                 height={100}
                 className="img"
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
               />
             </div>
             <div className="copy" aria-label="Product Description">
-              <div className="line">
-                <p>Explore Our Wide Range of Products</p>
-              </div>
-              <div className="line">
-                <p>From Electronics to Fashion, We&apos;ve Got You Covered</p>
-              </div>
-              <div className="line">
-                <p>Find the Perfect Items for Every Need.</p>
-              </div>
+              <div
+                className="text-center"
+                dangerouslySetInnerHTML={{ __html: data.description }}
+              />
             </div>
             <div className="btn">
-              <Button>Explore Now</Button>
+              <Button>{data.title}</Button>
             </div>
           </div>
 
