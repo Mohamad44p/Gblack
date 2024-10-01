@@ -141,10 +141,10 @@ export default function AnimatedMenu({
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="relative p-2 rounded-full bg-primary text-primary-foreground focus:outline-none"
+              className="relative p-1 rounded-full bg-primary text-primary-foreground focus:outline-none"
               onClick={openCart}
             >
-              <LucideIcons.ShoppingBag size={24} />
+              <LucideIcons.ShoppingBag size={20} />
               <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {getCartCount()}
               </span>

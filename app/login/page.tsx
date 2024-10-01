@@ -40,7 +40,7 @@ export default function LoginPage() {
           </span>
           <br />
           WELCOME
-          <br />
+          <br className="hidden md:block" />
           BACK
         </h1>
         <p className="text-[#f3e9d9] text-base md:text-lg max-w-md">
@@ -104,7 +104,7 @@ export default function LoginPage() {
             </Link>
             <Link
               href="/sign-up"
-              className="text-[#404628] text-sm md:text-base hover:underline"
+              className="text-[#404628] underline md:no-underline text-sm md:text-base hover:underline"
             >
               Don't have an account? Sign up
             </Link>

@@ -36,7 +36,7 @@ function Double({ categories }: DoubleCategoryProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   return (
-    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh)] md:w-full w-[900px]">
+    <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh)] md:w-full w-[800px]">
       {categories.map((category, index) => (
         <motion.div
           key={category.name}

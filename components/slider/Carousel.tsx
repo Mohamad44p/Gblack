@@ -1,17 +1,10 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Compass } from "lucide-react";
 import { useInView } from "react-intersection-observer";
-import useSWR from "swr";
 
 interface CarouselItem {
   id: number;
@@ -164,33 +157,33 @@ export default function ImprovedCarousel({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="absolute top-[20%] left-5 w-full max-w-2xl p-4 text-white md:left-10 lg:left-20"
+            className="absolute inset-x-0 bottom-20 md:bottom-auto md:top-[20%] md:left-5 w-full max-w-2xl p-4 text-white md:left-10 lg:left-20"
           >
-            <h2 className="mb-4 text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">
+            <h2 className="mb-2 md:mb-4 text-2xl md:text-3xl font-bold leading-tight lg:text-4xl xl:text-5xl">
               {carouselItems[currentIndex].title}
             </h2>
-            <p className="mb-6 text-lg md:text-xl">
+            <p className="mb-3 md:mb-6 hidden text-base md:text-lg lg:text-xl">
               {carouselItems[currentIndex].topic}
             </p>
-            <p className="mb-8 text-sm md:text-base lg:text-lg">
+            <p className="mb-4 md:mb-8 text-sm md:text-base lg:text-lg line-clamp-2 md:line-clamp-none">
               {carouselItems[currentIndex].description}
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-12 mb-10 md:gap-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 rounded border border-black bg-white px-6 py-2 font-bold text-black transition-colors hover:bg-gray-200"
+                className="flex items-center gap-1 md:gap-2 rounded border border-black bg-white px-3 md:px-6 py-1 md:py-2 text-sm md:text-base font-bold text-black transition-colors hover:bg-gray-200"
               >
-                <ShoppingCart size={20} aria-hidden="true" />
+                <ShoppingCart size={16} aria-hidden="true" />
                 <span>SHOP NOW</span>
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 rounded border border-yellow-400 bg-transparent px-6 py-2 font-bold text-white transition-colors hover:bg-white hover:text-black"
+                className="flex items-center gap-1 md:gap-2 rounded border border-yellow-400 bg-transparent px-3 md:px-6 py-1 md:py-2 text-sm md:text-base font-bold text-white transition-colors hover:bg-white hover:text-black"
               >
-                <Compass size={20} aria-hidden="true" />
-                <span>DISCOVER MORE</span>
+                <Compass size={16} aria-hidden="true" />
+                <span>DISCOVER</span>
               </motion.button>
             </div>
           </motion.div>
@@ -210,7 +203,7 @@ export default function ImprovedCarousel({
     >
       {memoizedCarouselContent}
       <div
-        className="absolute bottom-4 right-4 z-10 flex gap-2 md:bottom-8 md:right-8 lg:bottom-12 lg:right-12"
+        className="absolute bottom-2 left-0 ml-4 right-0 z-10 flex justify-start gap-2 md:bottom-8 md:right-8 md:left-auto md:justify-end lg:bottom-12 lg:right-12"
         role="tablist"
         ref={ref}
       >
@@ -219,9 +212,8 @@ export default function ImprovedCarousel({
             key={index}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className={`group relative h-24 w-16 cursor-pointer overflow-hidden rounded-lg transition-transform md:h-32 md:w-24 lg:h-40 lg:w-28 ${
-              index === currentIndex ? "ring-2 ring-yellow-400" : ""
-            }`}
+            className={`group relative h-16 w-12 md:h-24 md:w-16 lg:h-32 lg:w-24 cursor-pointer overflow-hidden rounded-lg transition-transform ${index === currentIndex ? "ring-2 ring-yellow-400" : ""
+              }`}
             onClick={() => showSlider(index)}
             role="tab"
             aria-selected={index === currentIndex}
@@ -231,17 +223,17 @@ export default function ImprovedCarousel({
               src={item.imgSrc}
               alt={item.title}
               fill
-              sizes="(max-width: 768px) 64px, (max-width: 1024px) 96px, 112px"
+              sizes="(max-width: 768px) 48px, (max-width: 1024px) 64px, 96px"
               className="transition-transform object-cover w-full h-full group-hover:scale-110"
               loading="eager"
               priority={index === 0}
               placeholder="blur"
               blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                shimmer(112, 160)
+                shimmer(96, 128)
               )}`}
             />
-            <div className="absolute inset-0 bg-black bg-opacity-50 p-2">
-              <p className="text-xs font-medium absolute bottom-4 text-white md:text-sm">
+            <div className="absolute inset-0 bg-black bg-opacity-50 p-1 md:p-2">
+              <p className="text-[10px] md:text-xs font-medium absolute bottom-1 md:bottom-2 text-white">
                 {item.productName}
               </p>
             </div>

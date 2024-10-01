@@ -121,7 +121,7 @@ const QuickViewModal = ({
               {product.name}
             </h2>
             <p
-              className="text-gray-300 mb-4"
+              className="text-gray-300 mb-4 line-clamp-2"
               dangerouslySetInnerHTML={{ __html: product.short_description }}
             ></p>
             <div className="flex items-center mb-4">
@@ -344,6 +344,7 @@ export default function AllHome() {
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
+                className="text-5xl md:text-6xl lg:text-7xl"
               >
                 Future Tech Emporium
               </h1>
@@ -370,7 +371,7 @@ export default function AllHome() {
                     selectedCategory === category.name ? "default" : "outline"
                   }
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`px-6 py-2 rounded-full text-lg font-semibold transition-all duration-300 mb-2 ${selectedCategory === category.name
+                  className={`md:px-6 px-2 py-2 rounded-full text-lg font-semibold transition-all duration-300 mb-2 ${selectedCategory === category.name
                     ? "bg-white text-black"
                     : "bg-transparent text-white border-white hover:bg-white hover:text-black"
                     }`}
@@ -450,7 +451,9 @@ export default function AllHome() {
                           </div>
                           <div className="p-6">
                             <div className="flex justify-between items-start mb-2">
+                              <Link href={`/product/${product.id}`}>
                               <h3 className="text-2xl font-bold">{product.name}</h3>
+                              </Link>
                               <Badge className="text-[10px] uppercase">
                                 {product.stock_status === "onbackorder" ? "Out of Stock" : "In Stock"}
                               </Badge>

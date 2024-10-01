@@ -10,7 +10,7 @@ export function TimlineAbout() {
             content: (
                 <div className="space-y-4">
                     <div className="flex items-center space-x-4">
-                        <ShoppingBag className="w-8 h-8 text-purple-500" />
+                        <ShoppingBag className="w-8 h-8 text-yellow-500" />
                         <h3 className="text-xl font-semibold text-white">GBALACK Launches</h3>
                     </div>
                     <p className="text-neutral-200 text-sm md:text-base font-normal">
@@ -42,7 +42,7 @@ export function TimlineAbout() {
                     <p className="text-neutral-200 text-sm md:text-base font-normal">
                         The idea for GBALACK is born. Our founders, a team of experienced e-commerce professionals and tech enthusiasts, come together with a shared vision of creating a next-generation online marketplace.
                     </p>
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-0.5 rounded-lg">
+                    <div className="bg-gradient-to-r from-yellow-200 to-yellow-500 p-0.5 rounded-lg">
                         <div className="bg-neutral-900 p-4 rounded-lg">
                             <h4 className="text-white font-semibold mb-2">Our Founding Principles</h4>
                             <ul className="list-disc list-inside text-neutral-300 text-sm space-y-2">
@@ -79,7 +79,7 @@ export function TimlineAbout() {
                         </div>
                         <div className="bg-neutral-800 p-4 rounded-lg flex items-center justify-center">
                             <div className="text-center">
-                                <div className="text-4xl font-bold text-purple-500 mb-2">1M+</div>
+                                <div className="text-4xl font-bold text-yellow-500 mb-2">1M+</div>
                                 <div className="text-white text-sm">Happy Customers</div>
                             </div>
                         </div>
@@ -127,7 +127,7 @@ export function TimlineAbout() {
                     GBALACK is more than just an e-commerce platform. We're a community of passionate shoppers, sellers, and innovators, working together to redefine the online shopping experience.
                 </p>
                 <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl opacity-20"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-200 to-yellow-500 blur-3xl opacity-20"></div>
                     <div className="relative z-10">
                         <Timeline data={data} />
                     </div>

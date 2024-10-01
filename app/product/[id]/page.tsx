@@ -3,6 +3,7 @@ import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 import ProductImageSlider from "@/components/singel/image-slider";
 import { cache } from "react";
 import SingleProductPage from "@/components/singel/ProductPage";
+import { ProductShowcase } from "./_component/CategoryProductShowcase";
 
 const api = new WooCommerceRestApi({
   url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,
@@ -34,17 +35,64 @@ const getReviews = cache(async (productId: number) => {
   }
 });
 
-const getRelatedProducts = cache(
-  async (categoryId: number, currentProductId: number) => {
+const getProductsInCategory = cache(
+  async (categoryId: number, currentProductId: number, limit: number = 4) => {
     try {
       const { data } = await api.get("products", {
         category: categoryId,
         exclude: [currentProductId],
-        per_page: 4,
+        per_page: limit,
       });
       return data;
     } catch (error) {
-      console.error("Error fetching related products:", error);
+      console.error("Error fetching products in category:", error);
+      return [];
+    }
+  }
+);
+
+const getLatestProductsInCategory = cache(
+  async (categoryId: number, currentProductId: number, limit: number = 4) => {
+    try {
+      const { data } = await api.get("products", {
+        category: categoryId,
+        exclude: [currentProductId],
+        per_page: limit,
+        orderby: 'date',
+        order: 'desc'
+      });
+      return data;
+    } catch (error) {
+      console.error("Error fetching latest products in category:", error);
+      return [];
+    }
+  }
+);
+
+const getRandomProductsFromOtherCategories = cache(
+  async (excludeCategoryId: number, limit: number = 4) => {
+    try {
+      const { data: categories } = await api.get("products/categories", {
+        exclude: [excludeCategoryId],
+        per_page: 100,
+      });
+
+      const randomCategories = categories
+        .sort(() => 0.5 - Math.random())
+        .slice(0, limit);
+
+      const productsPromises = randomCategories.map(async (category: any) => {
+        const { data } = await api.get("products", {
+          category: category.id,
+          per_page: 1,
+        });
+        return data[0];
+      });
+
+      const products = await Promise.all(productsPromises);
+      return products.filter(Boolean);
+    } catch (error) {
+      console.error("Error fetching random products from other categories:", error);
       return [];
     }
   }
@@ -101,10 +149,13 @@ export default async function ProductPage({
     notFound();
   }
 
-  const relatedProducts = await getRelatedProducts(
-    product.categories[0]?.id,
-    product.id
-  );
+  const categoryId = product.categories[0]?.id;
+
+  const [productsInCategory, latestProductsInCategory, randomProducts] = await Promise.all([
+    getProductsInCategory(categoryId, product.id),
+    getLatestProductsInCategory(categoryId, product.id, 3),
+    getRandomProductsFromOtherCategories(categoryId, 3)
+  ]);
 
   const totalRating = reviews.reduce(
     (sum: number, review: any) => sum + review.rating,
@@ -120,19 +171,38 @@ export default async function ProductPage({
     rating_count: ratingCount,
   };
 
-  const formattedProducts = relatedProducts.map((product: any) => ({
+  const formatProduct = (product: any) => ({
     id: product.id,
     name: product.name,
-    brand: product.categories[0]?.name || "",
-    description: product.short_description,
+    slug: product.slug,
+    permalink: product.permalink,
+    date_created: product.date_created,
+    type: product.type,
+    description: product.description,
+    short_description: product.short_description,
     price: product.price,
     regular_price: product.regular_price,
     sale_price: product.sale_price,
+    on_sale: product.on_sale,
+    purchasable: product.purchasable,
+    total_sales: product.total_sales,
+    virtual: product.virtual,
+    downloadable: product.downloadable,
+    categories: product.categories,
+    tags: product.tags,
     images: product.images,
-    average_rating: product.average_rating,
-    rating_count: product.rating_count,
     attributes: product.attributes,
-  }));
+    average_rating: product.average_rating,
+    ratingCount: product.rating_count,
+    stock_status: product.stock_status,
+    brand: product.categories[0]?.name || "",
+  });
+
+  const formattedProductsInCategory = productsInCategory.map(formatProduct);
+  const formattedLatestProducts = latestProductsInCategory.map(formatProduct);
+  const formattedRandomProducts = randomProducts.map(formatProduct);
+
+  const showcaseProducts = [...formattedLatestProducts, ...formattedRandomProducts];
 
   return (
     <section className="min-h-screen w-full">
@@ -141,8 +211,17 @@ export default async function ProductPage({
         shippingZones={shippingZones}
       />
       <section className="min-h-screen w-full">
-        <h1 className="text-5xl text-center my-10">You might also like</h1>
-        <ProductImageSlider products={formattedProducts} />
+        <h1 className="text-5xl text-center my-10">More Products in This Category</h1>
+        <ProductImageSlider products={formattedProductsInCategory} />
+      </section>
+      <section className="my-[20vh]">
+        <ProductShowcase
+          title="Discover More Products"
+          products={showcaseProducts}
+          featuredImage={showcaseProducts[0]?.images[0]?.src || "/placeholder.jpg"}
+          featuredTitle={`Explore Our Collection`}
+          featuredDescription={`Discover the latest products from various categories.`}
+        />
       </section>
     </section>
   );

@@ -50,7 +50,7 @@ export default function SignUpPage() {
           <span className="font-saolice text-2xl md:text-3xl lg:text-4xl mx-2 md:mx-4">
             an
           </span>
-          <br />
+          <br className="hidden md:block" />
           ACCOUNT
         </h1>
         <p className="text-[#f3e9d9] text-base md:text-lg max-w-md">

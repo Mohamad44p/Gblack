@@ -483,51 +483,8 @@ export default function EnhancedCheckout() {
     <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Checkout</h1>
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (step === 3) {
-                handleSubmit();
-              } else {
-                handleNextStep();
-              }
-            }}
-          >
-            {renderStepContent()}
-            <div className="mt-6 flex justify-between">
-              {step > 1 && (
-                <Button
-                  type="button"
-                  onClick={() => setStep(step - 1)}
-                  variant="outline"
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-                </Button>
-              )}
-              {step < 3 ? (
-                <Button type="submit" className="ml-auto">
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button type="submit" className="ml-auto" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processing
-                    </>
-                  ) : (
-                    <>
-                      Place Order
-                      <ShoppingBag className="ml-2 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </form>
-        </div>
-        <div className="lg:col-span-1">
+
+      <div className="lg:col-span-1 lg:order-2">
           <Card className="text-white border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center text-2xl">
@@ -589,6 +546,52 @@ export default function EnhancedCheckout() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+
+        <div className="lg:col-span-2 lg:order-1">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (step === 3) {
+                handleSubmit();
+              } else {
+                handleNextStep();
+              }
+            }}
+          >
+            {renderStepContent()}
+            <div className="mt-6 flex justify-between">
+              {step > 1 && (
+                <Button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  variant="outline"
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                </Button>
+              )}
+              {step < 3 ? (
+                <Button type="submit" className="ml-auto">
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button type="submit" className="ml-auto" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing
+                    </>
+                  ) : (
+                    <>
+                      Place Order
+                      <ShoppingBag className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </form>
         </div>
       </div>
     </div>

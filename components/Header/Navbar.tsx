@@ -24,6 +24,7 @@ const staticNavItems = [
   { name: "Accessories", href: "/category/accessories" },
   { name: "All Products", href: "/all" },
   { name: "On-Sale", href: "/on-sale" },
+  { name: "About Us", href: "/About-us" },
   { name: "Contact Us", href: "/contact-us" },
 ];
 

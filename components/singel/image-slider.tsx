@@ -26,13 +26,10 @@ interface WorkCarouselProps {
 }
 
 const backgroundColors = [
-  "bg-gray-400",
-  "bg-gray-500",
-  "bg-gray-600",
-  "bg-slate-600",
-  "bg-zinc-600",
-  "bg-neutral-600",
-  "bg-stone-600",
+  "#4c4c4c",
+  "#666666",
+  "#7F7F7F",
+  "#999999",
 ];
 
 export default function WorkCarousel({ products }: WorkCarouselProps) {
@@ -41,9 +38,12 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
   const [slideIndex, setSlideIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
+  const [currentBgColor, setCurrentBgColor] = useState(backgroundColors[0]);
 
   const getNextBackgroundColor = () => {
-    return backgroundColors[slideCount.current % backgroundColors.length];
+    const nextColor = backgroundColors[slideCount.current % backgroundColors.length];
+    setCurrentBgColor(nextColor);
+    return nextColor;
   };
 
   const handleHeaderClick = (
@@ -83,7 +83,8 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     slideImgDiv.appendChild(image);
 
     const slideContentDiv = document.createElement("div");
-    slideContentDiv.className = `relative w-full md:w-1/2 h-1/2 md:h-full ${getNextBackgroundColor()}`;
+    slideContentDiv.className = "relative w-full md:w-1/2 h-1/2 md:h-full";
+    slideContentDiv.style.backgroundColor = getNextBackgroundColor();
     const contentHeader = document.createElement("div");
     contentHeader.className =
       "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer";
@@ -206,13 +207,14 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
         <div className="absolute top-0 left-0 w-full h-full flex flex-col md:flex-row">
           <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
             <Image
-              src={products[0].images[0]?.src || "/placeholder.jpg"}
+              src={products[0].images[0]?.src}
               alt={products[0].name}
               layout="fill"
               objectFit="cover"
             />
           </div>
-          <div className={`relative w-full md:w-1/2 h-1/2 md:h-full ${backgroundColors[0]}`}>
+          <div className={`relative w-full md:w-1/2 h-1/2 md:h-full`}
+            style={{ backgroundColor: currentBgColor }}          >
             <div
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer"
               onClick={(e) => handleHeaderClick(e, products[0].id)}

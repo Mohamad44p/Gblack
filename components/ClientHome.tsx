@@ -42,14 +42,14 @@ export default function ClientHome({ initialProducts }: ClientHomeProps) {
         title="Newest Products"
         products={newestProducts}
         featuredImage="/images/Rotated/img-1.jpg"
-        featuredTitle="Latest Arrivals"
+        featuredTitle="Fresh Finds, Just for You!"
         featuredDescription="Discover our freshest styles"
       />
       <ProductShowcase
         title="Best Sellers"
         products={bestSellers}
         featuredImage="/images/Rotated/img-3.jpg"
-        featuredTitle="Top Picks"
+        featuredTitle="Bestsellers Everyone’s Talking About!"
         featuredDescription="Our most popular items"
       />
       <DynamicImprovedAllHome />

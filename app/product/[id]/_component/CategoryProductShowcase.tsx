@@ -32,9 +32,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { OptimizedImage } from "../OptimizedImage";
-import { Badge } from "../ui/badge";
 import React from "react";
+import { OptimizedImage } from "@/components/OptimizedImage";
+import { Badge } from "@/components/ui/badge";
 
 export interface Product {
   id: number;
@@ -133,12 +133,13 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <CardContent className="p-0 flex flex-col h-full relative">
-        <div
+        <Link
+          href={`/product/${product.id}`}
           className="relative w-full h-[250px] overflow-hidden"
         >
           <OptimizedImage
-            src={product.images[0].src}
-            alt={product.images[0].alt || product.name}
+            src={product.images[0]?.src || "/placeholder.jpg"}
+            alt={product.images[0]?.alt || product.name}
             fill
             priority
             className="transition-all object-cover w-full h-full duration-300 hover:scale-105"
@@ -163,15 +164,19 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               </Button>
             </div>
           )}
-        </div>
+        </Link>
         <div className="p-4 flex-grow flex flex-col justify-between bg-black">
           <div>
             <div className="flex justify-between items-center mb-1">
               <div className="text-sm text-white/60 font-medium">
-                {product.categories[0]?.name || "Uncategorized"}
+                {product.categories && product.categories.length > 0
+                  ? product.categories[0].name
+                  : "Uncategorized"}
               </div>
               <Badge className="text-[10px] uppercase">
-                {product.stock_status === "onbackorder" ? "Out of Stock" : "In Stock"}
+                {product.stock_status === "onbackorder"
+                  ? "Out of Stock"
+                  : "In Stock"}
               </Badge>
             </div>
             <Link href={`/product/${product.id}`} className="block">
@@ -179,11 +184,10 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 {product.name}
               </h3>
             </Link>
-            <p className="text-sm text-white/60 mb-2 line-clamp-2"
+            <p
+              className="text-sm text-white/60 mb-2 line-clamp-2"
               dangerouslySetInnerHTML={{ __html: product.short_description }}
-            >
-
-            </p>
+            ></p>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -206,10 +210,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${i < Math.round(parseFloat(product.average_rating))
-                    ? "text-yellow-400 fill-current"
-                    : "text-white/20"
-                    }`}
+                  className={`w-4 h-4 ${
+                    i < Math.round(parseFloat(product.average_rating))
+                      ? "text-yellow-400 fill-current"
+                      : "text-white/20"
+                  }`}
                 />
               ))}
               <span className="ml-1 text-sm text-white/60">
@@ -231,7 +236,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 id: product.id,
                 name: product.name,
                 price: isOnSale ? product.sale_price : product.regular_price,
-                image: product.images[0]?.src,
+                image: product.images[0]?.src || "/placeholder.jpg",
                 average_rating: product.average_rating,
                 rating_count: product.ratingCount,
                 short_description: product.short_description,
@@ -257,7 +262,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 ))}
             </RadioGroup>
           </div>
-          <div className="flex justify-start">
+          <div className="flex justify-end">
             <Button
               onClick={handleSizeSelection}
               disabled={product.stock_status === "onbackorder"}
@@ -303,10 +308,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${i < Math.round(parseFloat(product.average_rating))
-                        ? "text-yellow-400 fill-current"
-                        : "text-white/20"
-                        }`}
+                      className={`w-5 h-5 ${
+                        i < Math.round(parseFloat(product.average_rating))
+                          ? "text-yellow-400 fill-current"
+                          : "text-white/20"
+                      }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-white/60">
@@ -452,7 +458,7 @@ export function ProductShowcase({
         transition={{ duration: 0.5 }}
         className="mb-12"
       >
-        <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 text-center">
+        <h2 className="text-5xl md:text-6xl font-bold text-white mb-8 text-center">
           {title}
         </h2>
         <motion.div
@@ -460,7 +466,7 @@ export function ProductShowcase({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="overflow-hidden h-[170px] md:h-[300px] border-0 shadow-2xl relative rounded-lg">
+          <Card className="overflow-hidden h-[300px] border-0 shadow-2xl relative rounded-lg">
             <OptimizedImage
               src={featuredImage}
               alt="Featured product"
@@ -475,7 +481,7 @@ export function ProductShowcase({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
-                  className="mb-4 hidden md:inline-block bg-white/10 backdrop-filter backdrop-blur-sm text-white text-sm font-semibold py-2 px-6 rounded-full"
+                  className="mb-4 bg-white/10 backdrop-filter backdrop-blur-sm text-white text-sm font-semibold py-2 px-6 rounded-full inline-block"
                 >
                   <Sparkles
                     className="inline-block mr-2 h-4 w-4"
@@ -487,7 +493,7 @@ export function ProductShowcase({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
-                  className="md:text-6xl text-xl font-bold mb-4 text-white"
+                  className="text-6xl font-bold mb-4 text-white"
                 >
                   {featuredTitle}
                 </motion.h3>
@@ -499,6 +505,19 @@ export function ProductShowcase({
                 >
                   {featuredDescription}
                 </motion.p>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                >
+                  <Button
+                    size="lg"
+                    className="bg-white text-black hover:bg-white/80 transition-all duration-300 rounded-full"
+                  >
+                    <Zap className="mr-2 h-5 w-5" aria-hidden="true" />
+                    <span>Explore Now</span>
+                  </Button>
+                </motion.div>
               </div>
             </CardContent>
           </Card>

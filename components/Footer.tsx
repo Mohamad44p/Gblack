@@ -10,6 +10,11 @@ import {
   Youtube,
   Facebook,
   Twitter,
+  Phone,
+  Mail,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface Category {
@@ -18,8 +23,15 @@ interface Category {
   slug: string;
 }
 
+interface SocialLink {
+  id: number;
+  platform: string;
+  url: string;
+}
+
 interface AnimatedFooterProps {
   categories?: Category[];
+  socialLinks?: SocialLink[];
 }
 
 const staticNavItems = [
@@ -29,19 +41,30 @@ const staticNavItems = [
   { name: "Contact Us", href: "/contact-us" },
 ];
 
+const customerServiceLinks = [
+  { name: "Help & FAQs", href: "/help-faqs" },
+  { name: "Terms of Conditions", href: "/terms-conditions" },
+  { name: "Privacy Policy", href: "/privacy-policy" },
+  { name: "Online Returns Policy", href: "/returns-policy" },
+  { name: "Rewards Program", href: "/rewards" },
+  { name: "Rebate Center", href: "/rebates" },
+  { name: "Partners", href: "/partners" },
+];
+
 export default function AnimatedFooter({
   categories = [],
+  socialLinks = [],
 }: AnimatedFooterProps) {
   const controls = useAnimation();
   const [isInView, setIsInView] = useState(false);
+  const [openSection, setOpenSection] = useState("Quick Links");
 
   useEffect(() => {
     const handleScroll = () => {
       const footer = document.getElementById("animated-footer");
       if (footer) {
         const footerPosition = footer.getBoundingClientRect().top;
-        const windowHeight =
-          typeof window !== "undefined" ? window.innerHeight : 0;
+        const windowHeight = window.innerHeight;
         if (footerPosition < windowHeight) {
           setIsInView(true);
         } else {
@@ -50,10 +73,8 @@ export default function AnimatedFooter({
       }
     };
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("scroll", handleScroll);
-      return () => window.removeEventListener("scroll", handleScroll);
-    }
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -88,135 +109,224 @@ export default function AnimatedFooter({
     },
   };
 
-  const displayedCategories = categories.slice(0, 5);
+  const prioritizedCategories = categories.sort((a, b) => {
+    if (a.name.toLowerCase() === "men") return -1;
+    if (b.name.toLowerCase() === "men") return 1;
+    if (a.name.toLowerCase() === "women") return -1;
+    if (b.name.toLowerCase() === "women") return 1;
+    return 0;
+  });
+
+  const displayedCategories = prioritizedCategories.slice(0, 5);
+
+  const toggleSection = (section: string) => {
+    setOpenSection(openSection === section ? "" : section);
+  };
+
+  const AccordionSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="border-b border-gray-700">
+      <button
+        className="w-full py-4 px-2 flex justify-between items-center text-left"
+        onClick={() => toggleSection(title)}
+      >
+        <h3 className="text-xl font-semibold">{title}</h3>
+        {openSection === title ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+      </button>
+      {openSection === title && <div className="py-4 px-2">{children}</div>}
+    </div>
+  );
 
   return (
     <footer
       id="animated-footer"
-      className="bg-black text-white py-12 px-4 md:px-6"
+      className="bg-gradient-to-b from-gray-900 to-black text-white py-16 px-4 md:px-6"
     >
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Shop</h3>
-            <ul className="space-y-2">
-              {staticNavItems.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.href} className="hover:text-gray-300">
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Categories</h3>
-            <ul className="space-y-2">
-              {displayedCategories.map((category) => (
-                <li key={category.id}>
-                  <Link
-                    href={`/category/${category.slug}`}
-                    className="hover:text-gray-300"
-                  >
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-              {displayedCategories.length === 0 && (
-                <li>No categories available</li>
-              )}
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Company</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/About-us" className="hover:text-gray-300">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact-us" className="hover:text-gray-300">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="md:col-span-3 lg:col-span-1">
-            <Link
-              href="/contact-us"
-              className="inline-block bg-zinc-800 text-white py-2 px-6 rounded-md hover:bg-[#858585] transition-colors duration-300"
+        <div className="mb-12">
+          <div className="space-y-6 mb-8">
+            <motion.div
+              className="text-4xl md:text-5xl font-bold overflow-hidden"
+              variants={containerVariants}
+              initial="hidden"
+              animate={controls}
             >
-              CONTACT US
-            </Link>
-            <div className="mt-6 space-y-1">
-              <p>Customer Service: +972599605694</p>
-              <p>Email: support@gblack.com</p>
+              {"GBLACK".split("").map((letter, index) => (
+                <motion.span
+                  key={index}
+                  variants={letterVariants}
+                  style={{ display: "inline-block" }}
+                >
+                  {letter}
+                </motion.span>
+              ))}
+            </motion.div>
+            <p className="text-gray-400">
+              Elevate your style with our premium collection of fashion and accessories.
+            </p>
+            <div className="flex space-x-4">
+              {socialLinks.map((link) => {
+                const Icon = {
+                  facebook: Facebook,
+                  twitter: Twitter,
+                  instagram: Instagram,
+                  linkedin: Linkedin,
+                  youtube: Youtube,
+                  github: Github,
+                }[link.platform.toLowerCase()] || Facebook;
+                return (
+                  <Link key={link.id} href={link.url} className="text-gray-400 hover:text-white transition-colors">
+                    <Icon size={24} />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="md:hidden">
+            <AccordionSection title="Quick Links">
+              <ul className="space-y-3">
+                {staticNavItems.map((item) => (
+                  <li key={item.name}>
+                    <Link href={item.href} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                      <ArrowRight size={16} className="mr-2" />
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </AccordionSection>
+
+            <AccordionSection title="Categories">
+              <ul className="space-y-3">
+                {displayedCategories.map((category) => (
+                  <li key={category.id}>
+                    <Link
+                      href={`/category/${category.slug}`}
+                      className="text-gray-400 hover:text-white transition-colors flex items-center"
+                    >
+                      <ArrowRight size={16} className="mr-2" />
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+                {displayedCategories.length === 0 && (
+                  <li className="text-gray-400">No categories available</li>
+                )}
+              </ul>
+            </AccordionSection>
+
+            <AccordionSection title="Customer Service">
+              <ul className="space-y-3">
+                {customerServiceLinks.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className="text-gray-400 hover:text-white transition-colors flex items-center"
+                    >
+                      <ArrowRight size={16} className="mr-2" />
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </AccordionSection>
+
+            <AccordionSection title="Contact Us">
+              <div className="space-y-6">
+                <Link
+                  href="/contact-us"
+                  className="inline-block bg-white text-black font-semibold py-2 px-6 rounded-md hover:bg-gray-200 transition-colors duration-300"
+                >
+                  Get in Touch
+                </Link>
+                <div className="space-y-3">
+                  <p className="flex items-center text-gray-400">
+                    <Phone size={20} className="mr-3" />
+                    +972599605694
+                  </p>
+                  <p className="flex items-center text-gray-400">
+                    <Mail size={20} className="mr-3" />
+                    support@gblack.com
+                  </p>
+                </div>
+              </div>
+            </AccordionSection>
+          </div>
+
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 gap-12">
+            <div>
+              <h3 className="text-xl font-semibold mb-6 border-b border-gray-700 pb-2">Quick Links</h3>
+              <ul className="space-y-3">
+                {staticNavItems.map((item) => (
+                  <li key={item.name}>
+                    <Link href={item.href} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                      <ArrowRight size={16} className="mr-2" />
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-6 border-b border-gray-700 pb-2">Categories</h3>
+              <ul className="space-y-3">
+                {displayedCategories.map((category) => (
+                  <li key={category.id}>
+                    <Link
+                      href={`/category/${category.slug}`}
+                      className="text-gray-400 hover:text-white transition-colors flex items-center"
+                    >
+                      <ArrowRight size={16} className="mr-2" />
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+                {displayedCategories.length === 0 && (
+                  <li className="text-gray-400">No categories available</li>
+                )}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-6 border-b border-gray-700 pb-2">Customer Service</h3>
+              <ul className="space-y-3">
+                {customerServiceLinks.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className="text-gray-400 hover:text-white transition-colors flex items-center"
+                    >
+                      <ArrowRight size={16} className="mr-2" />
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold mb-6 border-b border-gray-700 pb-2">Contact Us</h3>
+              <Link
+                href="/contact-us"
+                className="inline-block bg-white text-black font-semibold py-2 px-6 rounded-md hover:bg-gray-200 transition-colors duration-300"
+              >
+                Get in Touch
+              </Link>
+              <div className="space-y-3">
+                <p className="flex items-center text-gray-400">
+                  <Phone size={20} className="mr-3" />
+                  +972599605694
+                </p>
+                <p className="flex items-center text-gray-400">
+                  <Mail size={20} className="mr-3" />
+                  support@gblack.com
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="border-t border-gray-700 pt-8 flex flex-col items-center">
-          <motion.div
-            className="text-6xl md:text-8xl font-bold mb-8 overflow-hidden"
-            variants={containerVariants}
-            initial="hidden"
-            animate={controls}
-          >
-            {"GBLACK".split("").map((letter, index) => (
-              <motion.span
-                key={index}
-                variants={letterVariants}
-                style={{ display: "inline-block" }}
-              >
-                {letter}
-              </motion.span>
-            ))}
-          </motion.div>
-          <div className="flex justify-between items-center w-full flex-wrap gap-4">
-            <div className="flex space-x-4">
-              <Link
-                href="/privacy-policy"
-                className="text-sm hover:text-gray-300"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/terms-of-use"
-                className="text-sm hover:text-gray-300"
-              >
-                Terms of Use
-              </Link>
-              <Link
-                href="/shipping-returns"
-                className="text-sm hover:text-gray-300"
-              >
-                Shipping & Returns
-              </Link>
-            </div>
-            <p className="text-sm">
-              &copy; {new Date().getFullYear()} GBLACK. All rights reserved.
-            </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="hover:text-gray-300">
-                <Instagram size={20} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Linkedin size={20} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Github size={20} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Youtube size={20} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Facebook size={20} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Twitter size={20} />
-              </Link>
-            </div>
-          </div>
+        <div className="border-t border-gray-800 pt-8 text-center">
+          <p className="text-gray-400">
+            © {new Date().getFullYear()} GBLACK. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
