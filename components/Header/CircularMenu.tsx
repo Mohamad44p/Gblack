@@ -125,7 +125,7 @@ export default function AnimatedMenu({
   return (
     <>
       <motion.div
-        className={`fixed top-0 md:hidden left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 p-2 md:hidden left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled ? "bg-black" : "bg-transparent"
         }`}
         initial={{ y: -100 }}

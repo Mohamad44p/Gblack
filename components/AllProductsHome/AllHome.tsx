@@ -121,7 +121,7 @@ const QuickViewModal = ({
               {product.name}
             </h2>
             <p
-              className="text-gray-300 mb-4 line-clamp-2"
+              className="text-gray-300 mb-4 md:line-clamp-2 line-clamp-1"
               dangerouslySetInnerHTML={{ __html: product.short_description }}
             ></p>
             <div className="flex items-center mb-4">

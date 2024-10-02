@@ -1,9 +1,25 @@
 import { notFound } from "next/navigation";
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
-import ProductImageSlider from "@/components/singel/image-slider";
-import { cache } from "react";
-import SingleProductPage from "@/components/singel/ProductPage";
-import { ProductShowcase } from "./_component/CategoryProductShowcase";
+import { cache, Suspense } from "react";
+import { unstable_cache } from "next/cache";
+import dynamic from "next/dynamic";
+import Loading from "@/app/loading";
+
+const SingleProductPage = dynamic(
+  () => import("@/components/singel/ProductPage"),
+  { ssr: false }
+);
+const ImageSlider = dynamic(() => import("@/components/singel/image-slider"), {
+  ssr: false,
+});
+
+const ProductShowcase = dynamic(
+  () =>
+    import("./_component/CategoryProductShowcase").then(
+      (mod) => mod.ProductShowcase
+    ),
+  { ssr: false }
+);
 
 const api = new WooCommerceRestApi({
   url: process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL!,
@@ -12,7 +28,11 @@ const api = new WooCommerceRestApi({
   version: "wc/v3",
 });
 
-const getProduct = cache(async (id: string) => {
+const cacheWithTTL = (fn: (...args: any[]) => Promise<any>, ttl: number) => {
+  return unstable_cache(fn, undefined, { revalidate: ttl });
+};
+
+const getProduct = cacheWithTTL(async (id: string) => {
   try {
     const { data } = await api.get(`products/${id}`);
     return data;
@@ -20,9 +40,9 @@ const getProduct = cache(async (id: string) => {
     console.error("Error fetching product:", error);
     return null;
   }
-});
+}, 3600);
 
-const getReviews = cache(async (productId: number) => {
+const getReviews = cacheWithTTL(async (productId: number) => {
   try {
     const { data } = await api.get(`products/reviews`, {
       product: productId,
@@ -33,9 +53,9 @@ const getReviews = cache(async (productId: number) => {
     console.error("Error fetching reviews:", error);
     return [];
   }
-});
+}, 3600);
 
-const getProductsInCategory = cache(
+const getProductsInCategory = cacheWithTTL(
   async (categoryId: number, currentProductId: number, limit: number = 4) => {
     try {
       const { data } = await api.get("products", {
@@ -48,28 +68,30 @@ const getProductsInCategory = cache(
       console.error("Error fetching products in category:", error);
       return [];
     }
-  }
+  },
+  3600
 );
 
-const getLatestProductsInCategory = cache(
+const getLatestProductsInCategory = cacheWithTTL(
   async (categoryId: number, currentProductId: number, limit: number = 4) => {
     try {
       const { data } = await api.get("products", {
         category: categoryId,
         exclude: [currentProductId],
         per_page: limit,
-        orderby: 'date',
-        order: 'desc'
+        orderby: "date",
+        order: "desc",
       });
       return data;
     } catch (error) {
       console.error("Error fetching latest products in category:", error);
       return [];
     }
-  }
+  },
+  1800
 );
 
-const getRandomProductsFromOtherCategories = cache(
+const getRandomProductsFromOtherCategories = cacheWithTTL(
   async (excludeCategoryId: number, limit: number = 4) => {
     try {
       const { data: categories } = await api.get("products/categories", {
@@ -92,13 +114,17 @@ const getRandomProductsFromOtherCategories = cache(
       const products = await Promise.all(productsPromises);
       return products.filter(Boolean);
     } catch (error) {
-      console.error("Error fetching random products from other categories:", error);
+      console.error(
+        "Error fetching random products from other categories:",
+        error
+      );
       return [];
     }
-  }
+  },
+  7200
 );
 
-const getShippingZones = cache(async () => {
+const getShippingZones = cacheWithTTL(async () => {
   try {
     const response = await api.get("shipping/zones");
     const zones = await Promise.all(
@@ -119,7 +145,7 @@ const getShippingZones = cache(async () => {
     console.error("Error fetching shipping zones:", error);
     return [];
   }
-});
+}, 86400);
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
@@ -151,11 +177,12 @@ export default async function ProductPage({
 
   const categoryId = product.categories[0]?.id;
 
-  const [productsInCategory, latestProductsInCategory, randomProducts] = await Promise.all([
-    getProductsInCategory(categoryId, product.id),
-    getLatestProductsInCategory(categoryId, product.id, 3),
-    getRandomProductsFromOtherCategories(categoryId, 3)
-  ]);
+  const [productsInCategory, latestProductsInCategory, randomProducts] =
+    await Promise.all([
+      getProductsInCategory(categoryId, product.id),
+      getLatestProductsInCategory(categoryId, product.id, 3),
+      getRandomProductsFromOtherCategories(categoryId, 3),
+    ]);
 
   const totalRating = reviews.reduce(
     (sum: number, review: any) => sum + review.rating,
@@ -202,27 +229,33 @@ export default async function ProductPage({
   const formattedLatestProducts = latestProductsInCategory.map(formatProduct);
   const formattedRandomProducts = randomProducts.map(formatProduct);
 
-  const showcaseProducts = [...formattedLatestProducts, ...formattedRandomProducts];
+  const showcaseProducts = [
+    ...formattedLatestProducts,
+    ...formattedRandomProducts,
+  ];
 
   return (
-    <section className="min-h-screen w-full">
-      <SingleProductPage
-        product={updatedProduct}
-        shippingZones={shippingZones}
-      />
+    <Suspense fallback={<Loading />}>
       <section className="min-h-screen w-full">
-        <h1 className="text-5xl text-center my-10">More Products in This Category</h1>
-        <ProductImageSlider products={formattedProductsInCategory} />
-      </section>
-      <section className="my-[20vh]">
-        <ProductShowcase
-          title="Discover More Products"
-          products={showcaseProducts}
-          featuredImage={showcaseProducts[0]?.images[0]?.src || "/placeholder.jpg"}
-          featuredTitle={`Explore Our Collection`}
-          featuredDescription={`Discover the latest products from various categories.`}
+        <SingleProductPage
+          product={updatedProduct}
+          shippingZones={shippingZones}
         />
+        <section className="min-h-screen w-full">
+          <ImageSlider products={formattedProductsInCategory} />
+        </section>
+        <section className="my-[20vh]">
+          <ProductShowcase
+            title="Discover More Products"
+            products={showcaseProducts}
+            featuredImage={
+              showcaseProducts[0]?.images[0]?.src || "/BlurImage.jpg"
+            }
+            featuredTitle={`Explore Our Collection`}
+            featuredDescription={`Discover the latest products from various categories.`}
+          />
+        </section>
       </section>
-    </section>
+    </Suspense>
   );
 }

@@ -342,7 +342,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                             />
                             <Label
                               htmlFor={`quick-size-${size}`}
-                              className="px-3 py-1 border border-white/20 rounded-full cursor-pointer hover:bg-white/10 transition-colors duration-200"
+                              className={`px-3 py-1 border border-white/20 rounded-full cursor-pointer transition-colors duration-200 ${
+                                selectedSize === size
+                                  ? "bg-white text-black"
+                                  : "hover:bg-white/10"
+                              }`}
                             >
                               {size}
                             </Label>

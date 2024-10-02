@@ -133,9 +133,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <CardContent className="p-0 flex flex-col h-full relative">
-        <div
-          className="relative w-full h-[250px] overflow-hidden"
-        >
+        <div className="relative w-full h-[250px] overflow-hidden">
           <OptimizedImage
             src={product.images[0].src}
             alt={product.images[0].alt || product.name}
@@ -171,7 +169,9 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 {product.categories[0]?.name || "Uncategorized"}
               </div>
               <Badge className="text-[10px] uppercase">
-                {product.stock_status === "onbackorder" ? "Out of Stock" : "In Stock"}
+                {product.stock_status === "onbackorder"
+                  ? "Out of Stock"
+                  : "In Stock"}
               </Badge>
             </div>
             <Link href={`/product/${product.id}`} className="block">
@@ -179,11 +179,10 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 {product.name}
               </h3>
             </Link>
-            <p className="text-sm text-white/60 mb-2 line-clamp-2"
+            <p
+              className="text-sm text-white/60 mb-2 line-clamp-2"
               dangerouslySetInnerHTML={{ __html: product.short_description }}
-            >
-
-            </p>
+            ></p>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -206,10 +205,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-4 h-4 ${i < Math.round(parseFloat(product.average_rating))
-                    ? "text-yellow-400 fill-current"
-                    : "text-white/20"
-                    }`}
+                  className={`w-4 h-4 ${
+                    i < Math.round(parseFloat(product.average_rating))
+                      ? "text-yellow-400 fill-current"
+                      : "text-white/20"
+                  }`}
                 />
               ))}
               <span className="ml-1 text-sm text-white/60">
@@ -252,7 +252,16 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                 sizeAttribute.options.map((size) => (
                   <div key={size} className="flex items-center space-x-2">
                     <RadioGroupItem value={size} id={`size-${size}`} />
-                    <Label htmlFor={`size-${size}`}>{size}</Label>
+                    <Label
+                      htmlFor={`size-${size}`}
+                      className={`px-3 py-1 border border-white/20 rounded-full cursor-pointer transition-colors duration-200 ${
+                        selectedSize === size
+                          ? "bg-white text-black"
+                          : "hover:bg-white/10"
+                      }`}
+                    >
+                      {size}
+                    </Label>
                   </div>
                 ))}
             </RadioGroup>
@@ -303,10 +312,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 ${i < Math.round(parseFloat(product.average_rating))
-                        ? "text-yellow-400 fill-current"
-                        : "text-white/20"
-                        }`}
+                      className={`w-5 h-5 ${
+                        i < Math.round(parseFloat(product.average_rating))
+                          ? "text-yellow-400 fill-current"
+                          : "text-white/20"
+                      }`}
                     />
                   ))}
                   <span className="ml-2 text-sm text-white/60">
@@ -314,7 +324,7 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                   </span>
                 </div>
                 <p
-                  className="text-white/80 mb-4"
+                  className="text-white/80 mb-4 md:line-clamp-none line-clamp-1"
                   dangerouslySetInnerHTML={{
                     __html: product.short_description,
                   }}
@@ -336,7 +346,11 @@ const ProductCard = ({ product, handleAddToCart }: ProductCardProps) => {
                             />
                             <Label
                               htmlFor={`quick-size-${size}`}
-                              className="px-3 py-1 border border-white/20 rounded-full cursor-pointer hover:bg-white/10 transition-colors duration-200"
+                              className={`px-3 py-1 border border-white/20 rounded-full cursor-pointer transition-colors duration-200 ${
+                                selectedSize === size
+                                  ? "bg-white text-black"
+                                  : "hover:bg-white/10"
+                              }`}
                             >
                               {size}
                             </Label>

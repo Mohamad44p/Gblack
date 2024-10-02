@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart,
   Heart,
@@ -10,9 +10,9 @@ import {
   AlertCircle,
   Filter,
   ArrowRight,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -20,13 +20,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 import {
   Pagination,
   PaginationContent,
@@ -35,39 +35,39 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
-import { useCart } from "@/contexts/CartContext"
-import { openCart } from "@/lib/hooks/events"
-import { toast } from "@/hooks/use-toast"
-import Link from "next/link"
-import Image from "next/image"
-import { WishlistButton } from "../WishlistButton"
+} from "@/components/ui/pagination";
+import { useCart } from "@/contexts/CartContext";
+import { openCart } from "@/lib/hooks/events";
+import { toast } from "@/hooks/use-toast";
+import Link from "next/link";
+import Image from "next/image";
+import { WishlistButton } from "../WishlistButton";
 
 interface Product {
-  id: number
-  name: string
-  price: string
-  regular_price: string
-  sale_price: string
-  on_sale: boolean
-  categories: { id: number; name: string; slug: string }[]
-  average_rating: string
-  images: { src: string }[]
-  description: string
-  short_description: string
-  date_created: string
-  stock_status: string
-  attributes: { name: string; options: string[] }[]
-  ratingCount: number
+  id: number;
+  name: string;
+  price: string;
+  regular_price: string;
+  sale_price: string;
+  on_sale: boolean;
+  categories: { id: number; name: string; slug: string }[];
+  average_rating: string;
+  images: { src: string }[];
+  description: string;
+  short_description: string;
+  date_created: string;
+  stock_status: string;
+  attributes: { name: string; options: string[] }[];
+  ratingCount: number;
 }
 
 interface Category {
-  id: number
-  name: string
-  slug: string
+  id: number;
+  name: string;
+  slug: string;
 }
 
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 12;
 
 const shimmer = (w: number, h: number) => `
 <svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -81,23 +81,23 @@ const shimmer = (w: number, h: number) => `
   <rect width="${w}" height="${h}" fill="#333" />
   <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
   <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
-</svg>`
+</svg>`;
 
 const toBase64 = (str: string) =>
   typeof window === "undefined"
     ? Buffer.from(str).toString("base64")
-    : window.btoa(str)
+    : window.btoa(str);
 
 const QuickViewModal = ({
   product,
   onClose,
 }: {
-  product: Product
-  onClose: () => void
+  product: Product;
+  onClose: () => void;
 }) => {
-  const { addToCart } = useCart()
-  const [selectedSize, setSelectedSize] = useState("")
-  const sizeAttribute = product.attributes.find((attr) => attr.name === "Size")
+  const { addToCart } = useCart();
+  const [selectedSize, setSelectedSize] = useState("");
+  const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
 
   const handleAddToCart = useCallback(() => {
     if (sizeAttribute && sizeAttribute.options.length > 0 && !selectedSize) {
@@ -105,8 +105,8 @@ const QuickViewModal = ({
         title: "Size required",
         description: "Please select a size before adding to cart.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     addToCart({
@@ -116,10 +116,10 @@ const QuickViewModal = ({
       image: product.images[0]?.src || "/placeholder.svg",
       quantity: 1,
       size: selectedSize,
-    })
-    onClose()
-    openCart()
-  }, [addToCart, onClose, product, selectedSize, sizeAttribute])
+    });
+    onClose();
+    openCart();
+  }, [addToCart, onClose, product, selectedSize, sizeAttribute]);
 
   return (
     <motion.div
@@ -172,7 +172,7 @@ const QuickViewModal = ({
               </h2>
             </Link>
             <p
-              className="text-gray-300 mb-4 line-clamp-2"
+              className="text-gray-300 mb-4 md:line-clamp-2 line-clamp-1"
               dangerouslySetInnerHTML={{ __html: product.short_description }}
             ></p>
             <div className="flex items-center mb-4">
@@ -264,8 +264,8 @@ const QuickViewModal = ({
         </div>
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};
 
 export const SkeletonProduct = () => {
   return (
@@ -293,46 +293,46 @@ export const SkeletonProduct = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function ProductList({
   initialProducts,
   initialCategories,
 }: {
-  initialProducts: Product[]
-  initialCategories: Category[]
+  initialProducts: Product[];
+  initialCategories: Category[];
 }) {
-  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<Category[]>([
     { id: 0, name: "All", slug: "all" },
     ...initialCategories,
-  ])
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [sortBy, setSortBy] = useState("date")
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
-  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [selectedGender, setSelectedGender] = useState("All")
-  const [stockFilter, setStockFilter] = useState("All")
-  const [saleFilter, setSaleFilter] = useState("All")
-  const [openAccordionItems, setOpenAccordionItems] = useState(["category"])
-  const { addToCart } = useCart()
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState("date");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedGender, setSelectedGender] = useState("All");
+  const [stockFilter, setStockFilter] = useState("All");
+  const [saleFilter, setSaleFilter] = useState("All");
+  const [openAccordionItems, setOpenAccordionItems] = useState(["category"]);
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    setProducts(initialProducts)
-  }, [initialProducts])
+    setProducts(initialProducts);
+  }, [initialProducts]);
 
   const handleAddToCart = useCallback(
     (product: Product) => {
       const sizeAttribute = product.attributes.find(
         (attr) => attr.name === "Size"
-      )
+      );
       if (sizeAttribute && sizeAttribute.options.length > 0) {
-        setSelectedProduct(product)
+        setSelectedProduct(product);
       } else {
         addToCart({
           id: product.id,
@@ -340,44 +340,44 @@ export default function ProductList({
           price: product.sale_price || product.price,
           image: product.images[0]?.src,
           quantity: 1,
-        })
-        openCart()
+        });
+        openCart();
       }
     },
     [addToCart]
-  )
+  );
 
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
         const categoryMatch =
           selectedCategory === "All" ||
-          product.categories.some((cat) => cat.name === selectedCategory)
+          product.categories.some((cat) => cat.name === selectedCategory);
 
-        const productPrice = parseFloat(product.sale_price || product.price)
+        const productPrice = parseFloat(product.sale_price || product.price);
         const priceMatch =
-          productPrice >= priceRange[0] && productPrice <= priceRange[1]
+          productPrice >= priceRange[0] && productPrice <= priceRange[1];
 
         const genderMatch =
           selectedGender === "All" ||
           product.attributes.some(
             (attr) =>
               attr.name === "Gender" && attr.options.includes(selectedGender)
-          )
+          );
 
         const stockMatch =
           stockFilter === "All" ||
           (stockFilter === "In Stock" && product.stock_status === "instock") ||
           (stockFilter === "Out of Stock" &&
-            product.stock_status === "outofstock")
+            product.stock_status === "outofstock");
         const saleMatch =
           saleFilter === "All" ||
           (saleFilter === "On Sale" && product.on_sale) ||
-          (saleFilter === "Regular Price" && !product.on_sale)
+          (saleFilter === "Regular Price" && !product.on_sale);
 
         return (
           categoryMatch && priceMatch && genderMatch && stockMatch && saleMatch
-        )
+        );
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -385,22 +385,22 @@ export default function ProductList({
             return (
               parseFloat(a.sale_price || a.price) -
               parseFloat(b.sale_price || b.price)
-            )
+            );
           case "price-desc":
             return (
               parseFloat(b.sale_price || b.price) -
               parseFloat(a.sale_price || a.price)
-            )
+            );
           case "name":
-            return a.name.localeCompare(b.name)
+            return a.name.localeCompare(b.name);
           case "date":
           default:
             return (
               new Date(b.date_created).getTime() -
               new Date(a.date_created).getTime()
-            )
+            );
         }
-      })
+      });
   }, [
     products,
     selectedCategory,
@@ -409,38 +409,38 @@ export default function ProductList({
     stockFilter,
     saleFilter,
     sortBy,
-  ])
+  ]);
 
   const totalPages = Math.max(
     1,
     Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
-  )
+  );
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
-  )
+  );
 
   const handlePriceChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = parseInt(event.target.value)
+      const value = parseInt(event.target.value);
       if (event.target.id === "minPrice") {
-        setPriceRange([value, Math.max(value, priceRange[1])])
+        setPriceRange([value, Math.max(value, priceRange[1])]);
       } else {
-        setPriceRange([Math.min(value, priceRange[0]), value])
+        setPriceRange([Math.min(value, priceRange[0]), value]);
       }
     },
     [priceRange]
-  )
+  );
 
   const clearFilters = useCallback(() => {
-    setSelectedCategory("All")
-    setPriceRange([0, 1000])
-    setSelectedGender("All")
-    setStockFilter("All")
-    setSaleFilter("All")
-    setSortBy("date")
-    setCurrentPage(1)
-  }, [])
+    setSelectedCategory("All");
+    setPriceRange([0, 1000]);
+    setSelectedGender("All");
+    setStockFilter("All");
+    setSaleFilter("All");
+    setSortBy("date");
+    setCurrentPage(1);
+  }, []);
 
   const FilterContent = () => (
     <Accordion
@@ -583,7 +583,7 @@ export default function ProductList({
         </AccordionContent>
       </AccordionItem>
     </Accordion>
-  )
+  );
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden relative">
@@ -596,7 +596,9 @@ export default function ProductList({
         <div className="container mx-auto px-4 py-16 relative z-10">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-semibold md:block hidden">Filters</h2>
-            <h1 className="md:text-4xl font-bold text-center text-xl">All Products</h1>
+            <h1 className="md:text-4xl font-bold text-center text-xl">
+              All Products
+            </h1>
             <div className="flex items-center">
               <select
                 className="px-4 py-2 border rounded-full bg-black text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -608,13 +610,23 @@ export default function ProductList({
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
               </select>
-              <Sheet open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
+              <Sheet
+                open={isFilterSheetOpen}
+                onOpenChange={setIsFilterSheetOpen}
+              >
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="ml-2 lg:hidden">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="ml-2 lg:hidden"
+                  >
                     <Filter className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] sm:w-[400px] bg-black overflow-y-auto">
+                <SheetContent
+                  side="left"
+                  className="w-[300px] sm:w-[400px] bg-black overflow-y-auto"
+                >
                   <SheetHeader>
                     <SheetTitle className="text-white">Filters</SheetTitle>
                     <SheetDescription className="text-gray-400">
@@ -628,23 +640,35 @@ export default function ProductList({
               </Sheet>
             </div>
           </div>
-          
+
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="hidden lg:block lg:w-1/4 space-y-6 bg-black p-6 rounded-lg border border-gray-700">
               <FilterContent />
               <div className="flex justify-between mt-4">
-                <Button onClick={clearFilters} variant="outline" className="w-full">
+                <Button
+                  onClick={clearFilters}
+                  variant="outline"
+                  className="w-full"
+                >
                   Clear Filters
                 </Button>
               </div>
             </div>
 
             <div className="flex-1">
-              <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" layout>
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                layout
+              >
                 <AnimatePresence>
                   {loading
                     ? [...Array(9)].map((_, index) => (
-                        <motion.div key={`skeleton-${index}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <motion.div
+                          key={`skeleton-${index}`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        >
                           <SkeletonProduct />
                         </motion.div>
                       ))
@@ -667,13 +691,18 @@ export default function ProductList({
                           >
                             <div className="relative overflow-hidden">
                               <Image
-                                src={product.images[0]?.src || "/placeholder.svg?height=400&width=600"}
+                                src={
+                                  product.images[0]?.src ||
+                                  "/placeholder.svg?height=400&width=600"
+                                }
                                 alt={product.name}
                                 width={600}
                                 height={400}
                                 className="w-full h-80 object-cover"
                                 placeholder="blur"
-                                blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(600, 400))}`}
+                                blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                                  shimmer(600, 400)
+                                )}`}
                               />
                               {product.on_sale && (
                                 <div className="absolute text-[10px] top-0 left-0 bg-red-500 text-white px-1 py-1 m-2 rounded-md">
@@ -683,7 +712,10 @@ export default function ProductList({
                               <motion.div
                                 className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                 initial={{ opacity: 0 }}
-                                animate={{ opacity: hoveredProduct === product.id ? 1 : 0 }}
+                                animate={{
+                                  opacity:
+                                    hoveredProduct === product.id ? 1 : 0,
+                                }}
                               >
                                 <Button
                                   className="bg-white text-black hover:bg-gray-200"
@@ -695,44 +727,67 @@ export default function ProductList({
                             </div>
                             <div className="p-6">
                               <div className="flex justify-between items-center mb-2">
-                                <Link href={`/product/${product.id}`} className="block">
+                                <Link
+                                  href={`/product/${product.id}`}
+                                  className="block"
+                                >
                                   <h3 className="text-xl font-bold hover:text-gray-300 transition-colors">
                                     {product.name}
                                   </h3>
                                 </Link>
                                 <Badge>
-                                  {product.stock_status === "instock" ? "In Stock" : "Out of Stock"}
+                                  {product.stock_status === "instock"
+                                    ? "In Stock"
+                                    : "Out of Stock"}
                                 </Badge>
                               </div>
-                              <p className="text-sm text-gray-400 mb-4 line-clamp-2" dangerouslySetInnerHTML={{ __html: product.short_description }}></p>
+                              <p
+                                className="text-sm text-gray-400 mb-4 line-clamp-2"
+                                dangerouslySetInnerHTML={{
+                                  __html: product.short_description,
+                                }}
+                              ></p>
                               <div className="flex justify-between items-center mb-4">
                                 {product.on_sale ? (
                                   <div>
-                                    <span className="text-xl font-bold text-white">{product.sale_price} NIS</span>
-                                    <span className="ml-2 text-lg text-red-500 line-through">{product.regular_price} NIS</span>
+                                    <span className="text-xl font-bold text-white">
+                                      {product.sale_price} NIS
+                                    </span>
+                                    <span className="ml-2 text-lg text-red-500 line-through">
+                                      {product.regular_price} NIS
+                                    </span>
                                   </div>
                                 ) : (
-                                  <span className="text-3xl font-bold">{product.price} NIS</span>
+                                  <span className="text-3xl font-bold">
+                                    {product.price} NIS
+                                  </span>
                                 )}
                                 <div className="flex items-center">
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
                                       className={`w-5 h-5 ${
-                                        i < Math.floor(parseFloat(product.average_rating))
+                                        i <
+                                        Math.floor(
+                                          parseFloat(product.average_rating)
+                                        )
                                           ? "text-yellow-400"
                                           : "text-gray-600"
                                       } fill-current`}
                                     />
                                   ))}
-                                  <span className="ml-2 text-gray-400">{product.average_rating}</span>
+                                  <span className="ml-2 text-gray-400">
+                                    {product.average_rating}
+                                  </span>
                                 </div>
                               </div>
                               <div className="flex justify-between items-center">
                                 <Button
                                   onClick={() => handleAddToCart(product)}
                                   className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                                  disabled={product.stock_status === "outofstock"}
+                                  disabled={
+                                    product.stock_status === "outofstock"
+                                  }
                                 >
                                   <ShoppingCart className="w-4 h-4 mr-2" />
                                   Add to Cart
@@ -745,7 +800,8 @@ export default function ProductList({
                                     price: product.price,
                                     image: product.images[0]?.src,
                                     rating_count: product.ratingCount,
-                                    short_description: product.short_description,
+                                    short_description:
+                                      product.short_description,
                                     attributes: product.attributes,
                                   }}
                                 />
@@ -760,8 +816,13 @@ export default function ProductList({
               {!loading && paginatedProducts.length === 0 && (
                 <div className="text-center py-12">
                   <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-lg font-medium text-gray-200">No products found</h3>
-                  <p className="mt-1 text-sm text-gray-400">Try adjusting your search or filter to find what you&apos;re looking for.</p>
+                  <h3 className="mt-2 text-lg font-medium text-gray-200">
+                    No products found
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Try adjusting your search or filter to find what you&apos;re
+                    looking for.
+                  </p>
                   <Button className="mt-6" onClick={clearFilters}>
                     Clear all filters
                   </Button>
@@ -775,8 +836,8 @@ export default function ProductList({
                       <PaginationPrevious
                         href="#"
                         onClick={(e) => {
-                          e.preventDefault()
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                          e.preventDefault();
+                          setCurrentPage((prev) => Math.max(prev - 1, 1));
                         }}
                       />
                     </PaginationItem>
@@ -785,8 +846,8 @@ export default function ProductList({
                         <PaginationLink
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault()
-                            setCurrentPage(i + 1)
+                            e.preventDefault();
+                            setCurrentPage(i + 1);
                           }}
                           isActive={currentPage === i + 1}
                         >
@@ -798,8 +859,10 @@ export default function ProductList({
                       <PaginationNext
                         href="#"
                         onClick={(e) => {
-                          e.preventDefault()
-                          setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                          e.preventDefault();
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages)
+                          );
                         }}
                       />
                     </PaginationItem>
@@ -813,9 +876,12 @@ export default function ProductList({
 
       <AnimatePresence>
         {selectedProduct && (
-          <QuickViewModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
+          <QuickViewModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+          />
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

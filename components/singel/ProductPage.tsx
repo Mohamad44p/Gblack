@@ -1,110 +1,124 @@
-"use client"
+"use client";
 
-import { useCallback, useState, useEffect } from "react"
-import ImageGallery from "@/components/singel/ImageGallery"
-import { Button } from "@/components/ui/button"
-import { Star, Truck, Share2, ShoppingCart, Bell } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { toast } from "@/hooks/use-toast"
-import { WishlistButton } from "@/components/WishlistButton"
-import { useCart } from "@/contexts/CartContext"
-import { openCart } from "@/lib/hooks/events"
-import ProductReviews from "./ProductReviews"
-import { motion } from "framer-motion"
-import { useInView } from "react-intersection-observer"
-import { useRouter } from "next/navigation"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useCallback, useState, useEffect, useMemo } from "react";
+import ImageGallery from "@/components/singel/ImageGallery";
+import { Button } from "@/components/ui/button";
+import { Star, Truck, Share2, ShoppingCart, Bell } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
+import { WishlistButton } from "@/components/WishlistButton";
+import { useCart } from "@/contexts/CartContext";
+import { openCart } from "@/lib/hooks/events";
+import ProductReviews from "./ProductReviews";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ProductAttribute {
-  id: number
-  name: string
-  options: string[]
+  id: number;
+  name: string;
+  options: string[];
 }
 
 interface ProductCategory {
-  id: number
-  name: string
-  slug: string
+  id: number;
+  name: string;
+  slug: string;
 }
 
 interface ProductImage {
-  id: number
-  src: string
-  alt: string
+  id: number;
+  src: string;
+  alt: string;
 }
 
 interface ShippingZone {
-  id: number
-  name: string
-  price: number
+  id: number;
+  name: string;
+  price: number;
 }
 
 interface ProductProps {
-  id: number
-  name: string
-  slug: string
-  permalink: string
-  price: string
-  regular_price: string
-  sale_price: string
-  on_sale: boolean
-  description: string
-  short_description: string
-  average_rating: string
-  rating_count: number
-  images: ProductImage[]
-  categories: ProductCategory[]
-  attributes: ProductAttribute[]
-  stock_quantity: number
-  sku: string
-  weight: string
+  id: number;
+  name: string;
+  slug: string;
+  permalink: string;
+  price: string;
+  regular_price: string;
+  sale_price: string;
+  on_sale: boolean;
+  description: string;
+  short_description: string;
+  average_rating: string;
+  rating_count: number;
+  images: ProductImage[];
+  categories: ProductCategory[];
+  attributes: ProductAttribute[];
+  stock_quantity: number;
+  sku: string;
+  weight: string;
   dimensions: {
-    length: string
-    width: string
-    height: string
-  }
-  manage_stock: boolean
-  backorders: string
-  backorders_allowed: boolean
-  backordered: boolean
-  low_stock_amount: number
-  sold_individually: boolean
+    length: string;
+    width: string;
+    height: string;
+  };
+  manage_stock: boolean;
+  backorders: string;
+  backorders_allowed: boolean;
+  backordered: boolean;
+  low_stock_amount: number;
+  sold_individually: boolean;
 }
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
-}
+};
 
 const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
-}
+};
 
-export default function Component({ product, shippingZones }: { product: ProductProps; shippingZones: ShippingZone[] }) {
-  const [selectedSize, setSelectedSize] = useState("")
-  const [quantity, setQuantity] = useState(1)
-  const { addToCart } = useCart()
+export default function Component({
+  product,
+  shippingZones,
+}: {
+  product: ProductProps;
+  shippingZones: ShippingZone[];
+}) {
+  const [selectedSize, setSelectedSize] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
-  })
-  const router = useRouter()
-  const [isLowStock, setIsLowStock] = useState(false)
-  const [isOutOfStock, setIsOutOfStock] = useState(false)
+  });
+  const router = useRouter();
+  const [isLowStock, setIsLowStock] = useState(false);
+  const [isOutOfStock, setIsOutOfStock] = useState(false);
 
-  const sizes = product.attributes.find((attr) => attr.name === "Size")?.options || []
-  const isOnSale = product.sale_price !== "" && product.sale_price !== product.regular_price
+  const sizes = useMemo(
+    () =>
+      product.attributes.find((attr) => attr.name === "Size")?.options || [],
+    [product.attributes]
+  );
+  const isOnSale = useMemo(
+    () =>
+      product.sale_price !== "" && product.sale_price !== product.regular_price,
+    [product.sale_price, product.regular_price]
+  );
 
   useEffect(() => {
     if (product.manage_stock) {
-      setIsLowStock(product.stock_quantity <= product.low_stock_amount)
-      setIsOutOfStock(product.stock_quantity === 0)
+      setIsLowStock(product.stock_quantity <= product.low_stock_amount);
+      setIsOutOfStock(product.stock_quantity === 0);
     }
-  }, [product.manage_stock, product.stock_quantity, product.low_stock_amount])
+  }, [product.manage_stock, product.stock_quantity, product.low_stock_amount]);
 
   const handleAddToCart = useCallback(() => {
     if (sizes.length > 0 && !selectedSize) {
@@ -112,8 +126,8 @@ export default function Component({ product, shippingZones }: { product: Product
         title: "Please select a size",
         description: "You must select a size before adding to cart.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (isOutOfStock) {
@@ -121,8 +135,8 @@ export default function Component({ product, shippingZones }: { product: Product
         title: "Out of Stock",
         description: "This product is currently out of stock.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (product.sold_individually && quantity > 1) {
@@ -130,8 +144,8 @@ export default function Component({ product, shippingZones }: { product: Product
         title: "Quantity Limit",
         description: "This product can only be purchased one at a time.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     addToCart({
@@ -141,16 +155,26 @@ export default function Component({ product, shippingZones }: { product: Product
       image: product.images[0]?.src || "/BlurImage.jpg",
       quantity: quantity,
       size: selectedSize,
-    })
+    });
     toast({
       title: "Added to cart",
-      description: `${quantity} x ${product.name} (Size: ${selectedSize || "N/A"}) added to your cart.`,
-    })
-    openCart()
-  }, [addToCart, isOnSale, product, quantity, selectedSize, sizes.length, isOutOfStock])
+      description: `${quantity} x ${product.name} (Size: ${
+        selectedSize || "N/A"
+      }) added to your cart.`,
+    });
+    openCart();
+  }, [
+    addToCart,
+    isOnSale,
+    product,
+    quantity,
+    selectedSize,
+    sizes.length,
+    isOutOfStock,
+  ]);
 
   const handleShare = useCallback(() => {
-    const productUrl = `${window.location.origin}/product/${product.id}`
+    const productUrl = `${window.location.origin}/product/${product.id}`;
     if (navigator.share) {
       navigator
         .share({
@@ -159,37 +183,77 @@ export default function Component({ product, shippingZones }: { product: Product
           url: productUrl,
         })
         .then(() => console.log("Successful share"))
-        .catch((error) => console.log("Error sharing", error))
+        .catch((error) => console.log("Error sharing", error));
     } else {
       toast({
         title: "Share",
         description: "Copy this link: " + productUrl,
-      })
+      });
     }
-  }, [product.id, product.name, product.short_description])
+  }, [product.id, product.name, product.short_description]);
 
   const handleQuantityChange = useCallback(
     (newQuantity: number) => {
       if (product.sold_individually) {
-        setQuantity(1)
-        return
+        setQuantity(1);
+        return;
       }
       setQuantity((prevQuantity) => {
         if (product.stock_quantity === null) {
-          return Math.max(1, newQuantity)
+          return Math.max(1, newQuantity);
         }
-        return Math.max(1, Math.min(product.stock_quantity, newQuantity))
-      })
+        return Math.max(1, Math.min(product.stock_quantity, newQuantity));
+      });
     },
     [product.stock_quantity, product.sold_individually]
-  )
+  );
 
   const handleNotifyMe = useCallback(() => {
     toast({
       title: "Notification Set",
       description: "We'll notify you when this product is back in stock.",
-    })
-  }, [])
+    });
+  }, []);
+
+  const renderProductDetails = useMemo(
+    () => (
+      <ul className="list-disc pl-5 space-y-2 text-gray-300">
+        <li>SKU: {product.sku}</li>
+        <li>Weight: {product.weight}</li>
+        <li>
+          Dimensions: {product.dimensions.length} x {product.dimensions.width} x{" "}
+          {product.dimensions.height}
+        </li>
+        {product.attributes.map((attr) => (
+          <li key={attr.id}>
+            {attr.name}: {attr.options.join(", ")}
+          </li>
+        ))}
+      </ul>
+    ),
+    [product.sku, product.weight, product.dimensions, product.attributes]
+  );
+
+  const renderShippingZones = useMemo(
+    () =>
+      shippingZones && shippingZones.length > 0 ? (
+        shippingZones.map((zone) => (
+          <div
+            key={zone.id}
+            className="flex justify-between items-center border-b border-gray-700 pb-2"
+          >
+            <span className="text-gray-300">{zone.name}:</span>
+            <span className="text-gray-300">
+              {typeof zone.price === "number" ? zone.price.toFixed(2) : "N/A"}{" "}
+              NIS
+            </span>
+          </div>
+        ))
+      ) : (
+        <p>No shipping zones available.</p>
+      ),
+    [shippingZones]
+  );
 
   return (
     <motion.div
@@ -204,7 +268,10 @@ export default function Component({ product, shippingZones }: { product: Product
           <motion.div variants={fadeInUp}>
             <ImageGallery images={product.images} isOnSale={isOnSale} />
           </motion.div>
-          <motion.div variants={fadeInUp} className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
+          <motion.div
+            variants={fadeInUp}
+            className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0"
+          >
             <motion.div variants={fadeInUp} className="mb-4">
               <span className="text-sm text-gray-400">
                 {product.categories.map((cat) => cat.name).join(" > ")}
@@ -212,7 +279,9 @@ export default function Component({ product, shippingZones }: { product: Product
               <div className="flex items-center justify-between mt-2">
                 <h1 className="text-2xl font-bold">{product.name}</h1>
                 <div className="flex items-center space-x-4">
-                  <span className="text-lg font-semibold">{product.stock_quantity} in stock</span>
+                  <span className="text-lg font-semibold">
+                    {product.stock_quantity} in stock
+                  </span>
                   <Badge variant="secondary" className="text-sm">
                     SKU: {product.sku}
                   </Badge>
@@ -221,7 +290,8 @@ export default function Component({ product, shippingZones }: { product: Product
             </motion.div>
 
             <motion.div variants={fadeInUp} className="mb-4">
-              <p className="text-sm text-gray-300 line-clamp-2"
+              <p
+                className="text-sm text-gray-300 line-clamp-2"
                 dangerouslySetInnerHTML={{ __html: product.short_description }}
               ></p>
             </motion.div>
@@ -298,7 +368,9 @@ export default function Component({ product, shippingZones }: { product: Product
                   min="1"
                   max={product.stock_quantity || undefined}
                   value={quantity}
-                  onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                  onChange={(e) =>
+                    handleQuantityChange(parseInt(e.target.value) || 1)
+                  }
                   className="w-16 text-center bg-transparent border-gray-600"
                   disabled={isOutOfStock || product.sold_individually}
                 />
@@ -318,7 +390,10 @@ export default function Component({ product, shippingZones }: { product: Product
               )}
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="flex flex-wrap gap-2.5 mb-6">
+            <motion.div
+              variants={fadeInUp}
+              className="flex flex-wrap gap-2.5 mb-6"
+            >
               <Button
                 variant={"default"}
                 className="flex-1 mr-2"
@@ -398,19 +473,7 @@ export default function Component({ product, shippingZones }: { product: Product
           <TabsContent value="details" className="mt-6 p-6 rounded-b-lg">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Product Details</h3>
-              <ul className="list-disc pl-5 space-y-2 text-gray-300">
-                <li>SKU: {product.sku}</li>
-                <li>Weight: {product.weight}</li>
-                <li>
-                  Dimensions: {product.dimensions.length} x{" "}
-                  {product.dimensions.width} x {product.dimensions.height}
-                </li>
-                {product.attributes.map((attr) => (
-                  <li key={attr.id}>
-                    {attr.name}: {attr.options.join(", ")}
-                  </li>
-                ))}
-              </ul>
+              {renderProductDetails}
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="mt-6 p-6 rounded-b-lg">
@@ -425,24 +488,7 @@ export default function Component({ product, shippingZones }: { product: Product
               <h4 className="text-md font-semibold text-gray-300">
                 Shipping Zones and Rates:
               </h4>
-              {shippingZones && shippingZones.length > 0 ? (
-                shippingZones.map((zone) => (
-                  <div
-                    key={zone.id}
-                    className="flex justify-between items-center border-b border-gray-700 pb-2"
-                  >
-                    <span className="text-gray-300">{zone.name}:</span>
-                    <span className="text-gray-300">
-                      {typeof zone.price === "number"
-                        ? zone.price.toFixed(2)
-                        : "N/A"}{" "}
-                      NIS
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p>No shipping zones available.</p>
-              )}
+              {renderShippingZones}
               <p className="mt-4 text-gray-300">
                 Free standard shipping on orders over 100 NIS. Expedited and
                 international shipping options available at checkout. Please
@@ -460,5 +506,5 @@ export default function Component({ product, shippingZones }: { product: Product
         </Tabs>
       </motion.div>
     </motion.div>
-  )
+  );
 }
