@@ -141,7 +141,7 @@ export default function AnimatedFooter({
       id="animated-footer"
       className="bg-gradient-to-b from-gray-900 to-black text-white py-16 px-4 md:px-6"
     >
-      <div className="container mx-auto">
+      <div>
         <div className="mb-12">
           <div className="space-y-6 mb-8">
             <motion.div
@@ -253,7 +253,7 @@ export default function AnimatedFooter({
             </AccordionSection>
           </div>
 
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 gap-12">
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
               <h3 className="text-xl font-semibold mb-6 border-b border-gray-700 pb-2">Quick Links</h3>
               <ul className="space-y-3">

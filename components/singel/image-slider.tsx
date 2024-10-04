@@ -1,11 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 
 interface Product {
   id: number;
@@ -17,8 +16,9 @@ interface Product {
   sale_price: string;
   images: Array<{ id: number; src: string; alt: string }>;
   average_rating: string;
-  rating_count: number;
+  ratingCount: number;
   attributes: Array<{ id: number; name: string; options: string[] }>;
+  short_description: string;
 }
 
 interface WorkCarouselProps {
@@ -80,11 +80,12 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     slideImgDiv.appendChild(image);
 
     const slideContentDiv = document.createElement("div");
-    slideContentDiv.className = "relative w-full md:w-1/2 h-1/2 md:h-full";
+    slideContentDiv.className =
+      "relative w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center items-center p-6";
     slideContentDiv.style.backgroundColor = getNextBackgroundColor();
+
     const contentHeader = document.createElement("div");
-    contentHeader.className =
-      "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer";
+    contentHeader.className = "text-center cursor-pointer mb-4";
     const header = document.createElement("h1");
     header.addEventListener("click", (event: MouseEvent) =>
       handleHeaderClick(
@@ -94,41 +95,59 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     );
     header.textContent = newSlide.name;
     header.className =
-      "font-romie text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal uppercase text-black";
+      "font-romie text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal uppercase text-white mb-4";
     splitHeader(header);
-    const letters = header.querySelectorAll("span");
+
+    const shortDescription = document.createElement("p");
+    shortDescription.className = "text-lg text-white mb-6 max-w-md text-center";
+    shortDescription.textContent = newSlide.short_description;
+
+    const priceDiv = document.createElement("div");
+    priceDiv.className = "flex items-center gap-4 mb-4";
+    const price = document.createElement("span");
+    price.className = "text-3xl font-bold text-white";
+    price.textContent = `$${newSlide.price}`;
+    const regularPrice = document.createElement("span");
+    regularPrice.className = "text-xl line-through text-gray-300";
+    regularPrice.textContent = `$${newSlide.regular_price}`;
+    priceDiv.appendChild(price);
+    priceDiv.appendChild(regularPrice);
+
+    const ratingDiv = document.createElement("div");
+    ratingDiv.className = "flex items-center gap-2 mb-6";
+    const rating = document.createElement("span");
+    rating.className = "text-xl font-bold text-white";
+    rating.textContent = newSlide.average_rating;
+    const starIcon = document.createElement("span");
+    starIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+    const ratingCount = document.createElement("span");
+    ratingCount.className = "text-sm text-gray-300";
+    ratingCount.textContent = `(${newSlide.ratingCount} reviews)`;
+    ratingDiv.appendChild(rating);
+    ratingDiv.appendChild(starIcon);
+    ratingDiv.appendChild(ratingCount);
+
+    const attributesDiv = document.createElement("div");
+    attributesDiv.className = "flex flex-wrap justify-center gap-4 mb-6";
+    newSlide.attributes.forEach((attr) => {
+      const attrSpan = document.createElement("span");
+      attrSpan.className =
+        "px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm text-white";
+      attrSpan.textContent = `${attr.name}: ${attr.options[0]}`;
+      attributesDiv.appendChild(attrSpan);
+    });
 
     contentHeader.appendChild(header);
     slideContentDiv.appendChild(contentHeader);
-
-    const workClient = document.querySelector("#work-client");
-    const workRole = document.querySelector("#work-role");
-    const workType = document.querySelector("#work-type");
-
-    if (workClient && workRole && workType) {
-      gsap.to([workClient, workRole, workType], {
-        opacity: 0,
-        x: 15,
-        duration: 0.3,
-        stagger: 0.1,
-        onComplete: () => {
-          if (workClient) workClient.textContent = newSlide.brand;
-          if (workRole) workRole.textContent = `$${newSlide.price}`;
-          if (workType)
-            workType.textContent = newSlide.attributes[0]?.options[0] || "N/A";
-          gsap.to([workClient, workRole, workType], {
-            opacity: 1,
-            x: 0,
-            duration: 0.3,
-            stagger: 0.1,
-            delay: 0.3,
-          });
-        },
-      });
-    }
+    slideContentDiv.appendChild(shortDescription);
+    slideContentDiv.appendChild(priceDiv);
+    slideContentDiv.appendChild(ratingDiv);
+    slideContentDiv.appendChild(attributesDiv);
 
     slideDiv.appendChild(slideImgDiv);
     slideDiv.appendChild(slideContentDiv);
+
+    const letters = header.querySelectorAll("span");
 
     gsap.set(letters, { top: "100px" });
 
@@ -192,6 +211,7 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     return () => {
       document.removeEventListener("click", handleClick);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnimating]);
 
   if (products.length === 0) {
@@ -215,53 +235,49 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
               />
             </div>
             <div
-              className={`relative w-full md:w-1/2 h-1/2 md:h-full`}
+              className="relative w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center items-center p-6"
               style={{ backgroundColor: currentBgColor }}
             >
               <div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center p-2 cursor-pointer"
+                className="text-center cursor-pointer mb-4"
                 onClick={(e) => handleHeaderClick(e, products[0].id)}
               >
-                <h1 className="font-romie text-2xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-normal uppercase text-black">
+                <h1 className="font-romie text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal uppercase text-white mb-4">
                   {products[0].name}
                 </h1>
               </div>
+              <p className="text-lg text-white mb-6 max-w-md text-center"
+                dangerouslySetInnerHTML={{ __html: products[0].short_description }}
+              >
+              </p>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-3xl font-bold text-white">
+                  ${products[0].price}
+                </span>
+                <span className="text-xl line-through text-gray-300">
+                  ${products[0].regular_price}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-xl font-bold text-white">
+                  {products[0].average_rating}
+                </span>
+                <Star className="text-yellow-400" />
+                <span className="text-sm text-gray-300">
+                  ({products[0].ratingCount} reviews)
+                </span>
+              </div>
+              <div className="flex flex-wrap justify-center gap-4 mb-6">
+                {products[0].attributes.map((attr) => (
+                  <span
+                    key={attr.id}
+                    className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm text-white"
+                  >
+                    {attr.name}: {attr.options[0]}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="absolute top-0 left-0 md:left-1/2 p-4 z-10">
-          <div className="flex items-center gap-2.5">
-            <p className="font-romie italic text-xs capitalize text-gray-300">
-              Brand
-            </p>
-            <p
-              id="work-client"
-              className="text-xs font-medium uppercase text-white"
-            >
-              {products[0].brand}
-            </p>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <p className="font-romie italic text-xs capitalize text-gray-300">
-              Price
-            </p>
-            <p
-              id="work-role"
-              className="text-xs font-medium uppercase text-white"
-            >
-              ${products[0].price}
-            </p>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <p className="font-romie italic text-xs capitalize text-gray-300">
-              Type
-            </p>
-            <p
-              id="work-type"
-              className="text-xs font-medium uppercase text-white"
-            >
-              {products[0].attributes[0]?.options[0] || "N/A"}
-            </p>
           </div>
         </div>
         <div className="absolute bottom-0 left-0 p-4 flex gap-2.5">
