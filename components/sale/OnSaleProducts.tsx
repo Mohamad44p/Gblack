@@ -87,7 +87,9 @@ export default function OnSaleProducts({ products }: { products: Product[] }) {
               </div>
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-2xl font-bold">{product.name}</h3>
+                   <Link href={`/product/${product.id}`}>
+                   <h3 className="text-2xl font-bold">{product.name}</h3>
+                   </Link>
                   <Badge>
                     {product.stock_status === "instock"
                       ? "In Stock"
@@ -110,10 +112,10 @@ export default function OnSaleProducts({ products }: { products: Product[] }) {
                         WebkitTextFillColor: "transparent",
                       }}
                     >
-                      ${product.sale_price}
+                      {product.sale_price} NIS
                     </span>
                     <span className="text-xl text-gray-400 line-through">
-                      ${product.regular_price}
+                      {product.regular_price} NIS
                     </span>
                   </div>
                   <div className="flex items-center">

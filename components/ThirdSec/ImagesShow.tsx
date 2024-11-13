@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ReactLenis } from "@studio-freight/react-lenis";
 import { WordPressData } from "./ServerImages";
 import GblackImages from "./GblackImage";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,18 +45,14 @@ export default function ExploreSection({ data }: { data: WordPressData }) {
           onUpdate: (self) => {
             const progress = self.progress;
             if (cardLeft instanceof HTMLElement) {
-              cardLeft.style.transform = `translateX(${
-                progress * leftXValues[index]
-              }px) translateY(${progress * yValues[index]}px) rotate(${
-                progress * leftRotationValues[index]
-              }deg)`;
+              cardLeft.style.transform = `translateX(${progress * leftXValues[index]
+                }px) translateY(${progress * yValues[index]}px) rotate(${progress * leftRotationValues[index]
+                }deg)`;
             }
             if (cardRight instanceof HTMLElement) {
-              cardRight.style.transform = `translateX(${
-                progress * rightXValues[index]
-              }px) translateY(${progress * yValues[index]}px) rotate(${
-                progress * rightRotationValues[index]
-              }deg)`;
+              cardRight.style.transform = `translateX(${progress * rightXValues[index]
+                }px) translateY(${progress * yValues[index]}px) rotate(${progress * rightRotationValues[index]
+                }deg)`;
             }
           },
         },
@@ -166,7 +163,10 @@ export default function ExploreSection({ data }: { data: WordPressData }) {
               />
             </div>
             <div className="btn">
-              <Button>{data.title}</Button>
+              <Link
+                href="/all">
+                <Button>{data.title}</Button>
+              </Link>
             </div>
           </div>
 

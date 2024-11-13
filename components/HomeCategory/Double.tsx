@@ -19,13 +19,13 @@ interface DoubleCategoryProps {
 
 const categories: [Category, Category] = [
   {
-    src: "/images/Man.jpg",
+    src: "/images/Man.jpeg",
     name: "Men",
     description: "Explore our collection for men",
     link: "/category/men",
   },
   {
-    src: "/images/Women.jpg",
+    src: "/images/Women.jpeg",
     name: "Women",
     description: "Discover our women's collection",
     link: "/category/women",

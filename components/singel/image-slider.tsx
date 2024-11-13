@@ -81,11 +81,11 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
 
     const slideContentDiv = document.createElement("div");
     slideContentDiv.className =
-      "relative w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center items-center p-6";
+      "relative w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center items-center p-4 md:p-6";
     slideContentDiv.style.backgroundColor = getNextBackgroundColor();
 
     const contentHeader = document.createElement("div");
-    contentHeader.className = "text-center cursor-pointer mb-4";
+    contentHeader.className = "text-center cursor-pointer mb-2 md:mb-4";
     const header = document.createElement("h1");
     header.addEventListener("click", (event: MouseEvent) =>
       handleHeaderClick(
@@ -95,44 +95,44 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     );
     header.textContent = newSlide.name;
     header.className =
-      "font-romie text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal uppercase text-white mb-4";
+      "font-romie text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal uppercase text-white mb-2 md:mb-4";
     splitHeader(header);
 
-    const shortDescription = document.createElement("p");
-    shortDescription.className = "text-lg text-white mb-6 max-w-md text-center";
-    shortDescription.textContent = newSlide.short_description;
+    const shortDescription = document.createElement("div"); // changed from p to div
+    shortDescription.className = "text-sm md:text-lg text-white mb-3 md:mb-6 max-w-md text-center";
+    shortDescription.innerHTML = newSlide.short_description; // changed from textContent to innerHTML
 
     const priceDiv = document.createElement("div");
-    priceDiv.className = "flex items-center gap-4 mb-4";
+    priceDiv.className = "flex items-center gap-2 md:gap-4 mb-2 md:mb-4";
     const price = document.createElement("span");
-    price.className = "text-3xl font-bold text-white";
-    price.textContent = `$${newSlide.price}`;
+    price.className = "text-xl md:text-3xl font-bold text-white";
+    price.textContent = `${newSlide.price} NIS`;
     const regularPrice = document.createElement("span");
-    regularPrice.className = "text-xl line-through text-gray-300";
-    regularPrice.textContent = `$${newSlide.regular_price}`;
+    regularPrice.className = "text-sm md:text-xl line-through text-gray-300";
+    regularPrice.textContent = `${newSlide.regular_price} NIS`;
     priceDiv.appendChild(price);
     priceDiv.appendChild(regularPrice);
 
     const ratingDiv = document.createElement("div");
-    ratingDiv.className = "flex items-center gap-2 mb-6";
+    ratingDiv.className = "flex items-center gap-1 md:gap-2 mb-3 md:mb-6";
     const rating = document.createElement("span");
-    rating.className = "text-xl font-bold text-white";
+    rating.className = "text-lg md:text-xl font-bold text-white";
     rating.textContent = newSlide.average_rating;
     const starIcon = document.createElement("span");
-    starIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+    starIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
     const ratingCount = document.createElement("span");
-    ratingCount.className = "text-sm text-gray-300";
+    ratingCount.className = "text-xs md:text-sm text-gray-300";
     ratingCount.textContent = `(${newSlide.ratingCount} reviews)`;
     ratingDiv.appendChild(rating);
     ratingDiv.appendChild(starIcon);
     ratingDiv.appendChild(ratingCount);
 
     const attributesDiv = document.createElement("div");
-    attributesDiv.className = "flex flex-wrap justify-center gap-4 mb-6";
+    attributesDiv.className = "flex flex-wrap justify-center gap-2 md:gap-4 mb-3 md:mb-6";
     newSlide.attributes.forEach((attr) => {
       const attrSpan = document.createElement("span");
       attrSpan.className =
-        "px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm text-white";
+        "px-2 py-1 md:px-3 md:py-1 bg-white bg-opacity-20 rounded-full text-xs md:text-sm text-white";
       attrSpan.textContent = `${attr.name}: ${attr.options[0]}`;
       attributesDiv.appendChild(attrSpan);
     });
@@ -211,7 +211,7 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
     return () => {
       document.removeEventListener("click", handleClick);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnimating]);
 
   if (products.length === 0) {
@@ -220,10 +220,10 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
 
   return (
     <>
-      <h1 className="text-5xl text-center my-10">
+      <h1 className="text-3xl md:text-5xl text-center my-6 md:my-10">
         More Products in This Category
       </h1>
-      <section className="relative w-full h-[600px] md:h-[800px] overflow-hidden bg-black">
+      <section className="relative w-full h-[850px] md:h-[800px] overflow-hidden bg-black">
         <div ref={carouselRef} className="w-full h-full">
           <div className="absolute top-0 left-0 w-full h-full flex flex-col md:flex-row">
             <div className="relative w-full md:w-1/2 h-1/2 md:h-full">
@@ -235,43 +235,43 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
               />
             </div>
             <div
-              className="relative w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center items-center p-6"
+              className="relative w-full md:w-1/2 h-1/2 md:h-full flex flex-col justify-center items-center p-4 md:p-6"
               style={{ backgroundColor: currentBgColor }}
             >
               <div
-                className="text-center cursor-pointer mb-4"
+                className="text-center cursor-pointer mb-2 md:mb-4"
                 onClick={(e) => handleHeaderClick(e, products[0].id)}
               >
-                <h1 className="font-romie text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal uppercase text-white mb-4">
+                <h1 className="font-romie text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal uppercase text-white mb-2 md:mb-4">
                   {products[0].name}
                 </h1>
               </div>
-              <p className="text-lg text-white mb-6 max-w-md text-center"
+              <div
+                className="text-sm md:text-lg text-white mb-3 md:mb-6 max-w-md text-center"
                 dangerouslySetInnerHTML={{ __html: products[0].short_description }}
-              >
-              </p>
-              <div className="flex items-center gap-4 mb-4">
-                <span className="text-3xl font-bold text-white">
-                  ${products[0].price}
+              />
+              <div className="flex items-center gap-2 md:gap-4 mb-2 md:mb-4">
+                <span className="text-xl md:text-3xl font-bold text-white">
+                  {products[0].price} NIS
                 </span>
-                <span className="text-xl line-through text-gray-300">
-                  ${products[0].regular_price}
+                <span className="text-sm md:text-xl line-through text-gray-300">
+                  {products[0].regular_price} NIS
                 </span>
               </div>
-              <div className="flex items-center gap-2 mb-6">
-                <span className="text-xl font-bold text-white">
+              <div className="flex items-center gap-1 md:gap-2 mb-3 md:mb-6">
+                <span className="text-lg md:text-xl font-bold text-white">
                   {products[0].average_rating}
                 </span>
-                <Star className="text-yellow-400" />
-                <span className="text-sm text-gray-300">
+                <Star className="text-yellow-400 w-4 h-4 md:w-6 md:h-6" />
+                <span className="text-xs md:text-sm text-gray-300">
                   ({products[0].ratingCount} reviews)
                 </span>
               </div>
-              <div className="flex flex-wrap justify-center gap-4 mb-6">
+              <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-3 md:mb-6">
                 {products[0].attributes.map((attr) => (
                   <span
                     key={attr.id}
-                    className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm text-white"
+                    className="px-2 py-1 md:px-3 md:py-1 bg-white bg-opacity-20 rounded-full text-xs md:text-sm text-white"
                   >
                     {attr.name}: {attr.options[0]}
                   </span>
@@ -280,16 +280,16 @@ export default function WorkCarousel({ products }: WorkCarouselProps) {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 p-4 flex gap-2.5">
+        <div className="absolute bottom-0 left-0 p-2 md:p-4 flex gap-2">
           <p className="text-xs font-medium text-gray-300">{slideIndex + 1}</p>
           <p className="text-xs font-medium text-gray-300">/</p>
           <p className="text-xs font-medium text-gray-300">{products.length}</p>
         </div>
         <div
-          className="absolute bottom-4 right-4 cursor-pointer bg-white p-2 rounded-full shadow-lg"
+          className="absolute bottom-2 md:bottom-4 right-2 md:right-4 cursor-pointer bg-white p-1 md:p-2 rounded-full shadow-lg"
           onClick={addNewSlide}
         >
-          <ArrowRight className="w-6 h-6 text-black" />
+          <ArrowRight className="w-4 h-4 md:w-6 md:h-6 text-black" />
         </div>
       </section>
     </>

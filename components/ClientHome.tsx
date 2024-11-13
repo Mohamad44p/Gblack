@@ -41,16 +41,12 @@ export default function ClientHome({ initialProducts }: ClientHomeProps) {
       <ProductShowcase
         title="Newest Products"
         products={newestProducts}
-        featuredImage="/images/Rotated/img-1.jpg"
-        featuredTitle="Fresh Finds, Just for You!"
-        featuredDescription="Discover our freshest styles"
+        featuredImage="/banners/Banner-10.jpg"
       />
       <ProductShowcase
         title="Best Sellers"
         products={bestSellers}
-        featuredImage="/images/Rotated/img-3.jpg"
-        featuredTitle="Bestsellers Everyone’s Talking About!"
-        featuredDescription="Our most popular items"
+        featuredImage="/banners/Banner-4.jpg"
       />
       <DynamicImprovedAllHome />
     </>

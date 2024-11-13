@@ -21,9 +21,7 @@ export function OptimizedImage({
         src={imgSrc}
         alt={alt}
         fill={fill}
-        sizes={
-          sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        }
+ 
         onError={() => setImgSrc(fallbackSrc)}
         {...props}
       />

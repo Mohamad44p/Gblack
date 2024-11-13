@@ -22,6 +22,7 @@ interface Category {
 const staticNavItems = [
   { name: "Home", href: "/" },
   { name: "Accessories", href: "/category/accessories" },
+  { name: "Athlete", href: "/category/athlete" },
   { name: "All Products", href: "/all" },
   { name: "On-Sale", href: "/on-sale" },
   { name: "About Us", href: "/About-us" },

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/miucm/v1/images`, {
-      next: { revalidate: 604800 },
+      next: { revalidate: 3 },
     })
     
     if (!res.ok) {

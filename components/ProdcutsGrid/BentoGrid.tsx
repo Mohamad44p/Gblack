@@ -83,8 +83,6 @@ interface ShowcaseProps {
   title: string;
   products: Product[];
   featuredImage: string;
-  featuredTitle: string;
-  featuredDescription: string;
 }
 
 interface ProductCardProps {
@@ -391,8 +389,6 @@ export function ProductShowcase({
   title,
   products,
   featuredImage,
-  featuredTitle,
-  featuredDescription,
 }: ShowcaseProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -474,47 +470,16 @@ export function ProductShowcase({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="overflow-hidden h-[170px] md:h-[300px] border-0 shadow-2xl relative rounded-lg">
+          <Card className="overflow-hidden h-[170px] md:h-[400px] border-0 shadow-2xl relative rounded-lg">
             <OptimizedImage
               src={featuredImage}
               alt="Featured product"
-              fill
+              width={1920}
+              height={1080}
               className="absolute inset-0 z-0 object-cover w-full h-full"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10"></div>
-            <CardContent className="p-10 absolute top-0 h-full z-20 flex items-center">
-              <div className="max-w-lg">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                  className="mb-4 hidden md:inline-block bg-white/10 backdrop-filter backdrop-blur-sm text-white text-sm font-semibold py-2 px-6 rounded-full"
-                >
-                  <Sparkles
-                    className="inline-block mr-2 h-4 w-4"
-                    aria-hidden="true"
-                  />
-                  <span>Featured Collection</span>
-                </motion.div>
-                <motion.h3
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                  className="md:text-6xl text-xl font-bold mb-4 text-white"
-                >
-                  {featuredTitle}
-                </motion.h3>
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.5 }}
-                  className="text-xl text-white/80 mb-6"
-                >
-                  {featuredDescription}
-                </motion.p>
-              </div>
-            </CardContent>
           </Card>
         </motion.div>
       </motion.div>

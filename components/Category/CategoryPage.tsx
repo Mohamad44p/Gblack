@@ -10,6 +10,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,8 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
 }) => {
   const [selectedSize, setSelectedSize] = useState("");
   const sizeAttribute = product.attributes.find((attr) => attr.name === "Size");
+  const isOnSale =
+  product.sale_price !== "" && product.sale_price !== product.regular_price;
 
   const handleAddToCart = () => {
     if (sizeAttribute && !selectedSize) {
@@ -101,18 +104,17 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
               </h2>
             </Link>
             <div
-              className="text-gray-300 mb-4"
+              className="text-gray-300 mb-4 line-clamp-2"
               dangerouslySetInnerHTML={{ __html: product.description }}
             ></div>
             <div className="flex items-center mb-4">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-5 h-5 ${
-                    i < Math.floor(parseFloat(product.average_rating))
+                  className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating))
                       ? "text-yellow-400"
                       : "text-gray-300"
-                  } fill-current`}
+                    } fill-current`}
                 />
               ))}
               <span className="ml-2 text-gray-400">
@@ -120,16 +122,34 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
               </span>
             </div>
             <div className="flex items-center justify-between mb-6">
-              <span
-                className="text-3xl font-bold"
-                style={{
-                  background: "linear-gradient(to right, #fff, #888)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                {product.price} NIS
-              </span>
+            {isOnSale ? (
+                <div>
+                  <span
+                    className="text-3xl font-bold mr-2"
+                    style={{
+                      background: "linear-gradient(to right, #fff, #888)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    {product.sale_price} NIS
+                  </span>
+                  <span className="text-xl text-red-600 line-through">
+                    ${product.regular_price}
+                  </span>
+                </div>
+              ) : (
+                <span
+                  className="text-3xl font-bold"
+                  style={{
+                    background: "linear-gradient(to right, #fff, #888)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {product.regular_price} NIS
+                </span>
+              )}
               <Badge
                 variant="secondary"
                 className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
@@ -170,6 +190,13 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 <span className="sr-only">Add to Wishlist</span>
               </Button>
             </div>
+            <Button
+              variant="outline"
+              className="px-3 w-full my-4 flex items-center justify-center gap-x-5 border-white hover:bg-blue-50 hover:text-black"
+            >
+              <span>View Product</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </motion.div>
@@ -227,7 +254,6 @@ export default function CategoryPage({
   const [sortBy, setSortBy] = useState("date");
   const [isLoading, setIsLoading] = useState(false);
   const { addToCart } = useCart();
-
   const totalPages = Math.ceil(totalProducts / productsPerPage);
 
   useEffect(() => {
@@ -372,8 +398,8 @@ export default function CategoryPage({
                             {product.stock_status === "instock"
                               ? "In Stock"
                               : product.stock_status === "outofstock"
-                              ? "Out of Stock"
-                              : "Out of Stock"}
+                                ? "Out of Stock"
+                                : "Out of Stock"}
                           </Badge>
                         </div>
                         <p
@@ -383,27 +409,43 @@ export default function CategoryPage({
                           }}
                         ></p>
                         <div className="flex justify-between items-center mb-4">
-                          <span
-                            className="text-3xl font-bold"
-                            style={{
-                              background:
-                                "linear-gradient(to right, #fff, #888)",
-                              WebkitBackgroundClip: "text",
-                              WebkitTextFillColor: "transparent",
-                            }}
-                          >
-                            {product.price} NIS
-                          </span>
+                          {product.on_sale ? (
+                            <div>
+                              <span
+                                className="text-2xl font-bold mr-2"
+                                style={{
+                                  background: "linear-gradient(to right, #fff, #888)",
+                                  WebkitBackgroundClip: "text",
+                                  WebkitTextFillColor: "transparent",
+                                }}
+                              >
+                                {product.sale_price} NIS
+                              </span>
+                              <span className="text-xl text-red-600 line-through">
+                                {product.regular_price} NIS
+                              </span>
+                            </div>
+                          ): (
+                            <span
+                              className="text-2xl font-bold"
+                              style={{
+                                background: "linear-gradient(to right, #fff, #888)",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                              }}
+                            >
+                              {product.price} NIS
+                            </span>
+                          )}
                           <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`w-5 h-5 ${
-                                  i <
-                                  Math.floor(parseFloat(product.average_rating))
+                                className={`w-5 h-5 ${i <
+                                    Math.floor(parseFloat(product.average_rating))
                                     ? "text-yellow-400"
                                     : "text-gray-600"
-                                } fill-current`}
+                                  } fill-current`}
                               />
                             ))}
                             <span className="ml-2 text-gray-400">
@@ -470,9 +512,8 @@ export default function CategoryPage({
                   const newPage = index + 1;
                   window.location.href = `?page=${newPage}`;
                 }}
-                className={`mx-1 ${
-                  currentPage === index + 1 ? "bg-white text-black" : ""
-                }`}
+                className={`mx-1 ${currentPage === index + 1 ? "bg-white text-black" : ""
+                  }`}
               >
                 {index + 1}
               </Button>

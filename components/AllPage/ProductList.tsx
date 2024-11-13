@@ -161,7 +161,7 @@ const QuickViewModal = ({
           <div className="md:w-1/2">
             <Link href={`/product/${product.id}`} className="cursor-pointer">
               <h2
-                className="text-3xl font-bold mb-4"
+                className="text-xl font-bold mb-4"
                 style={{
                   background: "linear-gradient(to right, #fff, #888)",
                   WebkitBackgroundClip: "text",
@@ -179,11 +179,10 @@ const QuickViewModal = ({
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-5 h-5 ${
-                    i < Math.floor(parseFloat(product.average_rating))
-                      ? "text-yellow-400"
-                      : "text-gray-300"
-                  } fill-current`}
+                  className={`w-5 h-5 ${i < Math.floor(parseFloat(product.average_rating))
+                    ? "text-yellow-400"
+                    : "text-gray-300"
+                    } fill-current`}
                 />
               ))}
               <span className="ml-2 text-gray-400">
@@ -253,7 +252,7 @@ const QuickViewModal = ({
               <Link href={`/product/${product.id}`} className="cursor-pointer">
                 <Button
                   variant="outline"
-                  className="px-3 border-white hover:bg-white hover:text-black"
+                  className="px-3 w-full border-white hover:bg-white hover:text-black"
                 >
                   View Product Details
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -459,11 +458,10 @@ export default function ProductList({
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  selectedCategory === category.name
-                    ? "bg-white text-black font-bold"
-                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${selectedCategory === category.name
+                  ? "bg-white text-black font-bold"
+                  : "text-gray-300 hover:bg-gray-300 hover:text-black"
+                  }`}
               >
                 {category.name}
               </button>
@@ -526,11 +524,10 @@ export default function ProductList({
               <button
                 key={gender}
                 onClick={() => setSelectedGender(gender)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  selectedGender === gender
-                    ? "bg-white text-black font-bold"
-                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${selectedGender === gender
+                  ? "bg-white text-black font-bold"
+                  : "text-gray-300 hover:bg-gray-300 hover:text-black"
+                  }`}
               >
                 {gender}
               </button>
@@ -548,11 +545,10 @@ export default function ProductList({
               <button
                 key={status}
                 onClick={() => setStockFilter(status)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  stockFilter === status
-                    ? "bg-white text-black font-bold"
-                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${stockFilter === status
+                  ? "bg-white text-black font-bold"
+                  : "text-gray-300 hover:bg-gray-300 hover:text-black"
+                  }`}
               >
                 {status}
               </button>
@@ -570,11 +566,10 @@ export default function ProductList({
               <button
                 key={status}
                 onClick={() => setSaleFilter(status)}
-                className={`block w-full text-left px-3 py-2 rounded-md ${
-                  saleFilter === status
-                    ? "bg-white text-black"
-                    : "text-gray-300 hover:bg-gray-300 hover:text-black"
-                }`}
+                className={`block w-full text-left px-3 py-2 rounded-md ${saleFilter === status
+                  ? "bg-white text-black"
+                  : "text-gray-300 hover:bg-gray-300 hover:text-black"
+                  }`}
               >
                 {status}
               </button>
@@ -663,153 +658,152 @@ export default function ProductList({
                 <AnimatePresence>
                   {loading
                     ? [...Array(9)].map((_, index) => (
-                        <motion.div
-                          key={`skeleton-${index}`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          <SkeletonProduct />
-                        </motion.div>
-                      ))
+                      <motion.div
+                        key={`skeleton-${index}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <SkeletonProduct />
+                      </motion.div>
+                    ))
                     : paginatedProducts.map((product) => (
+                      <motion.div
+                        key={product.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative group"
+                        onHoverStart={() => setHoveredProduct(product.id)}
+                        onHoverEnd={() => setHoveredProduct(null)}
+                      >
                         <motion.div
-                          key={product.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.5 }}
-                          className="relative group"
-                          onHoverStart={() => setHoveredProduct(product.id)}
-                          onHoverEnd={() => setHoveredProduct(null)}
+                          className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+                          whileHover={{ scale: 1.05, rotateY: 5 }}
+                          transition={{ duration: 0.3 }}
                         >
-                          <motion.div
-                            className="bg-white bg-opacity-5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
-                            whileHover={{ scale: 1.05, rotateY: 5 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <div className="relative overflow-hidden">
-                              <Image
-                                src={
-                                  product.images[0]?.src ||
-                                  "/placeholder.svg?height=400&width=600"
-                                }
-                                alt={product.name}
-                                width={600}
-                                height={400}
-                                className="w-full h-80 object-cover"
-                                placeholder="blur"
-                                blurDataURL={`data:image/svg+xml;base64,${toBase64(
-                                  shimmer(600, 400)
-                                )}`}
-                              />
-                              {product.on_sale && (
-                                <div className="absolute text-[10px] top-0 left-0 bg-red-500 text-white px-1 py-1 m-2 rounded-md">
-                                  On Sale
-                                </div>
-                              )}
-                              <motion.div
-                                className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                initial={{ opacity: 0 }}
-                                animate={{
-                                  opacity:
-                                    hoveredProduct === product.id ? 1 : 0,
-                                }}
+                          <div className="relative overflow-hidden">
+                            <Image
+                              src={
+                                product.images[0]?.src ||
+                                "/placeholder.svg?height=400&width=600"
+                              }
+                              alt={product.name}
+                              width={600}
+                              height={400}
+                              className="w-full h-80 object-cover"
+                              placeholder="blur"
+                              blurDataURL={`data:image/svg+xml;base64,${toBase64(
+                                shimmer(600, 400)
+                              )}`}
+                            />
+                            {product.on_sale && (
+                              <div className="absolute text-[10px] top-0 left-0 bg-red-500 text-white px-1 py-1 m-2 rounded-md">
+                                On Sale
+                              </div>
+                            )}
+                            <motion.div
+                              className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                              initial={{ opacity: 0 }}
+                              animate={{
+                                opacity:
+                                  hoveredProduct === product.id ? 1 : 0,
+                              }}
+                            >
+                              <Button
+                                className="bg-white text-black hover:bg-gray-200"
+                                onClick={() => setSelectedProduct(product)}
                               >
-                                <Button
-                                  className="bg-white text-black hover:bg-gray-200"
-                                  onClick={() => setSelectedProduct(product)}
-                                >
-                                  Quick View
-                                </Button>
-                              </motion.div>
+                                Quick View
+                              </Button>
+                            </motion.div>
+                          </div>
+                          <div className="p-6">
+                            <div className="flex justify-between items-center mb-2">
+                              <Link
+                                href={`/product/${product.id}`}
+                                className="block"
+                              >
+                                <h3 className="text-sm font-bold hover:text-gray-300 transition-colors">
+                                  {product.name}
+                                </h3>
+                              </Link>
+                              <Badge>
+                                {product.stock_status === "instock"
+                                  ? "In Stock"
+                                  : "Out of Stock"}
+                              </Badge>
                             </div>
-                            <div className="p-6">
-                              <div className="flex justify-between items-center mb-2">
-                                <Link
-                                  href={`/product/${product.id}`}
-                                  className="block"
-                                >
-                                  <h3 className="text-xl font-bold hover:text-gray-300 transition-colors">
-                                    {product.name}
-                                  </h3>
-                                </Link>
-                                <Badge>
-                                  {product.stock_status === "instock"
-                                    ? "In Stock"
-                                    : "Out of Stock"}
-                                </Badge>
-                              </div>
-                              <p
-                                className="text-sm text-gray-400 mb-4 line-clamp-2"
-                                dangerouslySetInnerHTML={{
-                                  __html: product.short_description,
-                                }}
-                              ></p>
-                              <div className="flex justify-between items-center mb-4">
-                                {product.on_sale ? (
-                                  <div>
-                                    <span className="text-xl font-bold text-white">
-                                      {product.sale_price} NIS
-                                    </span>
-                                    <span className="ml-2 text-lg text-red-500 line-through">
-                                      {product.regular_price} NIS
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-3xl font-bold">
-                                    {product.price} NIS
+                            <p
+                              className="text-sm text-gray-400 mb-4 line-clamp-2"
+                              dangerouslySetInnerHTML={{
+                                __html: product.short_description,
+                              }}
+                            ></p>
+                            <div className="flex justify-between items-center mb-4">
+                              {product.on_sale ? (
+                                <div>
+                                  <span className="text-xl font-bold text-white">
+                                    {product.sale_price} NIS
                                   </span>
-                                )}
-                                <div className="flex items-center">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-5 h-5 ${
-                                        i <
-                                        Math.floor(
-                                          parseFloat(product.average_rating)
-                                        )
-                                          ? "text-yellow-400"
-                                          : "text-gray-600"
-                                      } fill-current`}
-                                    />
-                                  ))}
-                                  <span className="ml-2 text-gray-400">
-                                    {product.average_rating}
+                                  <span className="ml-2 text-lg text-red-500 line-through">
+                                    {product.regular_price} NIS
                                   </span>
                                 </div>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <Button
-                                  onClick={() => handleAddToCart(product)}
-                                  className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
-                                  disabled={
-                                    product.stock_status === "outofstock"
-                                  }
-                                >
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  Add to Cart
-                                </Button>
-                                <WishlistButton
-                                  product={{
-                                    id: product.id,
-                                    name: product.name,
-                                    average_rating: product.average_rating,
-                                    price: product.price,
-                                    image: product.images[0]?.src,
-                                    rating_count: product.ratingCount,
-                                    short_description:
-                                      product.short_description,
-                                    attributes: product.attributes,
-                                  }}
-                                />
+                              ) : (
+                                <span className="text-3xl font-bold">
+                                  {product.price} NIS
+                                </span>
+                              )}
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-5 h-5 ${i <
+                                      Math.floor(
+                                        parseFloat(product.average_rating)
+                                      )
+                                      ? "text-yellow-400"
+                                      : "text-gray-600"
+                                      } fill-current`}
+                                  />
+                                ))}
+                                <span className="ml-2 text-gray-400">
+                                  {product.average_rating}
+                                </span>
                               </div>
                             </div>
-                          </motion.div>
+                            <div className="flex justify-between items-center">
+                              <Button
+                                onClick={() => handleAddToCart(product)}
+                                className="flex-1 mr-2 bg-white text-black hover:bg-gray-200"
+                                disabled={
+                                  product.stock_status === "outofstock"
+                                }
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Add to Cart
+                              </Button>
+                              <WishlistButton
+                                product={{
+                                  id: product.id,
+                                  name: product.name,
+                                  average_rating: product.average_rating,
+                                  price: product.price,
+                                  image: product.images[0]?.src,
+                                  rating_count: product.ratingCount,
+                                  short_description:
+                                    product.short_description,
+                                  attributes: product.attributes,
+                                }}
+                              />
+                            </div>
+                          </div>
                         </motion.div>
-                      ))}
+                      </motion.div>
+                    ))}
                 </AnimatePresence>
               </motion.div>
 

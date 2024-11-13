@@ -10,9 +10,7 @@ import React from "react";
 
 const CategoryPage = dynamic(
   () => import("@/components/Category/CategoryPage"),
-  {
-    loading: () => <div>Loading...</div>,
-  }
+  { ssr: false },
 );
 
 const api = new WooCommerceRestApi({

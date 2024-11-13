@@ -248,11 +248,7 @@ export default async function ProductPage({
           <ProductShowcase
             title="Discover More Products"
             products={showcaseProducts}
-            featuredImage={
-              showcaseProducts[0]?.images[0]?.src || "/BlurImage.jpg"
-            }
-            featuredTitle={`Explore Our Collection`}
-            featuredDescription={`Discover the latest products from various categories.`}
+            featuredImage={`/banners/Banner-${Math.floor(Math.random() * 10) + 1}.jpg`}
           />
         </section>
       </section>
